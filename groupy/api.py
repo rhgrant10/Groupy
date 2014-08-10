@@ -280,7 +280,7 @@ class Images(Api):
 	url = '/'.join([config.IMAGE_API_URL, 'pictures'])
 
 	@classmethod
-	def response(cls, data):
+	def response(cls, r):
 		try:
 			data = r.json()
 		except ValueError:
@@ -288,9 +288,9 @@ class Images(Api):
 		return data['payload']
 
 	@classmethod
-	def create(cls, filepath):
+	def create(cls, image):
 		r = requests.post(
 			cls.build_url(),
-			files={'file': open(filepath, 'rb')}
+			files={'file': image}
 		)
 		return cls.response(r)

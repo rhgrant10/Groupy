@@ -15,5 +15,5 @@ def _attempt_to_load_apikey():
 
 _attempt_to_load_apikey()
 
-from .objects import Group, User, Bot
+from .objects import Group, User, Bot, Attachment
 

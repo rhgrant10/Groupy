@@ -60,6 +60,8 @@ class Group:
 
 	@staticmethod
 	def _chunkify(text, chunk_size=450):
+		if text is None:
+			return [None]
 		chunks = []
 		while len(text) > chunk_size:
 			portion = text[:chunk_size]
@@ -80,7 +82,7 @@ class Group:
 	def post(self, text, *attachments):
 		if not text and not attachments:
 			raise ArgumentError('must be one attachment or text')
-		*chunks, last = self._chunkify(text) or [None]
+		*chunks, last = self._chunkify(text)
 		sent = []
 		for chunk in chunks:
 			sent.append(api.Messages.create(self.id, chunk))
@@ -101,6 +103,7 @@ class Group:
 		except errors.InvalidResponse as e:
 			return e.args[0].status_code == status.OK
 		return True
+
 
 class Member:
 	def __init__(self, **kwargs):
@@ -231,3 +234,32 @@ class User:
 		except errors.InvalidResponse as e:
 			return e.args[0].status_code == status.OK
 		return True
+
+
+class Attachment:
+	def __init__(self, type_, **kwargs):
+		self.type = type_
+		self.__dict__.update(kwargs)
+
+	def as_dict(self):
+		return self.__dict__
+
+	@classmethod
+	def image(cls, url):
+		return cls('image', url=url)
+
+	@classmethod
+	def new_image(cls, image):
+		return cls.image(api.Images.create(image)['url'])
+
+	@classmethod
+	def location(cls, name, lat, lng):
+		return cls('location', name=name, lat=lat, lng=lng)
+
+	@classmethod
+	def split(cls, token):
+		return cls('split', token=token)
+
+	@classmethod
+	def emoji(cls, placeholder, charmap):
+		return cls('emoji', placeholder=placeholder, charmap=charmap)
