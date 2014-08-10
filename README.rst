@@ -26,12 +26,16 @@ Usage
     >>> x = gs.first
     >>> assert a == x
     >>> members = x.members()
+    >>> len(members)
+    51
+    >>> x.max_members
+    100
     >>> muted = members.filter(muted=True)
     >>> for m in muted.sort('nickname'):
     ...   print(m)
     Bill
     Rob
-    ...
+    Tom
     >>> x.message_count
     32512
     >>> messages = x.messages()
