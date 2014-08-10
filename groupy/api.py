@@ -25,7 +25,7 @@ class Api:
 		try:
 			data = r.json()
 		except ValueError:
-			raise errors.InvalidResponse(r)
+			raise errors.InvalidResponseError(r)
 		if data['meta'].get("errors"):
 			raise errors.GroupMeError(data['meta'])
 		return data["response"]
