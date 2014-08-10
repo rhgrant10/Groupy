@@ -1,13 +1,16 @@
 Groupy
 ======
 
+A simple yet powerful GroupMe API wrapper.
+
 Installation
 ------------
 
-1) Go to `dev.groupme.com`, click the `Applications` menu button, then click
-"Looking for your access token?" Copy and paste your token into `~/.groupy.key`.
-
-2) Copy `Groupy/groupy` into your package directory for `Python3`.
+1) Login at ``https://dev.groupme.com/session/new``
+2) Click "Bots" menu button at the top
+3) Click "Click here to reveal"
+4) Copy and paste your token into `~/.groupy.key`.
+5) Copy `Groupy/groupy` into your package directory for `Python3`.
 
 Usage
 -----
@@ -16,33 +19,36 @@ Usage
 
     >>> import groupy
     >>> groups = groupy.Group.list()
-    >>> e8s = groups.filter(name__contains='E8')
-    >>> len(e8s)
+    >>> gs = groups.filter(name__contains='something')
+    >>> len(gs)
     2
-    >>> a, b = e8s
-    >>> x = e8s.first
+    >>> a, b = gs
+    >>> x = gs.first
     >>> assert a == x
     >>> members = x.members()
     >>> muted = members.filter(muted=True)
     >>> for m in muted.sort('nickname'):
     ...   print(m)
-    Bob (0xb0b501337 - L8 - Kirkwood/Edgewood)
-    Rob (rhgrant10 - L14 - Norcross)
+    Bill
+    Rob
     ...
+    >>> x.message_count
+    32512
     >>> messages = x.messages()
     >>> len(messages)
     100
     >>> likes = messages.first.likes()
     >>> len(likes)
-    1
+    2
     >>> for m in likes:
     ...   print(m)
-    Rob (rhgrant10 - L14 - Norcross)
+    Jane
+    Tom
     >>> print(messages.first.text)
-    "Hey Bob, do you like my API wrapper?"
+    "I'm working on it too! :-)"
     >>> me = groupy.User.get()
     >>> print(me)
-    Rob (rhgrant10 - L14 - Norcross)
+    Joe
     >>> # etc, etc...
     
  
