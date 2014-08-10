@@ -1,7 +1,7 @@
 Groupy
 ======
 
-A simple yet powerful GroupMe API wrapper.
+A simple yet powerful GroupMe API wrapper for Python 3.
 
 Installation
 ------------
@@ -9,8 +9,8 @@ Installation
 1) Login at ``https://dev.groupme.com/session/new``
 2) Click "Bots" menu button at the top
 3) Click "Click here to reveal"
-4) Copy and paste your token into `~/.groupy.key`.
-5) Copy `Groupy/groupy` into your package directory for `Python3`.
+4) Copy and paste your token into ``~/.groupy.key``.
+5) Copy ``Groupy/groupy`` into your package directory for ``Python3``.
 
 Usage
 -----
