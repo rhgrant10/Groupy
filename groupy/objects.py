@@ -60,23 +60,13 @@ class Group:
 
 	@staticmethod
 	def _chunkify(text, chunk_size=450):
-		if len(text) > chunk_size:
-			chunks = []
-			while len(text) > chunk_size:
-				portion = text[:chunk_size]
-				i = portion.rfind(' ')
-				if i < 0:
-					i = portion.rfind('\t')
-					if i < 0:
-						i = portion.rfind('\n')
-						if i < 0:
-							chunks.append(portion.strip())
-							text = text[len(portion):].strip()
-							continue
-				chunks.append(portion[:i].strip())
-				text = text[i:].strip()
-		else:
-			chunks = [text]
+		chunks = []
+		while len(text) > chunk_size:
+			portion = text[:chunk_size]
+			i = len(portion.rsplit(None, 1)[0])
+			chunks.append(portion[:i].strip())
+			text = text[i:].strip()
+		chunks.append(text)
 		return chunks
 
 	def refresh(self):
