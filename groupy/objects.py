@@ -3,8 +3,48 @@ from . import status
 from . import errors
 import operator
 
-class List(list):
+class FilterList(list):
+	"""A filterable list.
+
+	Acts just like a regular list, except it can be filtered using a special
+	keyword syntax. Also, the first and last items are special properties.
+
+	"""
 	def filter(self, **kwargs):
+		"""Filter the list and return a new instance.
+
+		Arguments are keyword arguments only, and can be appended with 
+		operator method names to indicate relationships other than equals.
+		For example, to filter the list down to only items with a name
+		containing 'ie':
+
+		.. code-block:: python
+
+			new_list = filter_list.filter(name__contains='ie')
+
+		As another example, this filters the list down to only those
+		with a created property that is less than 1234567890:
+
+		.. code-block:: python
+
+			new_list = filter_list.filter(created__lt=1234567890)
+
+		Acceptable operators are:
+
+		- ``__lt``: less than
+		- ``__gt``: greater than
+		- ``__contains``: contains
+		- ``__eq``: equal to
+		- ``__ne``: not equal to
+		- ``__le``: less than or equal to
+		- ``__ge``: greater than or equal to
+
+		Use of any operator listed here results in a 
+		:class:`errors.InvalidOperatorError`.
+
+		:return: a new list with potentially less items than the original
+		:rtype: :class:`FilterList`
+		"""
 		kvops = []
 		for k, v in kwargs.items():
 			if '__' in k[1:-1]:
@@ -16,13 +56,21 @@ class List(list):
 			else:
 				op = operator.eq
 			kvops.append((k, v, op))
-		return List(filter(
+		return FilterList(filter(
 			lambda i: all(hasattr(i, k) and op(getattr(i, k), v) for k, v, op in kvops),
 			self
 		))
 
 	def sort(self, key, reverse=False):
-		return List(sorted(self, key=lambda x: getattr(x, key, 0), reverse=reverse))
+		"""Return the same items in a new list but sorted.
+
+		:param str key: the name of the property on which to sort
+		:param bool reverse: ``True`` if the order should be reversed, 
+			``False`` otherwise.
+		:return: a new sorted list of the items in the original list
+		:rtype: :class:`FilterList`
+		"""
+		return FilterList(sorted(self, key=lambda x: getattr(x, key, 0), reverse=reverse))
 
 	@property
 	def first(self):
@@ -33,7 +81,7 @@ class List(list):
 		return self[-1]
 
 
-class MessageList(List):
+class MessagePager(FilterList):
 	def __init__(self, group, iter, backward=False):
 		super().__init__(iter)
 		self.backward = backward
@@ -104,7 +152,7 @@ class Group:
 			groups.extend(next_groups)
 			page += 1
 			next_groups = api.Groups.index(page=page)
-		return List(Group(**g) for g in groups)
+		return FilterList(Group(**g) for g in groups)
 
 	@classmethod
 	def former_list(cls):
@@ -115,7 +163,7 @@ class Group:
 			groups.extend(next_groups)
 			page += 1
 			next_groups = api.Groups.index(former=True, page=page)
-		return List(Group(**g) for g in groups)
+		return FilterList(Group(**g) for g in groups)
 
 	@staticmethod
 	def _chunkify(text, chunk_size=450):
@@ -141,7 +189,7 @@ class Group:
 				raise e
 			return None
 		self.message_count = r['count']
-		return MessageList(self, (Message(**m) for m in r['messages']), backward=after is not None)
+		return MessagePager(self, (Message(**m) for m in r['messages']), backward=after is not None)
 
 	def post(self, text, *attachments):
 		if not text and not attachments:
@@ -154,7 +202,7 @@ class Group:
 		return sent
 
 	def members(self):
-		return List(self._members)
+		return FilterList(self._members)
 
 	def add(self, *members):
 		ids = (Member.idenify(m) for m in members)
@@ -252,7 +300,7 @@ class Message:
 		return True
 
 	def likes(self):
-		return List(m for m in self.group.members() if m.user_id in self.favorited_by)
+		return FilterList(m for m in self.group.members() if m.user_id in self.favorited_by)
 
 
 class Bot:
@@ -264,7 +312,7 @@ class Bot:
 
 	@classmethod
 	def list(self):
-		return List(Bot(**b) for b in api.Bots.index())
+		return FilterList(Bot(**b) for b in api.Bots.index())
 
 	def post(self, text, picture_url=None):
 		try:
