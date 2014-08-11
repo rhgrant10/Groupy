@@ -216,6 +216,12 @@ class Member:
 				raise AttributeError('no nickname')
 			raise AttributeError('no user_id, email, or phone_number')
 
+	def post(self, text, *attachments):
+		pass
+
+	def messages(self):
+		pass
+
 
 class Message:
 	def __init__(self, **kwargs):
