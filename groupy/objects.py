@@ -107,6 +107,7 @@ class Group:
 
 class Member:
 	def __init__(self, **kwargs):
+		self.guid = kwargs.get('guid', None)
 		self.__dict__.update(kwargs)
 
 	def __str__(self):
@@ -114,7 +115,7 @@ class Member:
 
 	@property
 	def guid(self):
-		if not hasattr(self, '_guid') or self._guid is None:
+		if not self._guid:
 			self._guid = self._next_guid()
 		return self._guid
 	@guid.setter
