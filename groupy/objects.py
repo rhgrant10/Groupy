@@ -97,11 +97,25 @@ class Group:
 
 	@classmethod
 	def list(cls):
-		return List(Group(**g) for g in api.Groups.index())
+		groups = []
+		page = 1
+		next_groups = api.Groups.index(page=page)
+		while next_groups:
+			groups.extend(next_groups)
+			page += 1
+			next_groups = api.Groups.index(page=page)
+		return List(Group(**g) for g in groups)
 
 	@classmethod
 	def former_list(cls):
-		return List(Group(**g) for g in api.Groups.index(former=True))
+		groups = []
+		page = 1
+		next_groups = api.Groups.index(former=True, page=page)
+		while next_groups:
+			groups.extend(next_groups)
+			page += 1
+			next_groups = api.Groups.index(former=True, page=page)
+		return List(Group(**g) for g in groups)
 
 	@staticmethod
 	def _chunkify(text, chunk_size=450):
