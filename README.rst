@@ -49,10 +49,9 @@ Usage
     Jane
     Tom
     >>> print(messages.first.text)
-    "I'm working on it too! :-)"
+    I'm working on it too! :-)
     >>> me = groupy.User.get()
     >>> print(me)
     Joe
     >>> # etc, etc...
     
- 
