@@ -33,6 +33,51 @@ class List(list):
 		return self[-1]
 
 
+class MessageList(List):
+	def __init__(self, group, iter, backward=False):
+		super().__init__(iter)
+		self.backward = backward
+		self.group = group
+
+	@property
+	def oldest(self):
+	    return self.first if self.backward else self.last
+	
+	@property
+	def newest(self):
+	    return self.last if self.backward else self.first
+
+	def prepend(self, iter):
+		for each in self.older():
+			self.insert(0, each)
+
+	def newer(self):
+		return self.group.messages(after=self.newest.id)
+		
+	def older(self):
+		return self.group.messages(before=self.oldest.id)
+		
+	def inewer(self):
+		new = self.newer()
+		if not new:
+			return False
+		if self.backward:
+			self.extend(self.newer())
+		else:
+			self.prepend(self.newer())
+		return True
+		
+	def iolder(self):
+		old = self.older()
+		if not old:
+			return False
+		if self.backward:
+			self.prepend(self.older())
+		else:
+			self.extend(self.older())
+		return True
+
+
 class Group:
 	def __init__(self, **kwargs):
 		messages = kwargs.pop('messages', {})
@@ -75,9 +120,14 @@ class Group:
 		self.__init__(**api.Groups.show(self.id))
 
 	def messages(self, before=None, since=None, after=None, limit=None):
-		r = api.Messages.index(self.id, before_id=before, since_id=since, after_id=after)
+		try:
+			r = api.Messages.index(self.id, before_id=before, since_id=since, after_id=after)
+		except errors.InvalidResponseError as e:
+			if e.args[0].status_code != 304:
+				raise e
+			return None
 		self.message_count = r['count']
-		return List(Message(**m) for m in r['messages'])
+		return MessageList(self, (Message(**m) for m in r['messages']), backward=after is not None)
 
 	def post(self, text, *attachments):
 		if not text and not attachments:
