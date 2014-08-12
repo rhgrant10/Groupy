@@ -1,5 +1,7 @@
 import os
+import warnings
 import groupy.config
+
 
 def _attempt_to_load_apikey():
     filepath = os.path.expanduser(groupy.config.KEY_LOCATION)
@@ -15,5 +17,4 @@ def _attempt_to_load_apikey():
 
 _attempt_to_load_apikey()
 
-from .objects import Group, User, Bot, Attachment
-
+from .objects import Group, User, Bot, Attachment, FilterList

@@ -1,9 +1,10 @@
-
 class GroupMeError(Exception):
-	pass
+    pass
+
 
 class InvalidResponseError(GroupMeError):
-	pass
+    pass
+
 
 class InvalidOperatorError(NotImplementedError):
-	pass
+    pass
