@@ -155,7 +155,71 @@ class ApiResponse(object):
             setattr(self, k, v)
 
 
-class Group(ApiResponse):
+class Recipient(ApiResponse):
+    def __init__(self, endpoint, mkey, **kwargs):
+        self.endpoint = endpoint
+        self.mkey = mkey
+        self.count = kwargs.pop('count', 0)
+        super().__init__(**kwargs)
+
+    # Splits text into chunks so that each is less than the chunk_size.
+    @staticmethod
+    def _chunkify(text, chunk_size=450):
+        if text is None:
+            return [None]
+        chunks = []
+        while len(text) > chunk_size:
+            portion = text[:chunk_size]
+            # Find the index of the final whitespace character.
+            i = len(portion.rsplit(None, 1)[0])
+            # Append the chunk up to that character.
+            chunks.append(portion[:i].strip())
+            # Re-assign the text to all but the appended chunk.
+            text = text[i:].strip()
+        chunks.append(text)
+        return chunks
+
+    def __len__(self):
+        """Return the number of messages in the group.
+        """
+        return self.count
+
+    def post(self, endpoint, text, *attachments):
+        if not text and not attachments:
+            raise ValueError('must be one attachment or text')
+        *chunks, last = self._chunkify(text)
+        sent = []
+        for chunk in chunks:
+            sent.append(self.endpoint.create(self.id, chunk))
+        sent.append(self.endpoint.create(self.id, last, *attachments))
+        return sent
+
+    def messages(self, before=None, since=None, after=None, limit=None):
+        """Return a page of messages from the member.
+
+        :param str before: a reference message ID
+        :param str since: a reference message ID
+        :param str after: a reference message ID
+        :param int limit: maximum number of messages to include in the page
+        """
+        # Messages obtained with the 'after' parameter are in reversed order.
+        backward = after is not None
+        # Fetch the messages.
+        try:
+            r = self.endpoint.index(self.id, before_id=before,
+                                    since_id=since, after_id=after)
+        except errors.InvalidResponseError as e:
+            # 304 means no more messages.
+            if e.args[0].status_code == 304:
+                return None
+            raise e
+        # Update the message count and grab the messages.
+        self.count = r['count']
+        messages = (Message(**m) for m in r[self.mkey])
+        return MessagePager(self, messages, backward=backward)
+
+
+class Group(Recipient):
     """A GroupMe group.
     """
     def __init__(self, **kwargs):
@@ -164,21 +228,14 @@ class Group(ApiResponse):
         self.last_message_id = messages.get('last_message_id')
         self.last_message_created_at = messages.get('last_message_created_at')
         self._members = [Member(**m) for m in kwargs.pop('members')]
-        if 'max_memberships' in kwargs:
-            self.max_members = kwargs.pop('max_memberships')
-        else:
-            self.max_members = kwargs.pop('max_members')
-        super().__init__(**kwargs)
+        self.max_members = kwargs.pop('max_members') or \
+                kwargs.pop('max_memberships')
+        super().__init__(api.Messages, 'messages', **kwargs)
 
     def __repr__(self):
         return "{}, {}/{} members, {} messages".format(
             self.name, len(self.members()),
             self.max_members, self.message_count)
-
-    def __len__(self):
-        """Return the number of messages in the group.
-        """
-        return self.message_count
 
     @classmethod
     def list(cls, former=False):
@@ -201,75 +258,10 @@ class Group(ApiResponse):
                 next_groups = None
         return FilterList(Group(**g) for g in groups)
 
-    # Splits text into chunks so that each is less than the chunk_size.
-    @staticmethod
-    def _chunkify(text, chunk_size=450):
-        if text is None:
-            return [None]
-        chunks = []
-        while len(text) > chunk_size:
-            portion = text[:chunk_size]
-            # Find the index of the final whitespace character.
-            i = len(portion.rsplit(None, 1)[0])
-            # Append the chunk up to that character.
-            chunks.append(portion[:i].strip())
-            # Re-assign the text to all but the appended chunk.
-            text = text[i:].strip()
-        chunks.append(text)
-        return chunks
-
     def refresh(self):
         """Update the group with new information from the API.
         """
         self.__init__(**api.Groups.show(self.id))
-
-    def messages(self, before=None, since=None, after=None, limit=None):
-        """Return a page of messages from the group.
-
-        :param str before: a reference message ID
-        :param str since: a reference message ID
-        :param str after: a reference message ID
-        :param int limit: maximum number of messages to include in the page
-        """
-        try:
-            r = api.Messages.index(
-                self.id,
-                before_id=before,
-                since_id=since,
-                after_id=after)
-        except errors.InvalidResponseError as e:
-            if e.args[0].status_code != 304:
-                raise e
-            return None     # No more messages.
-        self.message_count = r['count']        # Update the message count.
-        messages = (Message(**m) for m in r['messages'])
-        backward = after is not None
-        return MessagePager(self, messages, backward=backward)
-
-    def post(self, text, *attachments):
-        """Post a message to the group.
-
-        .. note::
-
-            Messages with no text must have at least one attachment.
-
-        .. note::
-
-            Messages with a text longer than the maximum allowed length will be
-            split into multiple messages. If attachments exist then are posted
-            in the last message.
-
-        :param str text: the message text
-        :param list attachments: a list of attachments to include
-        """
-        if not text and not attachments:
-            raise ValueError('must be one attachment or text')
-        *chunks, last = self._chunkify(text)
-        sent = []
-        for chunk in chunks:
-            sent.append(api.Messages.create(self.id, chunk))
-        sent.append(api.Messages.create(self.id, last, *attachments))
-        return sent
 
     def members(self):
         """Return a list of the members in the group.
@@ -303,12 +295,12 @@ class Group(ApiResponse):
         return True
 
 
-class Member(ApiResponse):
+class Member(Recipient):
     """A GroupMe member.
     """
     def __init__(self, **kwargs):
         self.guid = kwargs.get('guid', None)    # set regardless of kwargs
-        super().__init__(**kwargs)
+        super().__init__(api.DirectMessages, 'direct_messages', **kwargs)
 
     def __repr__(self):
         return self.nickname
@@ -323,6 +315,11 @@ class Member(ApiResponse):
     def guid(self, value):
         self._guid = value
 
+    # Create and return a new guid based on the current time.
+    @staticmethod
+    def _next_guid():
+        return str(time.time())
+
     def identification(self):
         """Return the identification of the member.
 
@@ -336,14 +333,12 @@ class Member(ApiResponse):
             'guid': self._guid         # new guid set if nonexistant
         }
 
-    # Create and return a new guid based on the current time.
-    @staticmethod
-    def _next_guid():
-        return str(time.time())
-
     @classmethod
     def identify(cls, member):
         """Return or create an identification for a member.
+
+        If an identification cannot be created then raise an
+        :class:`AttributeError`.
 
         :param member: either a :class:`Member` or a ``dict``; if the latter,
             it must contain at least a ``nickname`` property as well as one of
@@ -368,23 +363,15 @@ class Member(ApiResponse):
                 raise AttributeError('no nickname')
             raise AttributeError('no user_id, email, or phone_number')
 
-    def post(self, text, *attachments):
-        if not text and not attachments:
-            raise ValueError('must be one attachment or text')
-        *chunks, last = self._chunkify(text)
-        sent = []
-        for chunk in chunks:
-            sent.append(api.DirectMessages.create(self.id, chunk))
-        sent.append(api.DirectMessages.create(self.id, last, *attachments))
-        return sent
-
-    def messages(self):
-        pass
-
 
 class Message(ApiResponse):
     """A GroupMe message.
     """
+    def __init__(self, **kwargs):
+        self._ref_id = kwargs.get('group_id') or kwargs.get('recipient_id')
+        self.system = kwargs.pop('system', False)
+        super().__init__(**kwargs)
+
     def __repr__(self):
         msg = "{}: {}".format(self.name, self.text or "")
         if self.attachments:
@@ -401,7 +388,7 @@ class Message(ApiResponse):
         """Like the message.
         """
         try:
-            api.Likes.create(self.group_id, self.id)
+            api.Likes.create(self._ref_id, self.id)
         except errors.InvalidResponse as e:
             return e.args[0].status_code == status.OK
         return True
@@ -410,7 +397,7 @@ class Message(ApiResponse):
         """Unlike the message.
         """
         try:
-            api.Likes.destroy(self.group_id, self.id)
+            api.Likes.destroy(self._ref_id, self.id)
         except errors.InvalidResponse as e:
             return e.args[0].status_code == status.OK
         return True
