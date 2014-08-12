@@ -154,6 +154,10 @@ class Group:
 		self.last_message_id = messages.get('last_message_id')
 		self.last_message_created_at = messages.get('last_message_created_at')
 		self._members = [Member(**m) for m in kwargs.pop('members')]
+		if 'max_memberships' in kwargs:
+			self.max_members = kwargs.pop('max_memberships')
+		else:
+			self.max_members = kwargs.pop('max_members')
 		self.__dict__.update(**kwargs)
 
 	def __str__(self):
@@ -167,29 +171,23 @@ class Group:
 		return self.message_count
 
 	@classmethod
-	def list(cls):
-		"""List all of your current groups.
+	def list(cls, former=False):
+		"""List all of your current or former groups.
 		"""
-		groups = []
+		# Former groups come as a single page.
+		if former:
+			return FilterList(Group(**g) for g in api.Groups.index(former=True))
+		# Current groups are listed in pages.
 		page = 1
+		groups = []
 		next_groups = api.Groups.index(page=page)
 		while next_groups:
 			groups.extend(next_groups)
 			page += 1
-			next_groups = api.Groups.index(page=page)
-		return FilterList(Group(**g) for g in groups)
-
-	@classmethod
-	def former_list(cls):
-		"""List all of your former groups.
-		"""
-		groups = []
-		page = 1
-		next_groups = api.Groups.index(former=True, page=page)
-		while next_groups:
-			groups.extend(next_groups)
-			page += 1
-			next_groups = api.Groups.index(former=True, page=page)
+			try:
+				next_groups = api.Groups.index(page=page)
+			except errors.InvalidResponseError:
+				next_groups = None
 		return FilterList(Group(**g) for g in groups)
 
 	# Splits text into chunks so that each is less than the chunk_size.
