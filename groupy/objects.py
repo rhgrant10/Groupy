@@ -56,10 +56,10 @@ class FilterList(list):
 			else:
 				op = operator.eq
 			kvops.append((k, v, op))
-		return FilterList(filter(
-			lambda i: all(hasattr(i, k) and op(getattr(i, k), v) for k, v, op in kvops),
-			self
-		))
+		return FilterList(
+			filter(lambda i: all(
+				hasattr(i, k) and op(getattr(i, k), v) for k, v, op in kvops),
+			self))
 
 	def sort(self, key, reverse=False):
 		"""Return the same items in a new list but sorted.
@@ -70,7 +70,10 @@ class FilterList(list):
 		:return: a new sorted list of the items in the original list
 		:rtype: :class:`FilterList`
 		"""
-		return FilterList(sorted(self, key=lambda x: getattr(x, key, 0), reverse=reverse))
+		return FilterList(
+			sorted(
+				self,
+				key=lambda x: getattr(x, key, 0), reverse=reverse))
 
 	@property
 	def first(self):
@@ -221,13 +224,19 @@ class Group:
 		:param int limit: maximum number of messages to include in the page
 		"""
 		try:
-			r = api.Messages.index(self.id, before_id=before, since_id=since, after_id=after)
+			r = api.Messages.index(self.id,
+					before_id=before,
+					since_id=since,
+					after_id=after)
 		except errors.InvalidResponseError as e:
 			if e.args[0].status_code != 304:
 				raise e
 			return None 	# No more messages.
 		self.message_count = r['count']		# Update the message count.
-		return MessagePager(self, (Message(**m) for m in r['messages']), backward=after is not None)
+		return MessagePager(
+				self,
+				(Message(**m) for m in r['messages']),
+				backward=after is not None)
 
 	def post(self, text, *attachments):
 		"""Post a message to the group.
@@ -396,7 +405,9 @@ class Message:
 	def likes(self):
 		"""Return a :class:`FilterList` of the members that like the message.
 		"""
-		return FilterList(m for m in self.group.members() if m.user_id in self.favorited_by)
+		liked = filter(lambda m: m.user_id in self.favorited_by,
+				self.group.members())
+		return FilterList(liked)
 
 
 class Bot:
