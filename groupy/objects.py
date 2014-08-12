@@ -160,7 +160,7 @@ class Group:
 			self.max_members = kwargs.pop('max_members')
 		self.__dict__.update(**kwargs)
 
-	def __str__(self):
+	def __repr__(self):
 		return "{}, {}/{} members, {} messages".format(
 				self.name, len(self.members()),
 				self.max_members, self.message_count)
@@ -293,7 +293,7 @@ class Member:
 		self.guid = kwargs.get('guid', None)
 		self.__dict__.update(kwargs)
 
-	def __str__(self):
+	def __repr__(self):
 		return self.nickname
 
 	@property
@@ -363,7 +363,7 @@ class Message:
 	def __init__(self, **kwargs):
 		self.__dict__.update(kwargs)
 
-	def __str__(self):
+	def __repr__(self):
 		msg = "{}: {}".format(self.name, self.text or "")
 		if self.attachments:
 			for a in self.attachments:
@@ -408,7 +408,7 @@ class Bot:
 	def __init__(self, **kwargs):
 		self.__dict__.update(kwargs)
 
-	def __str__(self):
+	def __repr__(self):
 		return self.name
 
 	@classmethod
@@ -452,7 +452,7 @@ class User:
 	def __init__(self, **kwargs):
 		self.__dict__.update(kwargs)
 
-	def __str__(self):
+	def __repr__(self):
 		return self.name
 
 	@classmethod
