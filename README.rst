@@ -1,57 +1,73 @@
+======
 Groupy
 ======
 
-A simple yet powerful GroupMe API wrapper for Python 3.
+The simple yet powerful GroupMe API wrapper for Python 3.
 
 Installation
-------------
+============
 
-1) Login at ``https://dev.groupme.com/session/new``
-2) Click "Bots" menu button at the top
-3) Click "Click here to reveal"
-4) Copy and paste your token into ``~/.groupy.key``.
+1) Login at ``https://dev.groupme.com/session/new``.
+2) Click "Bots" menu button at the top.
+3) Click "Click here to reveal" then copy your token.
+4) Paste your token into ``~/.groupy.key``.
 5) Copy ``Groupy/groupy`` into your package directory for ``Python3``.
 
 Usage
------
+=====
 
 .. code-block:: python
 
-	>>> import groupy
-	>>> groups = groupy.Group.list()
-	>>> gs = groups.filter(name__contains='something')
-	>>> len(gs)
-	2
-	>>> a, b = gs
-	>>> x = gs.first
-	>>> assert a == x
-	>>> members = x.members()
-	>>> len(members)
-	51
-	>>> x.max_members
-	100
-	>>> muted = members.filter(muted=True)
-	>>> for m in muted.sort('nickname'):
-	...   print(m)
-	Bill
-	Rob
-	Tom
-	>>> x.message_count
-	32512
-	>>> messages = x.messages()
-	>>> len(messages)
-	100
-	>>> likes = messages.first.likes()
-	>>> len(likes)
-	2
-	>>> for m in likes:
-	...   print(m)
-	Jane
-	Tom
-	>>> print(messages.first.text)
-	I'm working on it too! :-)
-	>>> me = groupy.User.get()
-	>>> print(me)
-	Joe
-	>>> # etc, etc...
-	
+    import groupy
+
+    # list the groups you're in or the groups you're not in anymore
+    groups = groupy.Group.list()
+    former_groups = groupy.Group.former_list()
+
+    # list the members in a group:
+    group = groups[0]
+    members = group.members()
+
+    # list the messages in a group:
+    messages = group.messages()
+
+    # now `messages` contains the most recent 100 messages in the group. Older
+    # messages (and once in existence, newer ones as well) can be obtained easily:
+    older_messages = messages.older()
+    newer_messages = messages.newer()
+
+    # post a message to a group
+    group.post('Hello world!')
+
+    # include an image with the message:
+    img = groupy.Attachment.new_image(open('imagefilepath', 'rb'))
+    group.post('Here is the pic you took :-)', img)
+
+    # messages have either text, attachments, or both:
+    message = messages.newest
+    print(message.text)
+    for a in message.attachments:
+      print(a)
+
+    # ...and can be liked and unliked:
+    message.like()
+    message.unlike()
+
+    # list the members that liked a message
+    likers = message.likes()
+    for member in likers:
+      print(member.nickname)
+
+    # list the messages from another member (direct messages)
+    members = group.members()
+    member = members[0]
+    direct_messages = member.messages()
+
+    # post a message to another member (direct message)
+    member.post('Hey are you available today?')
+
+    # get information about yourself
+    my = groupy.User.get()
+    print(my.nickname)
+    print(my.user_id)
+    print(my.email)
