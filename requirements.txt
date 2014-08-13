@@ -1,2 +1,1 @@
-Groupy
 requests==2.3.0
