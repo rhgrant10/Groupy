@@ -87,7 +87,7 @@ v0.3.0
 - Listing former ``Group`` s now works correctly
 - Listing ``Group`` s and former groups no longer limited to the first 500
 - ``DirectMessage`` api now accepts the ``after_id`` parameter
-- Documentation now on `Read the Docs<(http://groupy.readthedocs.org/en/latest/>`_
+- Documentation now on `Read the Docs<http://groupy.readthedocs.org/en/latest/>`_
 
 v0.2.0
 ------
