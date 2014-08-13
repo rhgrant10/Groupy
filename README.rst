@@ -83,7 +83,7 @@ v0.3.0
 ------
 
 - Liking/unliking works on direct ``Message`` s
-- ``Member``s can send and recieve direct ``Message`` s
+- ``Member`` s can send and recieve direct ``Message`` s
 - Listing former ``Group`` s now works correctly
 - Listing ``Group`` s and former groups no longer limited to the first 500
 - ``DirectMessage`` api now accepts the ``after_id`` parameter
@@ -95,8 +95,8 @@ v0.2.0
     - ``Message``s now returned in a special ``MessagePager`` class
 
 - v0.1.3
-    - Added class for message ``Attachment``s
-    - Fixed the splitting of long texts into multiple ``Message``s
+    - Added class for message ``Attachment`` s
+    - Fixed the splitting of long texts into multiple ``Message`` s
 
 - v0.1.2
     - Fixed ``InvalidResponseError`` bug
