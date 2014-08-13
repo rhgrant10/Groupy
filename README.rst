@@ -82,28 +82,36 @@ Version History
 v0.3.0
 ------
 
-- Liking/unliking works on direct ``Message`` s
-- ``Member`` s can send and recieve direct ``Message`` s
-- Listing former ``Group`` s now works correctly
-- Listing ``Group`` s and former groups no longer limited to the first 500
-- ``DirectMessage`` api now accepts the ``after_id`` parameter
-- Documentation now on `Read the Docs<http://groupy.readthedocs.org/en/latest/>`_
+- Liking/unliking works on direct messages
+- Member instances can send and recieve direct messages
+- Listing former groups now works correctly
+- Listing groups and former groups is no longer limited to the first 500
+- The direct message API now accepts the ``after_id`` parameter
+- Documentation now on `Read the Docs`_!
 
 v0.2.0
 ------
 
-    - ``Message``s now returned in a special ``MessagePager`` class
+- Messages are returned in a message pager
 
-- v0.1.3
-    - Added class for message ``Attachment`` s
-    - Fixed the splitting of long texts into multiple ``Message`` s
+v0.1.3
+------
 
-- v0.1.2
-    - Fixed ``InvalidResponseError`` bug
-    - Updated documentation
+- Added class for representing a message attachment
+- Fixed the automatic splitting of long texts
 
-- v0.1.1
-    - Added basic documentation
+v0.1.2
+------
 
-- v0.1.0:
-    - Initial release
+- Fixed ``InvalidResponseError`` bug
+- Updated documentation
+
+v0.1.1
+------
+- Added basic documentation
+
+v0.1.0
+------
+- Initial release
+
+.. _Read the Docs: http://groupy.readthedocs.org/en/latest/
