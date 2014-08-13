@@ -49,7 +49,7 @@ class FilterList(list):
         """
         kvops = []
         for k, v in kwargs.items():
-            if '__' in k[1:-1]:
+            if '__' in k[1:-1]:   # don't use it if at the start or end of k
                 k, o = k.rsplit('__', 1)
                 try:
                     op = getattr(operator, o)
@@ -58,8 +58,8 @@ class FilterList(list):
             else:
                 op = operator.eq
             kvops.append((k, v, op))
-        criteria = lambda i, k, v, op: hasattr(i, k) and op(getattr(i, k), v)
-        criteria = lambda i: all(criteria(i, k, v, op) for k, v, op in kvops)
+        test = lambda i, k, v, op: hasattr(i, k) and op(getattr(i, k), v)
+        criteria = lambda i: all(test(i, k, v, op) for k, v, op in kvops)
         return FilterList(filter(criteria, self))
 
     def sort(self, key, reverse=False):
@@ -71,18 +71,22 @@ class FilterList(list):
         :return: a new sorted list of the items in the original list
         :rtype: :class:`FilterList`
         """
-        return FilterList(
-            sorted(
-                self,
+        return FilterList(sorted(self,
                 key=lambda x: getattr(x, key, 0), reverse=reverse))
 
     @property
     def first(self):
-        return self[0]
+        try:
+            return self[0]
+        except IndexError:
+            return None
 
     @property
     def last(self):
-        return self[-1]
+        try:
+            return self[-1]
+        except IndexError:
+            return None
 
 
 class MessagePager(FilterList):
@@ -150,15 +154,27 @@ class MessagePager(FilterList):
 
 
 class ApiResponse(object):
+    """Base class for all API responses.
+
+    .. note::
+
+        All keyword arguments become properties.
+
+    """
     def __init__(self, **kwargs):
         for k, v in kwargs.items():
             setattr(self, k, v)
 
 
 class Recipient(ApiResponse):
-    def __init__(self, endpoint, mkey, **kwargs):
-        self.endpoint = endpoint
-        self.mkey = mkey
+    """Base class for Group and Member.
+
+    Recipients can post and recieve messages.
+    """
+    def __init__(self, endpoint, mkey, idkey, **kwargs):
+        self._endpoint = endpoint
+        self._mkey = mkey
+        self._idkey = kwargs.get(idkey)
         self.count = kwargs.pop('count', 0)
         super().__init__(**kwargs)
 
@@ -180,33 +196,47 @@ class Recipient(ApiResponse):
         return chunks
 
     def __len__(self):
-        """Return the number of messages in the group.
+        """Return the number of messages in the recipient.
         """
         return self.count
 
-    def post(self, endpoint, text, *attachments):
+    def post(self, text, *attachments):
+        """Post a message to the recipient.
+
+        Although the API limits messages to 450 characters, this method will
+        split the text component into as many as necessary and include the
+        attachments in the final message. Note that a list of messages sent is
+        always returned, even if it contains only one element.
+
+        :param str text: the message text
+        :param list attachments: the attachments to include
+        :returns: a list of raw API responses (sorry!)
+        :rtype: list
+        """
         if not text and not attachments:
             raise ValueError('must be one attachment or text')
         *chunks, last = self._chunkify(text)
         sent = []
         for chunk in chunks:
-            sent.append(self.endpoint.create(self.id, chunk))
-        sent.append(self.endpoint.create(self.id, last, *attachments))
+            sent.append(self._endpoint.create(self._idkey, chunk))
+        sent.append(self._endpoint.create(self._idkey, last, *attachments))
         return sent
 
     def messages(self, before=None, since=None, after=None, limit=None):
-        """Return a page of messages from the member.
+        """Return a page of messages from the recipient.
 
         :param str before: a reference message ID
         :param str since: a reference message ID
         :param str after: a reference message ID
         :param int limit: maximum number of messages to include in the page
+        :returns: a page of messages
+        :rtype: :class:`MessagePage`
         """
         # Messages obtained with the 'after' parameter are in reversed order.
         backward = after is not None
         # Fetch the messages.
         try:
-            r = self.endpoint.index(self.id, before_id=before,
+            r = self._endpoint.index(self._idkey, before_id=before,
                                     since_id=since, after_id=after)
         except errors.InvalidResponseError as e:
             # 304 means no more messages.
@@ -215,7 +245,7 @@ class Recipient(ApiResponse):
             raise e
         # Update the message count and grab the messages.
         self.count = r['count']
-        messages = (Message(**m) for m in r[self.mkey])
+        messages = (Message(self, **m) for m in r[self._mkey])
         return MessagePager(self, messages, backward=backward)
 
 
@@ -230,7 +260,7 @@ class Group(Recipient):
         self._members = [Member(**m) for m in kwargs.pop('members')]
         self.max_members = kwargs.pop('max_members') or \
                 kwargs.pop('max_memberships')
-        super().__init__(api.Messages, 'messages', **kwargs)
+        super().__init__(api.Messages, 'messages', 'id', **kwargs)
 
     def __repr__(self):
         return "{}, {}/{} members, {} messages".format(
@@ -287,6 +317,8 @@ class Group(Recipient):
         """Remove a member from the group.
 
         :param :class:`Member` member: the member to remove
+        :returns: ``True`` if successful, ``False`` otherwise
+        :rtype: bool
         """
         try:
             api.Members.remove(self.id, member.user_id)
@@ -300,7 +332,8 @@ class Member(Recipient):
     """
     def __init__(self, **kwargs):
         self.guid = kwargs.get('guid', None)    # set regardless of kwargs
-        super().__init__(api.DirectMessages, 'direct_messages', **kwargs)
+        super().__init__(api.DirectMessages, 'direct_messages',
+                         'user_id', **kwargs)
 
     def __repr__(self):
         return self.nickname
@@ -367,16 +400,22 @@ class Member(Recipient):
 class Message(ApiResponse):
     """A GroupMe message.
     """
-    def __init__(self, **kwargs):
-        self._ref_id = kwargs.get('group_id') or kwargs.get('recipient_id')
+    def __init__(self, recipient, **kwargs):
+        self._recipient = recipient
         self.system = kwargs.pop('system', False)
+        try:
+            self._conversation_id = recipient.group_id
+        except AttributeError:
+            sender = User.get()
+            participants = [sender.user_id, recipient.user_id]
+            self._conversation_id = '+'.join(sorted(participants))
         super().__init__(**kwargs)
 
     def __repr__(self):
         msg = "{}: {}".format(self.name, self.text or "")
         if self.attachments:
             for a in self.attachments:
-                msg += " +[{}]".format(a['type'])
+                msg += " +<{}>".format(str(a))
         return msg
 
     def __len__(self):
@@ -386,28 +425,37 @@ class Message(ApiResponse):
 
     def like(self):
         """Like the message.
+
+        :returns: ``True`` if successful, ``False`` otherwise
+        :rtype: bool
         """
         try:
-            api.Likes.create(self._ref_id, self.id)
+            api.Likes.create(self._conversation_id, self.id)
         except errors.InvalidResponse as e:
             return e.args[0].status_code == status.OK
         return True
 
     def unlike(self):
         """Unlike the message.
+
+        :returns: ``True`` if successful, ``False`` otherwise
+        :rtype: bool
         """
         try:
-            api.Likes.destroy(self._ref_id, self.id)
+            api.Likes.destroy(self._conversation_id, self.id)
         except errors.InvalidResponse as e:
             return e.args[0].status_code == status.OK
         return True
 
     def likes(self):
         """Return a :class:`FilterList` of the members that like the message.
+        
+        :returns: a list of the members who "liked" this message
+        :rtype: :class:`FilterList`
         """
         liked = filter(
             lambda m: m.user_id in self.favorited_by,
-            self.group.members())
+            self._recipient.members())
         return FilterList(liked)
 
 
@@ -427,7 +475,7 @@ class Bot(ApiResponse):
         return FilterList(Bot(**b) for b in api.Bots.index())
 
     def post(self, text, picture_url=None):
-        """Post a message to the group.
+        """Post a message to the group of the bot.
 
         :param str text: the message text
         :param str picture_url: the GroupMe image URL for an image
@@ -516,6 +564,16 @@ class Attachment:
 
     def as_dict(self):
         return self.__dict__
+
+    def __repr__(self):
+        if self.type == 'image':
+            return self.url
+        elif self.type == 'location':
+            return "{}: ({}, {})".format(self.name, self.lat, self.lng)
+        elif self.type == 'split':
+            return "split={}".format(self.token)
+        elif self.type == 'emoji':
+            return "{}: {}".format(self.placeholder, json.dumps(self.charmap))
 
     @classmethod
     def image(cls, url):
