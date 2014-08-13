@@ -239,8 +239,8 @@ class Recipient(ApiResponse):
             r = self._endpoint.index(self._idkey, before_id=before,
                                     since_id=since, after_id=after)
         except errors.InvalidResponseError as e:
-            # 304 means no more messages.
-            if e.args[0].status_code == 304:
+            # NOT_MODIFIED, in this case, means no more messages.
+            if e.args[0].status_code == status.NOT_MODIFIED:
                 return None
             raise e
         # Update the message count and grab the messages.
