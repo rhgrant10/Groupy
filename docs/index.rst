@@ -6,12 +6,12 @@
 Welcome to Groupy's documentation!
 ==================================
 
-.. automodule:: groupy
+The simple yet powerful wrapper for the GroupMe API
 
 .. toctree::
 	:maxdepth: 2
 
-	apidocs
+	pages/api
 
 Indices and tables
 ==================

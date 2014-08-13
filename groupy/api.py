@@ -5,11 +5,12 @@
 
 .. moduleauthor:: Robert Grant <rhgrant10@gmail.com>
 
-
 """
+
 import requests
 import time
 import json
+
 from . import config
 from . import errors
 
