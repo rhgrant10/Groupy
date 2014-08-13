@@ -24,32 +24,36 @@ Usage
     groups = groupy.Group.list()
     former_groups = groupy.Group.former_list()
 
-    # list the members in a group:
+    # list the members in a group
     group = groups[0]
     members = group.members()
+    
+    # add and remove members from a group
+    group2 = groups[1]
+    group2.add(members[0])
+    group2.remove(members[0])
 
-    # list the messages in a group:
+    # list the 100 most recent messages in a group
     messages = group.messages()
 
-    # now `messages` contains the most recent 100 messages in the group. Older
-    # messages (and once in existence, newer ones as well) can be obtained easily:
+    # older messages (and once in existence, newer ones as well) can be obtained easily.
     older_messages = messages.older()
     newer_messages = messages.newer()
 
     # post a message to a group
     group.post('Hello world!')
 
-    # include an image with the message:
+    # include an image with the message
     img = groupy.Attachment.new_image(open('imagefilepath', 'rb'))
     group.post('Here is the pic you took :-)', img)
 
-    # messages have either text, attachments, or both:
+    # messages have either text, attachments, or both
     message = messages.newest
     print(message.text)
     for a in message.attachments:
       print(a)
 
-    # ...and can be liked and unliked:
+    # ...and can be liked and unliked
     message.like()
     message.unlike()
 
