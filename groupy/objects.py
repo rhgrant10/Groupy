@@ -17,15 +17,15 @@ class FilterList(list):
 
         Arguments are keyword arguments only, and can be appended with
         operator method names to indicate relationships other than equals.
-        For example, to filter the list down to only items with a name
-        containing 'ie':
+        For example, to filter the list down to only items where 'name'
+        contains "ie":
 
         .. code-block:: python
 
             new_list = filter_list.filter(name__contains='ie')
 
         As another example, this filters the list down to only those
-        with a created property that is less than 1234567890:
+        with a 'created' property that is less than 1234567890:
 
         .. code-block:: python
 
@@ -61,18 +61,6 @@ class FilterList(list):
         test = lambda i, k, v, op: hasattr(i, k) and op(getattr(i, k), v)
         criteria = lambda i: all(test(i, k, v, op) for k, v, op in kvops)
         return FilterList(filter(criteria, self))
-
-    def sort(self, key, reverse=False):
-        """Return the same items in a new list but sorted.
-
-        :param str key: the name of the property on which to sort
-        :param bool reverse: ``True`` if the order should be reversed,
-            ``False`` otherwise.
-        :return: a new sorted list of the items in the original list
-        :rtype: :class:`FilterList`
-        """
-        return FilterList(sorted(self,
-                key=lambda x: getattr(x, key, 0), reverse=reverse))
 
     @property
     def first(self):
