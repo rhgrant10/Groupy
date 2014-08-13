@@ -1,6 +1,16 @@
+"""
+.. module:: objects
+   :platform: Unix, Windows
+   :synopsis: Module that abstracts the API calls into sensible objects.
+
+.. moduleauthor:: Robert Grant <rhgrant10@gmail.com>
+
+
+"""
 from . import api
 from . import status
 from . import errors
+
 import operator
 import time
 

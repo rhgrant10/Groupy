@@ -1,3 +1,12 @@
+"""
+.. module:: api
+   :platform: Unix, Windows
+   :synopsis: Module containing methods for every API endpoint.
+
+.. moduleauthor:: Robert Grant <rhgrant10@gmail.com>
+
+
+"""
 import requests
 import time
 import json
@@ -382,7 +391,7 @@ class Likes(Endpoint):
 class Bots(Endpoint):
     """Endpoint for the bots API.
 
-    Bots can be listed,- created, updated, and destroyed. Bots can also post
+    Bots can be listed, created, updated, and destroyed. Bots can also post
     messages to groups.
     """
     url = '/'.join([Endpoint.url, 'bots'])

@@ -1,3 +1,8 @@
+"""The simple yet powerful wrapper for the GroupMe API.
+
+.. moduleauthor:: Robert Grant <rhgrant10@gmail.com>
+
+"""
 import os
 import warnings
 import groupy.config
