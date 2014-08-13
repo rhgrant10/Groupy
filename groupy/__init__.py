@@ -10,15 +10,16 @@ import groupy.config
 
 def _attempt_to_load_apikey():
     filepath = os.path.expanduser(groupy.config.KEY_LOCATION)
-    with open(filepath, 'r') as f:
-        try:
+    try:
+        with open(filepath, 'r') as f:
             groupy.config.API_KEY = f.read().strip()
-        except IOError as e:
-            if e.errno != 2:
-                warnings.warn(
-                    'key file {} exists but could not be opened: {}'.format(
-                        groupy.config.KEY_LOCATION,
-                        str(e)))
+    except IOError as e:
+        groupy.config.API_KEY = None
+        if e.errno != 2:
+            warnings.warn(
+                'key file {} exists but could not be opened: {}'.format(
+                    groupy.config.KEY_LOCATION,
+                    str(e)))    
 
 _attempt_to_load_apikey()
 
