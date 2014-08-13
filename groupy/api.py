@@ -302,7 +302,7 @@ class DirectMessages(Endpoint):
     url = '/'.join([Endpoint.url, 'direct_messages'])
 
     @classmethod
-    def index(cls, other_user_id, before_id=None, since_id=None):
+    def index(cls, other_user_id, before_id=None, since_id=None, after_id=None):
         """List the direct messages with another user.
 
         :param str other_user_id: the ID of the other party
@@ -316,7 +316,8 @@ class DirectMessages(Endpoint):
             params={
                 'other_user_id': other_user_id,
                 'before_id': before_id,
-                'since_id': since_id
+                'since_id': since_id,
+                'after_id': after_id
             }
         )
         return cls.response(r)
