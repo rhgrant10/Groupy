@@ -7,20 +7,11 @@ Welcome to Groupy's documentation!
 ==================================
 
 .. automodule:: groupy
-	:members:
 
-Api Module
-----------
+.. toctree::
+	:maxdepth: 2
 
-.. automodule:: groupy.api
-	:members:
-
-Objects Module
---------------
-
-.. automodule:: groupy.objects
-	:members:
-
+	apidocs
 
 Indices and tables
 ==================

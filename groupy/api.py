@@ -13,6 +13,8 @@ import json
 from . import config
 from . import errors
 
+__all__ = ['Endpoint', 'Groups', 'Members', 'Messages', 'DirectMessages',
+    'Likes', 'Users', 'Sms']
 
 class Endpoint:
     '''An API endpoint capable of building a url and extracting data from the
@@ -30,8 +32,9 @@ class Endpoint:
         :param str path: a suffix for the final URL. If *args* are present,
             this should be a python format string pertaining to the given
             *args*.
-        :param list args: a list of arguments for the format string *path*.
-        :return: a complete URL
+        :param args: a list of arguments for the format string *path*.
+        :type args: :class:`list`
+        :returns: a complete URL
         :rtype: str
         """
         try:
@@ -51,8 +54,8 @@ class Endpoint:
 
         This method essentially strips the actual response of the envelope.
 
-        :param :class:`requests.Response` r: the HTTP response from an API call
-        :return: API response data
+        :param requests.Response r: the HTTP response from an API call
+        :returns: API response data
         :rtype: json
         """
         try:
@@ -65,12 +68,13 @@ class Endpoint:
 
     @staticmethod
     def clamp(value, lower, upper):
-        """Utility method for clamping a value between a *lower* and an
+        """Utility method for clamping a *value* between a *lower* and an
         *upper* value.
 
-        :param lower: the smallest possible value
-        :param upper: the largest possible value
-        :return: *value* such that ``lower <= value <= upper``
+        :param value: the value to clamp
+        :param lower: the "smallest" possible value
+        :param upper: the "largest" possible value
+        :returns: *value* such that ``lower <= value <= upper``
         """
         return max(lower, min(value, upper))
 
@@ -87,8 +91,8 @@ class Groups(Endpoint):
         """Return a specific group by its *group_id*.
 
         :param str group_id: the ID of the group to show.
-        :return: the group with the given *group_id*
-        :rtype: dict
+        :returns: the group with the given *group_id*
+        :rtype: :class:`dict`
         """
         r = requests.get(
             cls.build_url(group_id)
@@ -101,10 +105,11 @@ class Groups(Endpoint):
 
         :param int page: the page of groups to return
         :param int per_page: the number of groups in the page
-        :param bool former: True if old groups should be listed instead of
-            current groups, False otherwise
-        :return: multiple groups
-        :rtype: list
+        :param former: ``True`` if former groups should be listed instead of
+            current groups, ``False`` otherwise
+        :type former: :obj:`bool`
+        :returns: a list of groups
+        :rtype: :class:`list`
         """
         per_page = cls.clamp(per_page, 1, 500)
         r = requests.get(
@@ -123,10 +128,11 @@ class Groups(Endpoint):
         :param str name: the name of the new group
         :param str description: the description of the new group
         :param str image_url: the group avatar image as a GroupMe image URL
-        :param bool share: True if a link to join should be generated,
-            False otherwise
-        :return: the new group
-        :rtype: dict
+        :param share: ``True`` if a link to join should be generated, ``False``
+            otherwise
+        :type share: :obj:`bool`
+        :returns: the new group
+        :rtype: :class:`dict`
         """
         r = requests.post(
             cls.build_url(),
@@ -147,11 +153,12 @@ class Groups(Endpoint):
         :param str group_id: the ID of the group to update
         :param str name: the new name of the group
         :param str description: the new description of the group
-        :param bool share: True if a share link should be generated, False
+        :param share: True if a share link should be generated, False
             otherwise
+        :type share: :obj:`bool`
         :param str image_url: the GroupMe image URL for the new group avatar.
-        :return: the modified group
-        :rtype: dict
+        :returns: the modified group
+        :rtype: :class:`dict`
         """
         r = requests.post(
             cls.build_url('{}/update', group_id),
@@ -168,7 +175,9 @@ class Groups(Endpoint):
     def destroy(cls, group_id):
         """Destroy (or leave) a group.
 
-        If you are not the owner of a group, you can not destroy it.
+        .. note::
+
+            If you are not the owner of a group, you can not destroy it.
 
         :param str group_id: the ID of the group to destroy/leave
         """
@@ -192,9 +201,10 @@ class Members(Endpoint):
 
         :param str group_id: the ID of the group to which the members should
             be added
-        :param list members: the members to add.
-        :return: the ``results_id`` for this request
-        :rtype: dict
+        :param members: the members to add.
+        :type members: :class:`list`
+        :returns: the ``results_id`` for this request
+        :rtype: :class:`dict`
         """
         r = requests.post(
             cls.build_url('{}/members/add', group_id),
@@ -208,6 +218,8 @@ class Members(Endpoint):
 
         :param str group_id: the ID of the group to which the add call was made
         :param str result_id: the GUID returned by the add call
+        :returns: a list of successfully added members
+        :rtype: :class:`list`
         """
         r = requests.get(
             cls.build_url('{}/members/results/{}', group_id, result_id)
@@ -246,9 +258,9 @@ class Messages(Endpoint):
 
         Use ``before_id`` and ``after_id`` to "page" through messages.
         ``since_id`` is odd in that it returns the *most recent* messages
-        since the reference message, which means there may be missing
-        messages between the reference message and the oldest message in the
-        returned list of messages.
+        since the reference message, which means there may be messages missing
+        between the reference message and the oldest message in the returned
+        list of messages.
 
         .. note::
 
@@ -265,6 +277,8 @@ class Messages(Endpoint):
             return the messages just after the reference message
         :param int limit: a limit on the number of messages returned (between
             1 and 100 inclusive)
+        :returns: a :class:`dict` containing ``count`` and ``messages``
+        :rtype: :class:`dict`
         """
         limit = cls.clamp(limit, 1, 100)
         r = requests.get(
@@ -289,7 +303,10 @@ class Messages(Endpoint):
 
         :param str group_id: the ID of the group in which to create the message
         :param str text: the text of the message
-        :param list attachments: a list of attachments to include
+        :param attachments: a list of attachments to include
+        :type attachments: :class:`list`
+        :returns: the created message
+        :rtype: :class:`dict`
         """
         r = requests.post(
             cls.build_url('{}/messages', group_id),
@@ -317,8 +334,8 @@ class DirectMessages(Endpoint):
         :param str other_user_id: the ID of the other party
         :param str before_id: a reference message ID; specify this to list
             messages prior to it
-        :return: a list of direct messages
-        :rtype: list
+        :returns: a list of direct messages
+        :rtype: :class:`list`
         """
         r = requests.get(
             cls.build_url(),
@@ -337,9 +354,10 @@ class DirectMessages(Endpoint):
 
         :param str recipient_id: the ID of the recipient
         :param str text: the message text
-        :param list attachments: a list of attachments to include
-        :return: the new direct message
-        :rtype: dict
+        :param attachments: a list of attachments to include
+        :type attachments: :class:`list`
+        :returns: the created direct message
+        :rtype: :class:`dict`
         """
         r = requests.post(
             cls.build_url(),
@@ -360,6 +378,15 @@ class Likes(Endpoint):
     """Endpoint for the likes API.
 
     Likes can be created or destroyed.
+
+    .. note::
+
+        The ``conversation_id`` is poorly documented. For messages in a group,
+        it corresponds to the ``group_id`` (or ``id`` since they seem to always
+        be identical). For direct messages, it corresponds to the ``user_id`` of
+        both conversation participants sorted lexicographically and concatenated
+        with a plus sign ("+").
+
     """
     url = '/'.join([Endpoint.url, 'messages'])
 
@@ -399,6 +426,9 @@ class Bots(Endpoint):
     @classmethod
     def index(cls):
         """List bots.
+
+        :returns: a list of bots
+        :rtype: :class:`list`
         """
         r = requests.get(
             cls.build_url()
@@ -413,8 +443,8 @@ class Bots(Endpoint):
         :param str group_id: the ID of the group to which the bot will belong
         :param str avatar_url: the GroupMe image URL for the bot's avatar
         :param str callback_url: the callback URL for the bot
-        :return: the new bot
-        :rtype: dict
+        :returns: the new bot
+        :rtype: :class:`dict`
         """
         r = requests.post(
             cls.build_url(),
@@ -434,6 +464,8 @@ class Bots(Endpoint):
         :param str bot_id: the ID of the bot
         :param str text: the message text
         :param str picture_url: the GroupMe image URL for a picture
+        :returns: the created message
+        :rtype: :class:`dict`
         """
         r = requests.post(
             cls.build_url('post'),
@@ -466,6 +498,9 @@ class Users(Endpoint):
     @classmethod
     def me(cls):
         """Get the user's information.
+
+        :returns: the user's information
+        :rtype: :class:`dict`
         """
         r = requests.get(
             cls.build_url('me')
@@ -519,6 +554,15 @@ class Images(Endpoint):
 
     @classmethod
     def response(cls, r):
+        """Extract the data from the image service API response *r*.
+
+        This method basically returns the inner "payload."
+
+        :param r: the HTTP response from an API call
+        :type r: :class:`requests.Response`
+        :returns: API response data
+        :rtype: json
+        """
         try:
             data = r.json()
         except ValueError:
@@ -529,10 +573,11 @@ class Images(Endpoint):
     def create(cls, image):
         """Submit a new image.
 
-        :param file image: object with a file-like interface and containing an
-        image
-        :return: the URL at which the image can be accessed
-        :rtype: dict
+        :param image: object with a file-like interface and containing an
+            image
+        :type image: :obj:`file`
+        :returns: the URL at which the image can be accessed
+        :rtype: :class:`dict`
         """
         r = requests.post(
             cls.build_url(),

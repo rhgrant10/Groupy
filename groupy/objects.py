@@ -14,28 +14,30 @@ from . import errors
 import operator
 import time
 
+__all__ = ['ApiResponse', 'Recipient', 'Group', 'Member', 'Message',
+    'Bot', 'User', 'Attachment', 'FilterList', 'MessagePager']
 
 class FilterList(list):
     """A filterable list.
 
-    Acts just like a regular list, except it can be filtered using a special
-    keyword syntax. Also, the first and last items are special properties.
-
+    Acts just like a regular :class:`list`, except it can be filtered using a
+    special keyword syntax. Also, the first and last items are special
+    properties.
     """
     def filter(self, **kwargs):
         """Filter the list and return a new instance.
 
         Arguments are keyword arguments only, and can be appended with
         operator method names to indicate relationships other than equals.
-        For example, to filter the list down to only items where 'name'
-        contains "ie":
+        For example, to filter the list down to only items whose ``name``
+        property contains "ie":
 
         .. code-block:: python
 
             new_list = filter_list.filter(name__contains='ie')
 
         As another example, this filters the list down to only those
-        with a 'created' property that is less than 1234567890:
+        with a ``created`` property that is less than 1234567890:
 
         .. code-block:: python
 
@@ -52,10 +54,10 @@ class FilterList(list):
         - ``__ge``: greater than or equal to
 
         Use of any operator listed here results in a
-        :class:`errors.InvalidOperatorError`.
+        :class:`InvalidOperatorError<groupy.errors.InvalidOperatorError>`.
 
         :return: a new list with potentially less items than the original
-        :rtype: :class:`FilterList`
+        :rtype: :class:`FilterList<groupy.objects.FilterList>`
         """
         kvops = []
         for k, v in kwargs.items():
@@ -90,10 +92,13 @@ class FilterList(list):
 class MessagePager(FilterList):
     """A filterable, extendable page of messages.
 
-    :param Group group: the group from which to page through messages
-    :param list messages: the initial page of messages
-    :param bool backward: ``True`` if the oldest message is at index 0,
-        ``False`` otherwise
+    :param group: the group from which to page through messages
+    :type group: :class:`Group<groupy.objects.Group>`
+    :param messages: the initial page of messages
+    :type messages: :class:`list`
+    :param backward: ``True`` if the oldest message is at index 0, ``False``
+        otherwise
+    :type backward: :obj:`bool`
     """
     def __init__(self, group, messages, backward=False):
         super().__init__(messages)
@@ -102,32 +107,52 @@ class MessagePager(FilterList):
 
     @property
     def oldest(self):
+        """Return the oldest message in the list.
+
+        :returns: the oldest message in the list
+        :rtype: :class:`Message<groupy.objects.Message>`
+        """
         return self.first if self.backward else self.last
 
     @property
     def newest(self):
+        """Return the newest message in the list.
+
+        :returns: the newest message in the list
+        :rtype: :class:`Message<groupy.objects.Message>`
+        """
         return self.last if self.backward else self.first
 
     def prepend(self, messages):
-        """Prepend a list of messages.
+        """Prepend a list of messages to the list.
 
-        :param list messages: the messages to prepend
+        :param messages: the messages to prepend
+        :type messages: :class:`list`
         """
         for each in messages:
             self.insert(0, each)
 
     def newer(self):
         """Return the next (newer) page of messages.
+
+        :returns: a newer page of messages
+        :rtype: :class:`MessagePager<groupy.objects.MessagePager>`
         """
         return self.group.messages(after=self.newest.id)
 
     def older(self):
         """Return the previous (older) page of messages.
+        
+        :returns: an older page of messages
+        :rtype: :class:`MessagePager<groupy.objects.MessagePager>`
         """
         return self.group.messages(before=self.oldest.id)
 
     def inewer(self):
         """Add in-place the next (newer) page of messages.
+        
+        :returns: ``True`` if successful, ``False`` otherwise
+        :rtype: :obj:`bool`
         """
         new = self.newer()
         if not new:
@@ -140,6 +165,9 @@ class MessagePager(FilterList):
 
     def iolder(self):
         """Add in-place the previous (older) page of messages.
+        
+        :returns: ``True`` if successful, ``False`` otherwise
+        :rtype: :obj:`bool`
         """
         old = self.older()
         if not old:
@@ -168,6 +196,13 @@ class Recipient(ApiResponse):
     """Base class for Group and Member.
 
     Recipients can post and recieve messages.
+
+    :param endpoint: the API endpoint for messages
+    :type endpoint: :class:`Endpoint<groupy.objects.Endpoint>`
+    :param str mkey: the :class:`dict` key under which the endpoint returns
+        messages
+    :param str idkey: the :class:`dict` key whose value represents the key for
+        posting and retrieving messages
     """
     def __init__(self, endpoint, mkey, idkey, **kwargs):
         self._endpoint = endpoint
@@ -207,9 +242,10 @@ class Recipient(ApiResponse):
         always returned, even if it contains only one element.
 
         :param str text: the message text
-        :param list attachments: the attachments to include
+        :param attachments: the attachments to include
+        :type attachments: :class:`list`
         :returns: a list of raw API responses (sorry!)
-        :rtype: list
+        :rtype: :class:`list`
         """
         if not text and not attachments:
             raise ValueError('must be one attachment or text')
@@ -228,7 +264,7 @@ class Recipient(ApiResponse):
         :param str after: a reference message ID
         :param int limit: maximum number of messages to include in the page
         :returns: a page of messages
-        :rtype: :class:`MessagePage`
+        :rtype: :class:`MessagePager<groupy.objects.MessagePager>`
         """
         # Messages obtained with the 'after' parameter are in reversed order.
         backward = after is not None
@@ -268,6 +304,12 @@ class Group(Recipient):
     @classmethod
     def list(cls, former=False):
         """List all of your current or former groups.
+
+        :param former: ``True`` if former groups should be listed, 
+            ``False`` (default) lists current groups
+        :type former: :obj:`bool`
+        :returns: a list of groups
+        :rtype: :class:`FilterList<groupy.objects.FilterList>`
         """
         # Former groups come as a single page.
         if former:
@@ -287,24 +329,28 @@ class Group(Recipient):
         return FilterList(Group(**g) for g in groups)
 
     def refresh(self):
-        """Update the group with new information from the API.
+        """Refresh the group information from the API.
         """
         self.__init__(**api.Groups.show(self.id))
 
     def members(self):
         """Return a list of the members in the group.
+
+        :returns: the members of the group
+        :rtype: :class:`FilterList<groupy.objects.FilterList>`
         """
         return FilterList(self._members)
 
     def add(self, *members):
         """Add a member to a group.
 
-        Each member can be either an instance of :class:`Member` or a
-        ``dict`` containing ``'nickname'`` and one of ``'email'``,
-        ``'phone_number'``, or ``'user_id'``.
+        Each member can be either an instance of 
+        :class:`Member<groupy.objects.Member>` or a :class:`dict` containing 
+        ``nickname`` and one of ``email``, ``phone_number``, or ``user_id``.
 
-        :param list members: members to add to the group
-        :return: the results ID of the add call
+        :param members: members to add to the group
+        :type members: :class:`list`
+        :returns: the results ID of the add call
         :rtype: str
         """
         ids = (Member.idenify(m) for m in members)
@@ -314,7 +360,8 @@ class Group(Recipient):
     def remove(self, member):
         """Remove a member from the group.
 
-        :param :class:`Member` member: the member to remove
+        :param member: the member to remove
+        :type member: :class:`Member<groupy.objects.Member>`
         :returns: ``True`` if successful, ``False`` otherwise
         :rtype: bool
         """
@@ -354,9 +401,13 @@ class Member(Recipient):
     def identification(self):
         """Return the identification of the member.
 
-        A member is identified by their nickname and user_id properties. If the
-        member does not yet have a GUID, a new one is created and assigned to
-        them (and is returned alongside the nickname and user_id properties).
+        A member is identified by their ``nickname`` and ``user_id`` properties.
+        If the member does not yet have a GUID, a new one is created and
+        assigned to them (and is returned alongside the ``nickname`` and
+        ``user_id`` properties).
+
+        :returns: the ``nickname``, ``user_id``, and ``guid`` of the member
+        :rtype: :class:`dict`
         """
         return {
             'nickname': self.nickname,
@@ -368,14 +419,20 @@ class Member(Recipient):
     def identify(cls, member):
         """Return or create an identification for a member.
 
-        If an identification cannot be created then raise an
-        :class:`AttributeError`.
+        Member identification is required for adding them to groups. If member
+        is a :class:`dict`, it must contain the following keys:
 
-        :param member: either a :class:`Member` or a ``dict``; if the latter,
-            it must contain at least a ``nickname`` property as well as one of
-            ``user_id``, ``email``, or ``phone_number``
-        :return: the identification of member
-        :rtype: dict
+        - ``nickname``
+        - ``user_id`` or ``email`` or ``phone_number``
+        
+        If an identification cannot be created then raise an
+        :exc:`AttributeError<exceptions.AttributeError>`.
+
+        :param member: either a :class:`Member<groupy.objects.Member>` or a
+            :class:`dict` with the required keys
+        :returns: the identification of member
+        :rtype: :class:`dict`
+        :raises AttributeError: if an identication cannot be made
         """
         try:
             return member.identification()
@@ -397,6 +454,9 @@ class Member(Recipient):
 
 class Message(ApiResponse):
     """A GroupMe message.
+
+    :param recipient: the reciever of the message
+    :type recipient: :class:`Recipient<groupy.objects.Recipient>`
     """
     def __init__(self, recipient, **kwargs):
         self._recipient = recipient
@@ -446,10 +506,11 @@ class Message(ApiResponse):
         return True
 
     def likes(self):
-        """Return a :class:`FilterList` of the members that like the message.
+        """Return a :class:`FilterList<groupy.objects.FilterList>` of the
+        members that like the message.
         
         :returns: a list of the members who "liked" this message
-        :rtype: :class:`FilterList`
+        :rtype: :class:`FilterList<groupy.objects.FilterList>`
         """
         liked = filter(
             lambda m: m.user_id in self.favorited_by,
@@ -468,7 +529,10 @@ class Bot(ApiResponse):
 
     @classmethod
     def list(self):
-        """Return a :class:`FilterList` of the bots.
+        """Return a list of your bots.
+
+        :returns: a list of your bots
+        :rtype: :class:`FilterList<groupy.objects.FilterList>`
         """
         return FilterList(Bot(**b) for b in api.Bots.index())
 
@@ -509,7 +573,10 @@ class User(ApiResponse):
 
     @classmethod
     def get(cls):
-        """Return the user's information.
+        """Return your user information.
+
+        :returns: your user information
+        :rtype: :class:`dict`
         """
         return cls(**api.Users.me())
 
@@ -525,7 +592,7 @@ class User(ApiResponse):
             for which messages should be suppressed; if omitted, the user
             will recieve both push notifications as well as text messages
         :returns: ``True`` if successful, ``False`` otherwise
-        :rtype: bool
+        :rtype: :obj:`bool`
         """
         try:
             api.Sms.create(duration, registration_token)
@@ -536,11 +603,11 @@ class User(ApiResponse):
     def disable_sms(self):
         """Disable SMS mode.
 
-        Disabling SMS mode causes push notifications to cease being suppressed,
-        as well as discontinuation of SMS text messages.
+        Disabling SMS mode causes push notifications to resume and SMS text
+        messages to be discontinued.
 
         :returns: ``True`` if successful, ``False`` otherwise
-        :rtype: bool
+        :rtype: :obj:`bool`
         """
         try:
             api.Sms.delete()
@@ -579,7 +646,7 @@ class Attachment:
 
         :param str url: the GroupMe image URL for an image
         :returns: image attachment
-        :rtype: :class:`Attachment`
+        :rtype: :class:`Attachment<groupy.objects.Attachment>`
         """
         return cls('image', url=url)
 
@@ -590,9 +657,10 @@ class Attachment:
         Note that this posts the image to the image service API and uses the
         returned URL to create an image attachment.
 
-        :param file image: a file-like object containing an image
+        :param image: a file-like object containing an image
+        :type image: :obj:`file`
         :returns: image attachment
-        :rtype: :class:`Attachment`
+        :rtype: :class:`Attachment<groupy.objects.Attachment>`
         """
         return cls.image(api.Images.create(image)['url'])
 
@@ -604,7 +672,7 @@ class Attachment:
         :param float lat: the latitude component
         :param float lng: the longitude component
         :returns: a location attachment
-        :rtype: :class:`Attachment`
+        :rtype: :class:`Attachment<groupy.objects.Attachment>`
         """
         return cls('location', name=name, lat=lat, lng=lng)
 
@@ -612,9 +680,13 @@ class Attachment:
     def split(cls, token):
         """Create a split attachment.
 
+        .. note::
+
+            The split attachment is depreciated according to GroupMe.
+
         :param str token: the split token
         :returns: a split attachment
-        :rtype: :class:`Attachment`
+        :rtype: :class:`Attachment<groupy.objects.Attachment>`
         """
         return cls('split', token=token)
 
@@ -623,8 +695,9 @@ class Attachment:
         """Create an emoji attachment.
 
         :param str placeholder: a high code-point character
-        :param list charmap: a two-dimensional charmap
+        :param charmap: a two-dimensional charmap
+        :type charmap: :class:`list`
         :returns: an emoji attachment
-        :rtype: :class:`Attachment`
+        :rtype: :class:`Attachment<groupy.objects.Attachment>`
         """
         return cls('emoji', placeholder=placeholder, charmap=charmap)
