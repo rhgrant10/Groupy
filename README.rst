@@ -79,6 +79,12 @@ Usage
 Version History
 ===============
 
+v0.3.1
+------
+
+- Fixed bug when adding members to a group
+- Many additions to the docs
+
 v0.3.0
 ------
 
