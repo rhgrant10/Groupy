@@ -353,7 +353,7 @@ class Group(Recipient):
         :returns: the results ID of the add call
         :rtype: str
         """
-        ids = (Member.idenify(m) for m in members)
+        ids = (Member.identify(m) for m in members)
         r = api.Members.add(self.id, *ids)
         return r['results_id']
 
