@@ -532,7 +532,24 @@ class Bot(ApiResponse):
         return self.name
 
     @classmethod
-    def list(self):
+    def create(cls, name, group, avatar_url=None, callback_url=None):
+        """Create a new bot.
+        
+        :param str name: the name of the bot
+        :param group: the group to which the bot will belong
+        :type group: :class:`Bot<groupy.objects.Bot>`
+        :param str avatar_url: the URL for a GroupMe image to be used as the
+            bot's avatar
+        :param str callback_url: the URL to which each group message will be
+            POSTed
+        :returns: the new bot
+        :rtype: :class:`Bot<groupy.objects.Bot>`
+        """
+        bot = api.Bots.create(name, group.group_id, avatar_url, callback_url)
+        return cls(**bot)
+
+    @classmethod
+    def list(cls):
         """Return a list of your bots.
 
         :returns: a list of your bots
