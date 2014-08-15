@@ -30,14 +30,15 @@ less) detailed information.
 
 .. _read the API documentation: http://dev.groupme.com
 
-But Groupy lets you forget about the GroupMe API and focus on what you need to
-get done!
+But **Groupy** lets you forget about the GroupMe API and focus on what you need
+to get done!
 
 Features
 ^^^^^^^^
 
 - List and filter your current and former groups
 - Create, destroy, and update your groups
+- Add members to and remove members from groups
 - List and filter messages from groups and members
 - Post new messages to groups
 - Send direct messages to members
