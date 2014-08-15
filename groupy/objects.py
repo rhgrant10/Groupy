@@ -208,7 +208,7 @@ class Recipient(ApiResponse):
         self._endpoint = endpoint
         self._mkey = mkey
         self._idkey = kwargs.get(idkey)
-        self.count = kwargs.pop('count', 0)
+        self.message_count = kwargs.pop('count', 0)
         super().__init__(**kwargs)
 
     # Splits text into chunks so that each is less than the chunk_size.
@@ -231,7 +231,7 @@ class Recipient(ApiResponse):
     def __len__(self):
         """Return the number of messages in the recipient.
         """
-        return self.count
+        return self.message_count
 
     def post(self, text, *attachments):
         """Post a message to the recipient.
@@ -278,7 +278,7 @@ class Recipient(ApiResponse):
                 return None
             raise e
         # Update the message count and grab the messages.
-        self.count = r['count']
+        self.message_count = r['count']
         messages = (Message(self, **m) for m in r[self._mkey])
         return MessagePager(self, messages, backward=backward)
 
@@ -288,13 +288,17 @@ class Group(Recipient):
     """
     def __init__(self, **kwargs):
         messages = kwargs.pop('messages', {})
+        members = kwargs.pop('members')
+        super().__init__(api.Messages, 'messages', 'id', **kwargs)
         self.message_count = messages.get('count')
         self.last_message_id = messages.get('last_message_id')
         self.last_message_created_at = messages.get('last_message_created_at')
-        self._members = [Member(**m) for m in kwargs.pop('members')]
-        self.max_members = kwargs.pop('max_members') or \
-                kwargs.pop('max_memberships')
-        super().__init__(api.Messages, 'messages', 'id', **kwargs)
+        self._members = [Member(**m) for m in members]
+        for k in ['max_members', 'max_memberships']:
+            if k in kwargs:
+                self.max_members = kwargs[k]
+        else:
+            self.max_members = None
 
     def __repr__(self):
         return "{}, {}/{} members, {} messages".format(
