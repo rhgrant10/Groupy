@@ -601,7 +601,8 @@ class User(ApiResponse):
         """
         return cls(**api.Users.me())
 
-    def enable_sms(self, duration=4, registration_token=None):
+    @classmethod
+    def enable_sms(cls, duration=4, registration_token=None):
         """Enable SMS mode.
 
         Enabling SMS mode causes GroupMe to send a text message for each
@@ -621,7 +622,8 @@ class User(ApiResponse):
             return e.args[0].status_code == status.CREATED
         return True
 
-    def disable_sms(self):
+    @classmethod
+    def disable_sms(cls):
         """Disable SMS mode.
 
         Disabling SMS mode causes push notifications to resume and SMS text
