@@ -70,7 +70,7 @@ Verifying Installation
 You can verify that the installation worked by simply importing ``groupy`` from
 a ``Python3`` shell:
 
-.. code-block::
+.. code-block:: console
 
 	$ python3
 	Python 3.4.1 (default, Aug 11 2014, 10:05:47) 
