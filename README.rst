@@ -4,8 +4,6 @@ Groupy
 
 The simple yet powerful GroupMe API wrapper for Python 3.
 
-Get the full documentation on `Read the Docs`_!
-
 Installation
 ============
 
@@ -17,6 +15,8 @@ Installation
 
 Usage
 =====
+
+Get the full documentation on `Read the Docs`_!
 
 .. code-block:: python
 
@@ -86,6 +86,8 @@ Version History
 ===============
 
 v0.4.0
+------
+
 - All known members can now be listed directly
 - Re-wrote attachemnts classes
 
