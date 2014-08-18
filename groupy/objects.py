@@ -11,8 +11,9 @@ from . import api
 from . import status
 from . import errors
 
-import operator
+from datetime import datetime
 import time
+import operator
 
 __all__ = ['ApiResponse', 'Recipient', 'Group', 'Member', 'Message',
     'Bot', 'User', 'Attachment', 'FilterList', 'MessagePager']
@@ -300,6 +301,18 @@ class Group(Recipient):
         else:
             self.max_members = None
 
+        # self.created_at = datetime.fromtimestamp(kwargs.get('created_at'))
+        # self.creator_user_id = kwargs.get('creator_user_id')
+        # self.description = kwargs.get('description')
+        # self.group_id = kwargs.get('group_id')
+        # self.id = kwargs.get('id')
+        # self.image_url = kwargs.get('image_url')
+        # self.last_message_created_at = \
+        #         datetime.fromtimestamp(kwargs.get('last_message_created_at'))
+        # self.
+        
+
+
     def __repr__(self):
         return "{}, {}/{} members, {} messages".format(
             self.name, len(self.members()),
@@ -463,15 +476,21 @@ class Message(ApiResponse):
     :type recipient: :class:`Recipient<groupy.objects.Recipient>`
     """
     def __init__(self, recipient, **kwargs):
+        super().__init__()
         self._recipient = recipient
+        self.attachments = [Attachment(**a) for a in kwargs.get('attachments')]
+        self.avatar_url = kwargs.get('avatar_url')
+        self.created_at = datetime.fromtimestamp(kwargs.get('created_at'))
+        self.favorited_by = kwargs.get('favorited_by')
         self.system = kwargs.pop('system', False)
-        try:
+
+        # Determine the conversation id (different for direct messages)
+        try:    # assume group message
             self._conversation_id = recipient.group_id
-        except AttributeError:
+        except AttributeError:  # oops, its a direct message
             sender = User.get()
             participants = [sender.user_id, recipient.user_id]
             self._conversation_id = '+'.join(sorted(participants))
-        super().__init__(**kwargs)
 
     def __repr__(self):
         msg = "{}: {}".format(self.name, self.text or "")
@@ -528,6 +547,14 @@ class Bot(ApiResponse):
     Each bot belongs to a single group. Messages posted by the bot are always
     posted to the group to which the bot belongs.
     """
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.bot_id = kwargs.get('bot_id')
+        self.gorup_id = kwargs.get('group_id')
+        self.name = kwargs.get('name')
+        self.avatar_url = kwargs.get('avatar_url')
+        self.callback_url = kwargs.get('callback_url')
+
     def __repr__(self):
         return self.name
 
@@ -589,6 +616,18 @@ class User(ApiResponse):
 
     This is you, as determined by your API key.
     """
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.created_at = datetime.fromtimestamp(kwargs.get('created_at'))
+        self.udpated_at = datetime.fromtimestamp(kwargs.get('updated_at'))
+        self.id = kwargs.get('id')
+        self.user_id = kwargs.get('user_id')
+        self.name = kwargs.get('name')
+        self.email = kwargs.get('email')
+        self.phone_number = kwargs.get('phone_number')
+        self.image_url = kwargs.get('image_url')
+        self.sms = kwargs.get('sms')
+
     def __repr__(self):
         return self.name
 

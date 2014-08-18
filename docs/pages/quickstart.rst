@@ -76,7 +76,7 @@ The number of messages in a group can be obtained directly from the group.
     >>> num_messages = group.message_count
 
 If you attempt to obtain the number of messages in a group by obtaining the
-length of the list of messages, you'll probably find they are not equal.
+length of the list of messages, you'll probably find they're not equal.
 
 .. code-block:: python
 
@@ -84,8 +84,8 @@ length of the list of messages, you'll probably find they are not equal.
     False
 
 That's because messages are returned in pages since there may be thousands. By
-default, :func:`~groupy.objects.Recipient.messages` returns the most recent page
-of messages. The default (and maximum) page size is 100.
+default, :func:`~groupy.objects.Recipient.messages` returns the most recent
+page of messages. The default (and maximum) page size is 100.
 
 Retrieving more messages is simple. Message pages can fetch the next and
 previous pages.
@@ -243,22 +243,56 @@ Removing members, however, must be done one at a time:
     ...   group2.remove(m)
     ... 
 
-Inspecting Yourself
-===================
+GroupMe and You
+===============
 
 One of the most basic pieces of information you'll want to obtain is your own!
-Groupy makes this very simple:
+**Groupy** makes this very simple:
 
 .. code-block:: python
 
     >>> from groupy import User
     >>> your_info = User.get()
 
+It contains your GroupMe profile/account information and settings: 
+
+.. code-block:: python
+
+    >>> print(your_info.user_id)
+    12345678
+    >>> print(your_info.name)
+    Billy Bob <-- the MAN!
+    >>> print(your_info.image_url)
+    http://i.groupme.com/a01b23c45d56e78f90a01b12c3456789
+    >>> print(your_info.sms)
+    False
+    >>> print(your_info.phone_number)
+    +1 5055555555
+    >>> print(your_info.email)
+    bb@example.com
+
+It also contains some meta, social, and undocumented information: 
+
+.. code-block:: python
+
+    >>> print(your_info.created_at)
+    1234567890
+    >>> print(your_info.updated_at)
+    1234567890
+    >>> print(your_info.facebook_connected)
+    False
+    >>> print(your_info.twitter_connected)
+    False
+    >>> print(your_info.local)
+    en_US
+    >>> print(your_info.zip_code)
+    >>> 
+
 Bots
 ====
 
-Bots can be a useful tool because each has a callback URL to which every message
-in the group is POSTed. This allows your bot the chance to do... well,
+Bots can be a useful tool because each has a callback URL to which every
+message in the group is POSTed. This allows your bot the chance to do... well,
 something (whatever that may be) in response to every message!
 
 .. note::
@@ -268,12 +302,8 @@ something (whatever that may be) in response to every message!
     adding and removing users, liking messages, direct messaging a member, and
     creating or modifying group will be done under your name.
 
-Creating a bot
---------------
-
-Bot creation is relatively simple. You'll need to give the bot a name and
-associate it with a specific group. Additionally, you can give the bot a
-callback URL and an avatar URL.
+Bot creation is simple. You'll need to give the bot a name and associate it
+with a specific group. 
 
 .. code-block:: python
 
@@ -281,22 +311,9 @@ callback URL and an avatar URL.
     >>> group = Group.list().first
     >>> bot = Bot.create('R2D2', group)
 
-``bot`` is now the newly created bot and is ready to be used.
-
-Listing all the bots
---------------------
-
-You can create multiple bots. To list all the bots you have created:
-
-.. code-block:: python
-
-    >>> from groupy import Bot
-    >>> bots = Bot.list()
-
-Now ``bots`` contains a list of all of your bots.
-
-Making the bot talk
--------------------
+``bot`` is now the newly created bot and is ready to be used. If you want, you
+can also specify a callback URL *(recommened)*, as well as an image URL to be
+used for the bot's avatar.
 
 Just about the only thing a bot can do is post a message to a group. **Groupy**
 makes it easy:
@@ -306,4 +323,14 @@ makes it easy:
     >>> from group import Bot
     >>> bot = Bot.list().first
     >>> bot.post("I'm a bot!")
+
+Note that the bot always posts its messages to the group in which it belongs.
+You can create multiple bots. Listing all of your bots is straightforward.
+
+.. code-block:: python
+
+    >>> from groupy import Bot
+    >>> bots = Bot.list()
+
+Now ``bots`` contains a list of all of your bots.
 
