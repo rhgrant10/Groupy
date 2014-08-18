@@ -12,6 +12,8 @@ from . import status
 from . import errors
 
 from datetime import datetime
+from collections import Counter
+import json
 import time
 import operator
 
@@ -291,27 +293,37 @@ class Group(Recipient):
         messages = kwargs.pop('messages', {})
         members = kwargs.pop('members')
         super().__init__(api.Messages, 'messages', 'id', **kwargs)
+
+        self.id = kwargs.get('id')
+        self.group_id = kwargs.get('group_id')
+        self.name = kwargs.get('name')
+        self.type = kwargs.get('type')
+        self.description = kwargs.get('description')
+        self.image_url = kwargs.get('image_url')
+        self.creator_user_id = kwargs.get('creator_user_id')
+        self.created_at = datetime.fromtimestamp(kwargs.get('created_at'))
+        self.updated_at = datetime.fromtimestamp(kwargs.get('updated_at'))
+        ca = messages.get('last_message_created_at')
+        if ca >= 0:
+            self.last_message_created_at = datetime.fromtimestamp(ca)
+            self.last_message_id = messages.get('last_message_id')
+        else:
+            self.last_message_created_at = None
+            self.last_message_id = None
         self.message_count = messages.get('count')
-        self.last_message_id = messages.get('last_message_id')
-        self.last_message_created_at = messages.get('last_message_created_at')
         self._members = [Member(**m) for m in members]
+        self.share_url = kwargs.get('share_url')
+        
+        # Undocumented properties.
+        # 'max_members' for groups, 'max_memberships' for former groups.
         for k in ['max_members', 'max_memberships']:
             if k in kwargs:
                 self.max_members = kwargs[k]
+                break
         else:
             self.max_members = None
-
-        # self.created_at = datetime.fromtimestamp(kwargs.get('created_at'))
-        # self.creator_user_id = kwargs.get('creator_user_id')
-        # self.description = kwargs.get('description')
-        # self.group_id = kwargs.get('group_id')
-        # self.id = kwargs.get('id')
-        # self.image_url = kwargs.get('image_url')
-        # self.last_message_created_at = \
-        #         datetime.fromtimestamp(kwargs.get('last_message_created_at'))
-        # self.
-        
-
+        self.office_mode = kwargs.get('office_mode')
+        self.phone_number = kwargs.get('phone_number')
 
     def __repr__(self):
         return "{}, {}/{} members, {} messages".format(
@@ -393,9 +405,41 @@ class Member(Recipient):
     """A GroupMe member.
     """
     def __init__(self, **kwargs):
-        self.guid = kwargs.get('guid', None)    # set regardless of kwargs
         super().__init__(api.DirectMessages, 'direct_messages',
                          'user_id', **kwargs)
+        self.id = kwargs.get('id')
+        self.user_id = kwargs.get('user_id')
+        self.nickname = kwargs.get('nickname')
+        self.muted = kwargs.get('muted')
+        self.image_url = kwargs.get('image_url')
+        self.autokicked = kwargs.get('autokicked')
+        self.app_installed = kwargs.get('app_installed')
+        self.guid = kwargs.get('guid', None)
+        self.message_count = None
+
+    @classmethod
+    def list(cls):
+        """List all known members regardless of group membership.
+        
+        :returns: a list of all known members
+        :rtype: :class:`~groupy.objects.FilterList`
+        """
+        groups = Group.list()
+        members = {}
+        for g in groups:
+            for m in g.members():
+                if m.user_id not in members:
+                    members[m.user_id] = {
+                        'member': m,
+                        'name': Counter({m.nickname: 1})
+                    }
+                else:
+                    members[m.user_id]['name'][m.nickname] += 1
+        renamed = []
+        for d in members.values():
+            d['member'].nickname = d['name'].most_common()[0][0]
+            renamed.append(d['member'])
+        return FilterList(renamed)
 
     def __repr__(self):
         return self.nickname
@@ -470,6 +514,8 @@ class Member(Recipient):
 
 
 class Message(ApiResponse):
+    _user = None
+    
     """A GroupMe message.
 
     :param recipient: the reciever of the message
@@ -478,18 +524,28 @@ class Message(ApiResponse):
     def __init__(self, recipient, **kwargs):
         super().__init__()
         self._recipient = recipient
-        self.attachments = [Attachment(**a) for a in kwargs.get('attachments')]
-        self.avatar_url = kwargs.get('avatar_url')
+        
+        self.id = kwargs.get('id')
+        self.source_guid = kwargs.get('source_guid')
         self.created_at = datetime.fromtimestamp(kwargs.get('created_at'))
-        self.favorited_by = kwargs.get('favorited_by')
+        self.user_id = kwargs.get('user_id')
+        self.group_id = kwargs.get('group_id')
+        self.recipient_id = kwargs.get('recipient_id')
+        self.name = kwargs.get('name')
+        self.avatar_url = kwargs.get('avatar_url')
+        self.text = kwargs.get('text')
         self.system = kwargs.pop('system', False)
-
+        self.favorited_by = kwargs.get('favorited_by')
+        self.attachments = [
+            AttachmentFactory.create(**a) for a in kwargs.get('attachments')]
+        
         # Determine the conversation id (different for direct messages)
         try:    # assume group message
             self._conversation_id = recipient.group_id
         except AttributeError:  # oops, its a direct message
-            sender = User.get()
-            participants = [sender.user_id, recipient.user_id]
+            if self._user is None:
+                self._user = User.get()
+            participants = [self._user.user_id, recipient.user_id]
             self._conversation_id = '+'.join(sorted(participants))
 
     def __repr__(self):
@@ -535,9 +591,17 @@ class Message(ApiResponse):
         :returns: a list of the members who "liked" this message
         :rtype: :class:`FilterList<groupy.objects.FilterList>`
         """
-        liked = filter(
-            lambda m: m.user_id in self.favorited_by,
-            self._recipient.members())
+        try:
+            liked = filter(
+                lambda m: m.user_id in self.favorited_by,
+                self._recipient.members())
+        except AttributeError:
+            liked = []
+            for i in self.favorited_by:
+                if i == self._user.user_id:
+                    liked.append(self._user)
+                elif i == self.recipient_id:
+                    liked.append(self._recipient)
         return FilterList(liked)
 
 
@@ -630,7 +694,13 @@ class User(ApiResponse):
 
     def __repr__(self):
         return self.name
-
+        
+    @property
+    def nickname(self):
+        """Your user name.
+        """
+        return self.name
+    
     @classmethod
     def get(cls):
         """Return your user information.
@@ -678,88 +748,86 @@ class User(ApiResponse):
         return True
 
 
+
 class Attachment:
-    """A GroupMe attachment.
-
-    Attachments are polymorphic objects representing either an image, location,
-    split, or emoji. Use one of the factory methods to create an attachment.
-    """
-    def __init__(self, type_, **kwargs):
-        self.type = type_
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-
+    def __init__(self, type):
+        self.type = type
+        
     def as_dict(self):
         return self.__dict__
+        
+
+class GenericAttachment(Attachment):
+    def __init__(self, type, **kwargs):
+        super().__init__(type)
+        for k in kwargs:
+            setattr(self, k, kwargs[k])
+
+
+class Image(Attachment):
+    def __init__(self, url):
+        super().__init__('image')
+        self.url = url
+        
+    def __repr__(self):
+        return self.url
+        
+    @classmethod
+    def file(cls, image):
+        return cls(api.Images.create(image)['url'])
+
+
+class Location(Attachment):
+    def __init__(self, name, lat, lng):
+        super().__init__('location')
+        self.name = name
+        self.lat = lat
+        self.lng = lng
+        
+    def __repr__(self):
+        return "{}: ({}, {})".format(self.name, self.lat, self.lng)
+        
+
+class Emoji(Attachment):
+    def __init__(self, placeholder, charmap):
+        super().__init__('emoji')
+        self.placeholder = placeholder
+        self.charmap = charmap
+        
+    def __repr__(self):
+        return "{}: {}".format(self.placeholder, json.dumps(self.charmap))
+
+
+class Split(Attachment):
+    def __init__(self, token):
+        super().__init__('split')
+        self.token = token
+
+
+class Mentions(Attachment):
+    def __init__(self, loci, user_ids):
+        super().__init__('mentions')
+        self.loci = loci
+        self.user_ids = user_ids
 
     def __repr__(self):
-        if self.type == 'image':
-            return self.url
-        elif self.type == 'location':
-            return "{}: ({}, {})".format(self.name, self.lat, self.lng)
-        elif self.type == 'split':
-            return "split={}".format(self.token)
-        elif self.type == 'emoji':
-            return "{}: {}".format(self.placeholder, json.dumps(self.charmap))
+        return ''
+
+
+class AttachmentFactory:
+    _factories = {
+        'image': Image,
+        'location': Location,
+        'emoji': Emoji,
+        'mentions': Mentions,
+        'split': Split
+    }
 
     @classmethod
-    def image(cls, url):
-        """Create an image attachment.
+    def create(cls, **kwargs):
+        t = kwargs.pop('type', None)
+        if t not in cls._factories:
+            return GenericAttachment(t, **kwargs)
+        return cls._factories[t](**kwargs)
+        
 
-        :param str url: the GroupMe image URL for an image
-        :returns: image attachment
-        :rtype: :class:`Attachment<groupy.objects.Attachment>`
-        """
-        return cls('image', url=url)
-
-    @classmethod
-    def new_image(cls, image):
-        """Create an image attachment for a local image.
-
-        Note that this posts the image to the image service API and uses the
-        returned URL to create an image attachment.
-
-        :param image: a file-like object containing an image
-        :type image: :obj:`file`
-        :returns: image attachment
-        :rtype: :class:`Attachment<groupy.objects.Attachment>`
-        """
-        return cls.image(api.Images.create(image)['url'])
-
-    @classmethod
-    def location(cls, name, lat, lng):
-        """Create a location attachment.
-
-        :param str name: the name of the location
-        :param float lat: the latitude component
-        :param float lng: the longitude component
-        :returns: a location attachment
-        :rtype: :class:`Attachment<groupy.objects.Attachment>`
-        """
-        return cls('location', name=name, lat=lat, lng=lng)
-
-    @classmethod
-    def split(cls, token):
-        """Create a split attachment.
-
-        .. note::
-
-            The split attachment is depreciated according to GroupMe.
-
-        :param str token: the split token
-        :returns: a split attachment
-        :rtype: :class:`Attachment<groupy.objects.Attachment>`
-        """
-        return cls('split', token=token)
-
-    @classmethod
-    def emoji(cls, placeholder, charmap):
-        """Create an emoji attachment.
-
-        :param str placeholder: a high code-point character
-        :param charmap: a two-dimensional charmap
-        :type charmap: :class:`list`
-        :returns: an emoji attachment
-        :rtype: :class:`Attachment<groupy.objects.Attachment>`
-        """
-        return cls('emoji', placeholder=placeholder, charmap=charmap)
