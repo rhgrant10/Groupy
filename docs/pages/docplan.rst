@@ -50,6 +50,114 @@ Quickstart
 	+ List all members from all groups
 	+ Finding the first message in a group
 
+Basic Usage
+===========
+
+Listing Things
+--------------
+
+Groups, Members, and Bots can be listed directly.
+
+.. code-block:: python
+
+	>>> import groupy
+	>>> groups = groupy.Group.list()
+	>>> members = groupy.Member.list()
+	>>> bots = groupy.Bot.list()
+
+The object lists are returned as a :class:`~groupy.objects.FilterList`. These
+behave just like the built-in :class:`list` does, but with some additional
+features: :obj:`~groupy.objects.FilterList.first`, and
+:obj:`~groupy.objects.FilterList.last`, and
+
+.. code-block:: python
+
+	>>> groups.first == groups[0]
+	True
+	>>> groups.last == groups[-1]
+	True
+
+The most useful feature of a :class:`groupy.objects.FilterList`, however, is its
+:func:`~groupy.objects.FilterList.filter` method. It parses whatever keyword
+arguments are passed to it and filters the list such that only the items meeting
+all criteria are included. The keywords correspond to object properties, but
+also indicate how to test the relation to the value of the keyword argument.
+Thus a keyword-value pair such as ``name='Bob'`` would keep only those items
+with a ``name`` property equal to ``"Bob"``, whereas a pair like ``age__lt=20``
+would keep only those items with an ``age`` property *less than* ``20``.
+
+For example, suppose our list of groups has 3 items:
+
+.. code-block:: python
+
+	>>> for g in groups:
+	...   print(g.name)
+	...
+	My Family
+	DevTeam #6
+	Friday Night Trivia
+
+We want to find only the groups containing "am" in their title. Easy:
+
+.. code-block:: python
+
+	>>> matches = groups.filter(name__contains='am')
+	>>> len(matches)
+	2
+	>>> for m in matches:
+	...   print(m.name)
+	My Family
+	DevTeam #6
+
+Similarly, any :class:`~groupy.objects.FilterList` can be filtered:
+
+.. code-block:: python
+
+	>>> for m in members:
+	...   print(m.nickname)
+	... 
+	Dan the Man
+	Manuel
+	Fred
+	Dan
+	>>> for m in members.filter(nickname='Dan'):
+	...   print(m.nickname)
+	... 
+	Dan
+	>>> for m in members.filter(nickname__contains='Dan'):
+	...   print(m.nickname)
+	... 
+	Dan the Man
+	Dan
+	>>> for m in members.filter(nickname__ge='F'):
+	...   print(m.nickname)
+	... 
+	Manuel
+	Fred
+
+Groups
+------
+
+Properties
+""""""""""
+
+
+
+- Listing messages
+- Listing members
+
+Messages
+--------
+
+- Properties
+- Likes
+
+Members
+-------
+
+Bots
+----
+
 Advanced Usage
 ==============
 
