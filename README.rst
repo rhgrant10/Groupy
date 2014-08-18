@@ -4,6 +4,8 @@ Groupy
 
 The simple yet powerful GroupMe API wrapper for Python 3.
 
+Get the full documentation on `Read the Docs`_!
+
 Installation
 ============
 
@@ -22,7 +24,7 @@ Usage
 
     # list the groups you're in or the groups you're not in anymore
     groups = groupy.Group.list()
-    former_groups = groupy.Group.former_list()
+    former_groups = groupy.Group.list(former=True)
 
     # list the members in a group
     group = groups[0]
@@ -40,11 +42,16 @@ Usage
     older_messages = messages.older()
     newer_messages = messages.newer()
 
+    # collect all messages from a group
+    all_messages = group.messages()
+    while all_messages.iolder():
+      pass
+
     # post a message to a group
     group.post('Hello world!')
 
     # include an image with the message
-    img = groupy.Attachment.new_image(open('imagefilepath', 'rb'))
+    img = groupy.Image.file(open('imagefilepath', 'rb'))
     group.post('Here is the pic you took :-)', img)
 
     # messages have either text, attachments, or both
@@ -58,8 +65,7 @@ Usage
     message.unlike()
 
     # list the members that liked a message
-    likers = message.likes()
-    for member in likers:
+    for member in message.likes():
       print(member.nickname)
 
     # list the messages from another member (direct messages)
@@ -78,6 +84,10 @@ Usage
 
 Version History
 ===============
+
+v0.4.0
+- All known members can now be listed directly
+- Re-wrote attachemnts classes
 
 v0.3.1
 ------
