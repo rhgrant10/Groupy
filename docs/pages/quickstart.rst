@@ -73,10 +73,12 @@ The number of messages in a group can be obtained directly from the group.
 
     >>> from groupy import Group
     >>> group = Group.list().first
-    >>> num_messages = group.message_count
+    >>> group.message_count
+    1348
 
-If you attempt to obtain the number of messages in a group by obtaining the
-length of the list of messages, you'll probably find they're not equal.
+As you can see, this group contains 1348 messages. If you attempt to obtain the
+number of messages in a group by obtaining the length of the list of messages,
+you'll probably find they're not equal.
 
 .. code-block:: python
 
@@ -271,22 +273,18 @@ It contains your GroupMe profile/account information and settings:
     >>> print(your_info.email)
     bb@example.com
 
-It also contains some meta, social, and undocumented information: 
+It also contains some meta information: 
 
 .. code-block:: python
 
     >>> print(your_info.created_at)
-    1234567890
+    2011-3-14 14:11:12
     >>> print(your_info.updated_at)
-    1234567890
-    >>> print(your_info.facebook_connected)
-    False
-    >>> print(your_info.twitter_connected)
-    False
-    >>> print(your_info.local)
-    en_US
-    >>> print(your_info.zip_code)
-    >>> 
+    2013-4-20 6:58:26
+
+``created_at`` and ``updated_at`` are returned as :class:`~datetime.datetime`
+objects.
+
 
 Bots
 ====

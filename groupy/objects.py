@@ -422,7 +422,7 @@ class Member(Recipient):
         """List all known members regardless of group membership.
         
         :returns: a list of all known members
-        :rtype: :class:`~groupy.objects.FilterList`
+        :rtype: :class:`~groupy.objects.FilterList
         """
         groups = Group.list()
         members = {}
