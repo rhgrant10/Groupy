@@ -91,7 +91,7 @@ For example, suppose our list of groups has 3 items:
 .. code-block:: python
 
 	>>> for g in groups:
-	...   print(g.name)
+	...     print(g.name)
 	...
 	My Family
 	DevTeam #6
@@ -105,7 +105,7 @@ We want to find only the groups containing "am" in their title. Easy:
 	>>> len(matches)
 	2
 	>>> for m in matches:
-	...   print(m.name)
+	...     print(m.name)
 	My Family
 	DevTeam #6
 
@@ -114,23 +114,23 @@ Similarly, any :class:`~groupy.objects.FilterList` can be filtered:
 .. code-block:: python
 
 	>>> for m in members:
-	...   print(m.nickname)
+	...     print(m.nickname)
 	... 
 	Dan the Man
 	Manuel
 	Fred
 	Dan
 	>>> for m in members.filter(nickname='Dan'):
-	...   print(m.nickname)
+	...     print(m.nickname)
 	... 
 	Dan
 	>>> for m in members.filter(nickname__contains='Dan'):
-	...   print(m.nickname)
+	...     print(m.nickname)
 	... 
 	Dan the Man
 	Dan
 	>>> for m in members.filter(nickname__ge='F'):
-	...   print(m.nickname)
+	...     print(m.nickname)
 	... 
 	Manuel
 	Fred
@@ -138,18 +138,66 @@ Similarly, any :class:`~groupy.objects.FilterList` can be filtered:
 Groups
 ------
 
-Properties
-""""""""""
+From a :class:`groupy.objects.Group`, you can list its 
+:class:`groupy.objects.Member`s and :class:`groupy.objects.Message`s.
 
+.. code-block:: python
 
+	>>> from groupy import Group
+	>>> groups = Group.list()
+	>>> group = groups.first
+	>>> messages = group.messages()
+	>>> members = group.memers()
 
-- Listing messages
-- Listing members
+A group returns all of its members in a single list. However, since there may
+be thousands of messages in a group, messages are returned in pages.
+
+.. code-block:: python
+
+	>>> group.message_count
+	31229
+	>>> len(messages)
+	100
+
+To page through the messages, use :func:`groupy.objects.MessagePager.older` and
+:func:`groupy.objects.MessagePager.newer`.
+
+.. code-block:: python
+
+	>>> older = messages.older()
+	>>> newer = messages.newer()
+
+There are also methods for collecting a newer or older page of messages into one
+list: :func:`groupy.objects.MessagePager.iolder` and
+:func:`groupy.objects.MessagePager.inewer`. An example of using the former to
+retrieve all messages in a group:
+
+.. code-block:: python
+
+	>>> from groupy import Group
+	>>> group = Group.list().first
+	>>> messages = group.messages()
+	>>> while messages.iolder():
+	...       pass
+	>>> len(messages) == group.message_count
+	True
+
+New messages can be posted to a group as well.
+
+.. code-block:: python
+
+	>>> from group import Group
+	>>> group = Group.list().first
+	>>> group.post('Hello to you')
+
+.. note::
+
+	Posting a message does not affect ``message_count``. However, retrieving any
+	page of messages *does* update it.
 
 Messages
 --------
 
-- Properties
 - Likes
 
 Members
