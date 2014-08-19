@@ -362,6 +362,19 @@ class Group(Recipient):
         """
         self.__init__(**api.Groups.show(self.id))
 
+    def update(self, name=None, description=None, image_url=None, share=None):
+        """Change group information.
+
+        :param str name: the new name of the group
+        :param str description: the new description of the group
+        :param str image_url: the URL for the new group image
+        :param share: whether to generate a share URL
+        :type share: :obj:`bool`
+        """
+        api.Groups.update(name=name, description=description,
+                          image_url=image_url, share=share)
+        self.refresh()
+
     def members(self):
         """Return a list of the members in the group.
 
