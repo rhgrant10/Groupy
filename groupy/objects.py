@@ -527,13 +527,13 @@ class Member(Recipient):
 
 
 class Message(ApiResponse):
-    _user = None
-    
     """A GroupMe message.
 
     :param recipient: the reciever of the message
     :type recipient: :class:`Recipient<groupy.objects.Recipient>`
     """
+    _user = None
+    
     def __init__(self, recipient, **kwargs):
         super().__init__()
         self._recipient = recipient
