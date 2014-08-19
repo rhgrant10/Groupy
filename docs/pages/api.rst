@@ -1,33 +1,33 @@
-========
-API Docs
-========
+==============
+Developer Docs
+==============
 
-``groupy.config``
-=================
+The ``config`` Module
+=====================
 
 .. automodule:: groupy.config
 	:members:
 
-``groupy.api``
-==============
+The ``api`` Module
+==================
 
 .. automodule:: groupy.api
 	:members:
 
-``groupy.objects``
-==================
+The ``objects`` Module
+======================
 
 .. automodule:: groupy.objects
 	:members:
 
-``groupy.errors``
-=================
+The ``errors`` Module
+=====================
 
 .. automodule:: groupy.errors
 	:members:
 
-``groupy.status``
-=================
+The ``status`` Module
+=====================
 
 .. automodule:: groupy.status
 	:members:
