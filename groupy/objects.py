@@ -765,12 +765,13 @@ class GenericAttachment(Attachment):
 
 
 class Image(Attachment):
-    def __init__(self, url):
+    def __init__(self, url, source_url=None):
         super().__init__('image')
         self.url = url
+        self.source_url = source_url
         
     def __repr__(self):
-        return self.url
+        return "Image(url={!r})".format(self.url)
         
     @classmethod
     def file(cls, image):
@@ -778,14 +779,16 @@ class Image(Attachment):
 
 
 class Location(Attachment):
-    def __init__(self, name, lat, lng):
+    def __init__(self, name, lat, lng, foursquare_venue_id=None):
         super().__init__('location')
         self.name = name
         self.lat = lat
         self.lng = lng
+        self.foursquare_venue_id = foursquare_venue_id
         
     def __repr__(self):
-        return "{}: ({}, {})".format(self.name, self.lat, self.lng)
+        return "Location(name={!r}, lat={!r}, lng={!r})".format(
+                self.name, self.lat, self.lng)
         
 
 class Emoji(Attachment):
@@ -795,7 +798,8 @@ class Emoji(Attachment):
         self.charmap = charmap
         
     def __repr__(self):
-        return "{}: {}".format(self.placeholder, json.dumps(self.charmap))
+        return "Emoji(placeholder={!r}, charmap={!r})".format(
+            self.placeholder, self.charmap)
 
 
 class Split(Attachment):
@@ -803,15 +807,18 @@ class Split(Attachment):
         super().__init__('split')
         self.token = token
 
+    def __repr__(self):
+        return "Split(token={!r})".format(self.token)
+
 
 class Mentions(Attachment):
-    def __init__(self, loci, user_ids):
+    def __init__(self, user_ids, loci=None):
         super().__init__('mentions')
         self.loci = loci
         self.user_ids = user_ids
 
     def __repr__(self):
-        return ''
+        return "Mentions({!r})".format(self.user_ids)
 
 
 class AttachmentFactory:
@@ -826,8 +833,12 @@ class AttachmentFactory:
     @classmethod
     def create(cls, **kwargs):
         t = kwargs.pop('type', None)
-        if t not in cls._factories:
-            return GenericAttachment(t, **kwargs)
-        return cls._factories[t](**kwargs)
+        try:
+            return cls._factories[t](**kwargs)
+        except TypeError:
+            print('type: {}'.format(t))
+            print(json.dumps(kwargs, indent=2))
+        except KeyError:
+            return GenericAttachment(t, **kwargs)        
         
 
