@@ -3,9 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-==================================
-Welcome to Groupy's documentation!
-==================================
+==================
+Welcome to Groupy!
+==================
 
 The simple yet powerful wrapper for the GroupMe API
 
@@ -34,7 +34,7 @@ But **Groupy** lets you forget about the GroupMe API and focus on what you need
 to get done!
 
 Features
-^^^^^^^^
+--------
 
 - List and filter your current and former groups
 - Create, destroy, and update your groups
@@ -51,7 +51,7 @@ Features
 - Enable and disable SMS mode
 
 Table of Contents
-=================
+-----------------
 
 .. toctree::
 	:maxdepth: 2

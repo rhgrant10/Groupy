@@ -34,21 +34,21 @@ From Source
 
 If you have ``git``, it's as easy as: 
 
-   .. code-block:: bash
+.. code-block:: bash
 
-       $ git clone https://github.com/rhgrant10/Groupy.git
-       $ cd Groupy
-       $ cp -r groupy /usr/lib/python3/dist-packages	# see note below
+    $ git clone https://github.com/rhgrant10/Groupy.git
+    $ cd Groupy
+    $ cp -r groupy /usr/lib/python3/dist-packages	# see note below
 
 If you don't have ``git`` installed (and don't wish to install it), that's okay
 too! You can get the project as a zip file using ``wget``:
 
 .. code-block:: console
 
-	   $ wget https://github.com/rhgrant10/Groupy/archive/master.zip
-	   $ unzip master.zip
-	   $ cd Groupy-master
-	   $ cp -r groupy /usr/lib/python3/dist-packages	# see note below
+	$ wget https://github.com/rhgrant10/Groupy/archive/master.zip
+	$ unzip master.zip
+	$ cd Groupy-master
+	$ cp -r groupy /usr/lib/python3/dist-packages	# see note below
 
 If neither ``git`` nor ``wget`` are on your system (for example, you might have
 Windows installed rather than a flavor of Linux), that's still okay! Simply
@@ -63,21 +63,3 @@ click this `link to download it using your browser`_ as a zip file.
 .. _this StackOverflow question: http://stackoverflow.com/questions/122327/how-do-i-find-the-location-of-my-python-site-packages-directory
 
 There, all done! Feels good, right? 
-
-Verifying Installation
-----------------------
-
-You can verify that the installation worked by simply importing ``groupy`` from
-a ``Python3`` shell:
-
-.. code-block:: console
-
-	$ python3
-	Python 3.4.1 (default, Aug 11 2014, 10:05:47) 
-	[GCC 4.8.2] on linux
-	Type "help", "copyright", "credits" or "license" for more information.
-	>>> import groupy
-	>>> 
-
-If you get no errors, you're good to go! 
-
