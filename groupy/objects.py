@@ -5,6 +5,8 @@
 
 .. moduleauthor:: Robert Grant <rhgrant10@gmail.com>
 
+The ``objects`` module contains classes that represent the objects returned by
+the GroupMe API.
 
 """
 from . import api

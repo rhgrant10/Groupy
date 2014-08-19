@@ -1,3 +1,22 @@
+"""
+.. module:: objects
+   :platform: Unix, Windows
+   :synopsis: Module that abstracts the API calls into sensible objects.
+
+.. moduleauthor:: Robert Grant <rhgrant10@gmail.com>
+
+The ``status`` module contains API response status code constants and a method
+that returns the textual description of such a constant.
+
+"""
+
+__all__ = [
+    'OK', 'CREATED', 'NO_CONTENT', 'NOT_MODIFIED', 'BAD_REQUEST',
+    'UNAUTHORIZED', 'FORBIDDEN', 'NOT_FOUND', 'ENHANCE_YOUR_CLAIM',
+    'INTERNAL_SERVER_ERROR', 'BAD_GATEWAY', 'SERVICE_UNAVAILABLE',
+    'description'
+]
+
 OK = 200
 """Success
 """

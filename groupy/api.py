@@ -5,6 +5,8 @@
 
 .. moduleauthor:: Robert Grant <rhgrant10@gmail.com>
 
+The ``api`` module is a basic abstraction of the GroupMe API.
+
 """
 
 import requests

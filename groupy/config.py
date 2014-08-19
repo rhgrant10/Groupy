@@ -4,6 +4,9 @@
    :synopsis: Module containing configuration values.
 
 .. moduleauthor:: Robert Grant <rhgrant10@gmail.com>
+
+The ``config`` module contains all the configuration options.
+
 """
 
 # Set this to the base URL for the GroupMe API (default is
