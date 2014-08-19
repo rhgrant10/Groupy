@@ -1,6 +1,6 @@
-==========
-Quickstart
-==========
+===========
+Basic Usage
+===========
 
 This page gives an overview of all but the most advanced features of **Groupy**.
 
@@ -12,207 +12,346 @@ First, you'll want to make sure that
 See the :doc:`installation` page for instructions. Now that that's out of the
 way, let's get started!
 
-List Groups
-===========
 
-The starting point for everything is to obtain a list of groups.
 
-First, of course, we must import the Groupy module:
+Listing Things
+==============
+
+Groups, Members, and Bots can be listed directly.
 
 .. code-block:: python
 
     >>> import groupy
+    >>> groups = groupy.Group.list()
+    >>> members = groupy.Member.list()
+    >>> bots = groupy.Bot.list()
 
-Now let's list your groups:
+The object lists are returned as a :class:`~groupy.objects.FilterList`. These
+behave just like the built-in :class:`list` does, but with some additional
+features: :obj:`~groupy.objects.FilterList.first` and
+:obj:`~groupy.objects.FilterList.last`.
 
 .. code-block:: python
 
-    >>> groups = groupy.Group.list()
+    >>> groups.first == groups[0]
+    True
+    >>> groups.last == groups[-1]
+    True
 
-The ``groups`` list acts just like the regular Python :class:`list`, but has
-some additional features as well. Let's take a look.
+The most useful feature of a :class:`~groupy.objects.FilterList`, however, is
+its :func:`~groupy.objects.FilterList.filter` method. It parses whatever
+keyword arguments are passed to it and filters the list such that only the
+items meeting all criteria are included. The keywords correspond to object
+properties, but also indicate how to test the relation to the value of the
+keyword argument. Thus a keyword-value pair such as ``name='Bob'`` would keep
+only those items with a ``name`` property equal to ``"Bob"``, whereas a pair
+like ``age__lt=20`` keeps only those items with an ``age`` property *less than*
+``20``.
 
+Some simple examples: 
+
+.. code-block:: python
+
+    >>> from groupy import Group
+    >>> groups = Group.list()
+    >>> for g in groups:
+    ...     print(g.name)
+    ...
+    My Family
+    DevTeam #6
+    Friday Night Trivia
+    >>> for g in groups.filter(name__contains='am'):
+    ...     print(g.name)
+    My Family
+    DevTeam #6
+    >>> 
+    >>> members = groups.first.members()
+    >>> for m in members:
+    ...     print(m.nickname)
+    ... 
+    Dan the Man
+    Manuel
+    Fred
+    Dan
+    >>> for m in members.filter(nickname='Dan'):
+    ...     print(m.nickname)
+    ... 
+    Dan
+    >>> for m in members.filter(nickname__contains='Dan'):
+    ...     print(m.nickname)
+    ... 
+    Dan the Man
+    Dan
+    >>> for m in members.filter(nickname__ge='F'):
+    ...     print(m.nickname)
+    ... 
+    Manuel
+    Fred
+
+Groups
+======
+
+.. todo::
+
+    Add section about modifying a group.
+
+From a :class:`~groupy.objects.Group`, you can list its 
+:class:`~groupy.objects.Member`\ s and :class:`~groupy.objects.Message`\ s.
+
+.. code-block:: python
+
+    >>> from groupy import Group
+    >>> groups = Group.list()
     >>> group = groups.first
-    >>> group = groups.last
+    >>> messages = group.messages()
+    >>> members = group.memers()
 
-These are merely convenience properties, but are used throught the
-documentation.
+A group returns all of its members in a single list. So determining the number
+of members in a group should be a familiar task.
 
-List Messages
-=============
+.. code-block:: python
 
-Now that we have a group, we can list the messages it contains.
+    >>> len(members)
+    5
+
+:class:`~groupy.objects.Message`\ s, however, are a different matter. Since
+there may be thousands of messages in a group, messages are returned in pages.
+The default (and maximum) number of messages per page is 100. To determine the
+total number of messages in a group, simply access the ``message_count``
+attribute. Additional pages of messages can be obtained using 
+:func:`~groupy.objects.MessagePager.older` and
+:func:`~groupy.objects.MessagePager.newer`.
+
+.. code-block:: python
+
+    >>> len(messages)
+    100
+    >>> group.message_count
+    3014
+    >>> older = messages.older()
+    >>> newer = messages.newer()
+
+There are also methods for collecting a newer or older page of messages into
+one list: :func:`~groupy.objects.MessagePager.iolder` and
+:func:`~groupy.objects.MessagePager.inewer`. An example of using the former to
+retrieve all messages in a group:
+
+.. code-block:: python
+
+    >>> from groupy import Group
+    >>> group = Group.list().first
+    >>> messages = group.messages()
+    >>> while messages.iolder():
+    ...       pass
+    >>> len(messages) == group.message_count
+    True
+
+Often you'll want to post a new message to a group. New messages can be posted
+to a group using its :func:`~groupy.objects.Group.post` method.
+
+.. code-block:: python
+
+    >>> from group import Group
+    >>> group = Group.list().first
+    >>> group.post('Hello to you')
+    >>> print(group.messages().newest.text)
+    'Hello to you'
+
+.. note::
+
+    Posting a message does not affect ``message_count``. However, retrieving
+    any page of messages *does* update it.
+
+Messages
+========
+
+Unlike :class:`~groupy.objects.Group`\ s, :class:`~groupy.objects.Member`\ s,
+and :class:`~groupy.objects.Bot`\ s, :class:`~groupy.objects.Message`\ s
+*cannot* be listed directly. Instead, :class:`~groupy.objects.Message`\ s are
+listed either from :class:`~groupy.objects.Group` or
+:class:`~groupy.objects.Member` instances.
+
+To list the messages from a group, use a group's 
+:func:`~groupy.objects.Group.messages` method.
+
+.. code-block:: python
+
+    >>> from groupy import Group
+    >>> group = Group.list().first
+    >>> messages = group.messages()
+
+To list the messages from a member, use a member's 
+:func:`~groupy.objects.Member.messages` method.
+
+.. code-block:: python
+
+    >>> from groupy import Member
+    >>> member = Member.list().first
+    >>> messages = member.messages()
+
+Messages have several properties. Let's look at a few of them. Messages have a
+timestamp indicating when the message was created.
+
+.. code-block:: python
+
+    >>> message = messages.newest
+    >>> message.created_at
+    2014-4-29 12:19:05
+
+As with other API objects, timestamp data is returned as 
+:class:`datetime.datetime` instances.
+
+Messages also contain information about the member who posted it.
+
+    >>> message.user_id
+    '0123456789'
+    >>> message.name
+    'Kevin'
+    >>> message.avatar_url
+    'http://i.groupme.com/a01b23c45d56e78f90a01b12c3456789'
+
+Of course, messages have text and attachments. A message may or may not have
+text or attachments, but every message must have one or the other.
+
+    >>> message.text
+    'Hello'
+    >>> message.attachments
+    [Image(url='http://i.groupme.com/a01b23c45d56e78f90a01b12c3456789')]
+
+.. note::
+
+    Although the majority of messages will have just one attachment, there is
+    no limit on the number of attachments. In fact, despite most clients being
+    incapable of displaying them, the API doesn't even limit the number of each
+    kind of attachment. For example, a single message might have two images,
+    three locations, and one emoji.
+
+There are multiple types of messages. System messages are messages that are not
+sent by a member, but generated by member actions. Many things generate system
+messages, including member changes, group updates (name, avatar, etc.), member
+changes (nickname, avatar, etc.), and changing the topic.
+
+Additionally there are group messages and direct messages. Group messages are
+messages in a group, whereas direct messages are messages between two members.
+
+Each message has a few properties that can be used to differentiate the types.
+
+    >>> message.group_id
+    '1234567890'
+    >>> message.recipient_id
+    None
+    >>> message.system
+    False
+
+In the above example, we can see that ``message.system`` is ``False``, which
+indicates that the message was sent by a member, not the system. We can also
+see that although the message has a ``message.group_id``, it does *not* have a
+``message.recipient_id``, which means it is a group message. Had it been a
+system message, ``message.system`` would have been ``True``. Had it been a
+direct message, ``message.group_id`` would have been ``None`` and
+``message.recipient_id`` would contain a valid user ID.
+
+Lastly, each message contains a list of user IDs to indicate which members have
+"liked" it.
+
+    >>> message.favorited_by
+    ['2345678901', '3456789012']
+
+Because often more information about the member is desired, a list of actual
+:class:`~groupy.objects.Member` instances can be retrieved using the
+:func:`~groupy.objects.Message.likes` method.
+
+.. code-block:: python
+
+    >>> message.likes()
+    [Rob, Jennifer, Vlad]
+
+Messages can also be liked and unliked.
+
+.. code-block:: python
+
+    >>> message.like()
+    True
+    >>> message.unlike()
+    True
+
+.. note::
+
+    Currently, the message instance itself does **not** update its own
+    attributes. You must re-fetch the message.
+
+
+Members
+=======
+
+:class:`~groupy.objects.Member` instances represent other GroupMe users.
+Finding members can be accomplished in one of three ways.
+
+Firstly, members may be listed from a group. This lists just the members of a
+particular group.
+
+.. code-block:: python
+
+    >>> from groupy import Group
+    >>> group = Group.list().first
+    >>> members = group.members()
+
+Secondly, members may be listed from a message. This lists just the members who
+have "liked" a particular message.
 
 .. code-block:: python
 
     >>> messages = group.messages()
+    >>> message = message.newest
+    >>> members = message.likes()
 
-We can work with the list of messages in the same way that we can work with
-lists of groups.
-
-.. code-block:: python
-
-    >>> message = messages.first
-    >>> message = messages.last
-
-But that can be rather misleading, since (usually) the first message in the list
-is actually the newest! That's okay, because lists of messages have two
-additional properties to make sense of the situation.
+Lastly, *all* the members you've seen thus far can be listed directly.
 
 .. code-block:: python
 
-    >>> message = messages.oldest
-    >>> message = messages.newest
+    >>> from groupy import Member
+    >>> members = Member.list()
 
-More Messages
-=============
+.. note::
 
-The number of messages in a group can be obtained directly from the group.
+    Although many attributes of a member are specific to a particular group,
+    members listed in this fashion are taken from a single group with one
+    exception: the nickname of each member listed from
+    :func:`group.objects.Member.list` is the most frequent of the names that
+    the member uses among the groups of which you are both members.
 
-.. code-block:: python
-
-    >>> from groupy import Group
-    >>> group = Group.list().first
-    >>> group.message_count
-    1348
-
-As you can see, this group contains 1348 messages. If you attempt to obtain the
-number of messages in a group by obtaining the length of the list of messages,
-you'll probably find they're not equal.
+Each member has a user ID, a nickname, and a URL indicating their avatar image
+that are specific to the group from which the member was listed.
 
 .. code-block:: python
 
-    >>> group.message_count == len(group.messages())
+    >>> member = members.first
+    >>> member.user_id
+    '0123456789'
+    >>> member.nickname
+    'Bill'
+    >>> member.avatar_url
+    'http://i.groupme.com/a01b23c45d56e78f90a01b12c3456789'
+
+Members have one more property of interest: ``muted``. This indicates whether
+the member has that group muted.
+
+.. code-block:: python
+
+    >>> member1, member2 = members[:2]
+    >>> member1.muted
     False
-
-That's because messages are returned in pages since there may be thousands. By
-default, :func:`~groupy.objects.Recipient.messages` returns the most recent
-page of messages. The default (and maximum) page size is 100.
-
-Retrieving more messages is simple. Message pages can fetch the next and
-previous pages.
-
-.. code-block:: python
-
-    >>> older = messages.older()
-    >>> newer = messages.newer()
-
-Now there are 3 pages worth of messages\ [#]_\ . But clearly, seperate pages of
-messages are difficult to work with. There's an easier way.
-
-.. code-block:: python
-
-    >>> while messages.iolder():
-    ...   pass
-    ... 
-
-Presto\ [#]_\ ! Now ``messages`` contains *every* message in the group.
-
-.. code-block:: python
-
-    >>> group.message_count == len(messages)
+    >>> member2.muted
     True
 
-The :func:`~groupy.objects.MessagePager.inewer` method is just like
-:func:`~groupy.objects.MessagePager.newer` except that it operates "in-place"
-and extends the list on which it was invoked intelligently such that the
-messages in the list are in a consistent temporal order. The "in-place" version
-returns ``True`` if the list was extended, and ``False`` otherwise.
-
-One common task is to check whether there are new messages.
-:func:`~groupy.objects.MessagePager.inewer` makes this a trivial task.
+Messaging a member and retrieving the messages between you and the member is
+done in the same way as when messaging a group.
 
 .. code-block:: python
 
-    >>> if messages.inewer():
-    ...   # Hey, we have new messages!
-    ... else:
-    ...   # No newer messages than the newest message in 'messages'
-    ... 
-
-Of course, there is more than one way to skin a cat! The following method may
-work better if you need to process *just* the new messages, whereas the method
-above would work better for situations in which the entire message history must
-be repeatedly processed.
-
-.. code-block:: python
-
-    >>> new_messages = messages.newer()
-    >>> if new_messages:
-    ...   # Hey, we have new messages.
-    ... else:
-    ...   # Man... this group is quiet!
-    ... 
-
-.. [#] In reality, there may not be any messages newer than those in
-   ``messages``, in which case ``newer`` would be ``None``, but let's ignore
-   those details for the time being.
-
-.. [#] It may take a while, depending on your connection speed and number of
-    messages in the group.
-
-Messaging
-=========
-
-You'll probably often want to send a message. **Groupy** makes this easy.
-
-.. code-block:: python
-
-    >>> from groupy import Group
-    >>> group = Group.list().first
-    >>> group.post("Hello group")
-
-Super easy, right? What about messaging a member? Also super easy:
-
-.. code-block:: python
-
-    >>> member = group.members().first
-    >>> member.post("Hello person")
-
-Likes
-=====
-
-There is another fact of life we must face: sometimes you like messages. We all
-do it... how hard can it be? Not that hard:
-
-.. code-block:: python
-
-    >>> message = group.messages().first
-    >>> message.like()
-
-Now what if we decided we made a mistake and don't like the message afterall?
-Also not a problem:
-
-.. code-block:: python
-
-    >>> message.unlike()
-
-Note that both :func:`~groupy.objects.Message.like` and
-:func:`~groupy.objects.Message.unlike` return ``True`` if the action was
-successful:
-
-.. code-block:: python
-
-    >>> if message.like():
-    ...   # Success!
-    ... else:
-    ...   # Uh-oh...
-    ...
-
-What about finding out who has already liked a message? Likes are reported
-conveniently as a list of members:
-
-.. code-block:: python
-
-    >>> favorited_by = message.likes()
-
-Now ``favorited_by`` is a list of the members who liked the message. This means
-that counting likes is a simple matter of finding the length of
-``favorited_by``:
-
-.. code-block:: python
-
-    >>> num_likes = len(favorited_by)
+    >>> member.post("Hello")
+    >>> member.messages().newest.text
+    'Hello'
 
 
 Groups and Members
