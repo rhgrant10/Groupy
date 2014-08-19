@@ -17,7 +17,9 @@ way, let's get started!
 Listing Things
 ==============
 
-Groups, Members, and Bots can be listed directly.
+The most basic operation is listing things. :class:`~groupy.objects.Group`\ s,
+:class:`~groupy.objects.Member`\ s, and :class:`~groupy.objects.Bot`\ s can be
+listed directly.
 
 .. code-block:: python
 
@@ -27,8 +29,8 @@ Groups, Members, and Bots can be listed directly.
     >>> bots = groupy.Bot.list()
 
 The object lists are returned as a :class:`~groupy.objects.FilterList`. These
-behave just like the built-in :class:`list` does, but with some additional
-features: :obj:`~groupy.objects.FilterList.first` and
+behave just like the built-in :class:`list` does with some convenient
+functionality: :obj:`~groupy.objects.FilterList.first` and
 :obj:`~groupy.objects.FilterList.last`.
 
 .. code-block:: python
@@ -38,7 +40,7 @@ features: :obj:`~groupy.objects.FilterList.first` and
     >>> groups.last == groups[-1]
     True
 
-The most useful feature of a :class:`~groupy.objects.FilterList`, however, is
+However, the most useful feature of a :class:`~groupy.objects.FilterList` is
 its :func:`~groupy.objects.FilterList.filter` method. It parses whatever
 keyword arguments are passed to it and filters the list such that only the
 items meeting all criteria are included. The keywords correspond to object
@@ -90,10 +92,6 @@ Some simple examples:
 
 Groups
 ======
-
-.. todo::
-
-    Add section about modifying a group.
 
 From a :class:`~groupy.objects.Group`, you can list its 
 :class:`~groupy.objects.Member`\ s and :class:`~groupy.objects.Message`\ s.
@@ -161,6 +159,65 @@ to a group using its :func:`~groupy.objects.Group.post` method.
 
     Posting a message does not affect ``message_count``. However, retrieving
     any page of messages *does* update it.
+
+:class:`~groupy.objects.Group`\ s have many attributes, some of which can be
+changed.
+
+.. code-block:: python
+
+    >>> group.name
+    'My Family'
+    >>> group.image_url
+    'http://i.groupme.com/a01b23c45d56e78f90a01b12c3456789'
+    >>> group.description
+    'Group of my family members - so we can keep up with each other.'
+    >>> group.update(name="My Group of Family Members")
+    >>> group.name
+    'My Group of Family Members'
+    >>> group.update(name="[old] Family Group", description="The old family group")
+    >>> group.name
+    '[old] Family Group'
+    >>> group.description
+    'The old family group'
+
+Some :class:`~groupy.objects.Group`\ s also have a ``share_url`` that others
+can visit to join the group.
+
+.. code-block:: python
+
+    >>> group.share_url
+    'https://groupme.com/join_group/1234567890/SHARE_TOKEN'
+
+Beware that not every group is created with a share link, in which case the
+value of ``share_url`` would be ``None``. However, this can be changed in the
+same way as other group information.
+
+.. code-block:: python
+
+    >>> print(group.share_url)
+    None
+    >>> group.update(share=True)
+    >>> group.share_url
+    'https://groupme.com/join_group/1234567890/SHARE_TOKEN'
+
+.. note::
+
+    The ``SHARE_TOKEN`` is specific to each group's share link.
+
+The remainder of a :class:`~groupy.objects.Group`\ s aattributes cannot be
+changed. Some more important ones are shown below.
+
+.. code-block:: python
+
+    >>> group.group_id
+    '1234567890'
+    >>> group.creator_user_id
+    '0123456789'
+    >>> print(group.created_at)
+    2013-12-25 9:53:33
+    >>> print(group.updated_at)
+    2013-12-26 4:21:08
+
 
 Messages
 ========
