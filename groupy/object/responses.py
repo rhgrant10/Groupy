@@ -1,187 +1,13 @@
-"""
-.. module:: objects
-   :platform: Unix, Windows
-   :synopsis: Module that abstracts the API calls into sensible objects.
-
-.. moduleauthor:: Robert Grant <rhgrant10@gmail.com>
-
-The ``objects`` module contains classes that represent the objects returned by
-the GroupMe API.
-
-"""
-from . import api
-from . import status
-from . import errors
+from ..api import status
+from ..api import errors
+from ..api import endpoint
+from .listers import FilterList, MessagePager
+from .attachments import AttachmentFactory
 
 from datetime import datetime
 from collections import Counter
-import json
+
 import time
-import operator
-
-__all__ = ['ApiResponse', 'Recipient', 'Group', 'Member', 'Message',
-    'Bot', 'User', 'Attachment', 'FilterList', 'MessagePager']
-
-class FilterList(list):
-    """A filterable list.
-
-    Acts just like a regular :class:`list`, except it can be filtered using a
-    special keyword syntax. Also, the first and last items are special
-    properties.
-    """
-    def filter(self, **kwargs):
-        """Filter the list and return a new instance.
-
-        Arguments are keyword arguments only, and can be appended with
-        operator method names to indicate relationships other than equals.
-        For example, to filter the list down to only items whose ``name``
-        property contains "ie":
-
-        .. code-block:: python
-
-            new_list = filter_list.filter(name__contains='ie')
-
-        As another example, this filters the list down to only those
-        with a ``created`` property that is less than 1234567890:
-
-        .. code-block:: python
-
-            new_list = filter_list.filter(created__lt=1234567890)
-
-        Acceptable operators are:
-
-        - ``__lt``: less than
-        - ``__gt``: greater than
-        - ``__contains``: contains
-        - ``__eq``: equal to
-        - ``__ne``: not equal to
-        - ``__le``: less than or equal to
-        - ``__ge``: greater than or equal to
-
-        Use of any operator listed here results in a
-        :class:`InvalidOperatorError<groupy.errors.InvalidOperatorError>`.
-
-        :return: a new list with potentially less items than the original
-        :rtype: :class:`FilterList<groupy.objects.FilterList>`
-        """
-        kvops = []
-        for k, v in kwargs.items():
-            if '__' in k[1:-1]:   # don't use it if at the start or end of k
-                k, o = k.rsplit('__', 1)
-                try:
-                    op = getattr(operator, o)
-                except AttributeError:
-                    raise errors.InvalidOperatorError("__{}".format(o))
-            else:
-                op = operator.eq
-            kvops.append((k, v, op))
-        test = lambda i, k, v, op: hasattr(i, k) and op(getattr(i, k), v)
-        criteria = lambda i: all(test(i, k, v, op) for k, v, op in kvops)
-        return FilterList(filter(criteria, self))
-
-    @property
-    def first(self):
-        try:
-            return self[0]
-        except IndexError:
-            return None
-
-    @property
-    def last(self):
-        try:
-            return self[-1]
-        except IndexError:
-            return None
-
-
-class MessagePager(FilterList):
-    """A filterable, extendable page of messages.
-
-    :param group: the group from which to page through messages
-    :type group: :class:`Group<groupy.objects.Group>`
-    :param messages: the initial page of messages
-    :type messages: :class:`list`
-    :param backward: ``True`` if the oldest message is at index 0, ``False``
-        otherwise
-    :type backward: :obj:`bool`
-    """
-    def __init__(self, group, messages, backward=False):
-        super().__init__(messages)
-        self.backward = backward
-        self.group = group
-
-    @property
-    def oldest(self):
-        """Return the oldest message in the list.
-
-        :returns: the oldest message in the list
-        :rtype: :class:`Message<groupy.objects.Message>`
-        """
-        return self.first if self.backward else self.last
-
-    @property
-    def newest(self):
-        """Return the newest message in the list.
-
-        :returns: the newest message in the list
-        :rtype: :class:`Message<groupy.objects.Message>`
-        """
-        return self.last if self.backward else self.first
-
-    def prepend(self, messages):
-        """Prepend a list of messages to the list.
-
-        :param messages: the messages to prepend
-        :type messages: :class:`list`
-        """
-        for each in messages:
-            self.insert(0, each)
-
-    def newer(self):
-        """Return the next (newer) page of messages.
-
-        :returns: a newer page of messages
-        :rtype: :class:`MessagePager<groupy.objects.MessagePager>`
-        """
-        return self.group.messages(after=self.newest.id)
-
-    def older(self):
-        """Return the previous (older) page of messages.
-        
-        :returns: an older page of messages
-        :rtype: :class:`MessagePager<groupy.objects.MessagePager>`
-        """
-        return self.group.messages(before=self.oldest.id)
-
-    def inewer(self):
-        """Add in-place the next (newer) page of messages.
-        
-        :returns: ``True`` if successful, ``False`` otherwise
-        :rtype: :obj:`bool`
-        """
-        new = self.newer()
-        if not new:
-            return False
-        if self.backward:
-            self.extend(self.newer())
-        else:
-            self.prepend(self.newer())
-        return True
-
-    def iolder(self):
-        """Add in-place the previous (older) page of messages.
-        
-        :returns: ``True`` if successful, ``False`` otherwise
-        :rtype: :obj:`bool`
-        """
-        old = self.older()
-        if not old:
-            return False
-        if self.backward:
-            self.prepend(self.older())
-        else:
-            self.extend(self.older())
-        return True
 
 
 class ApiResponse(object):
@@ -294,7 +120,7 @@ class Group(Recipient):
     def __init__(self, **kwargs):
         messages = kwargs.pop('messages', {})
         members = kwargs.pop('members')
-        super().__init__(api.Messages, 'messages', 'id', **kwargs)
+        super().__init__(endpoint.Messages, 'messages', 'id', **kwargs)
 
         self.id = kwargs.get('id')
         self.group_id = kwargs.get('group_id')
@@ -344,17 +170,17 @@ class Group(Recipient):
         """
         # Former groups come as a single page.
         if former:
-            groups = api.Groups.index(former=True)
+            groups = endpoint.Groups.index(former=True)
             return FilterList(Group(**g) for g in groups)
         # Current groups are listed in pages.
         page = 1
         groups = []
-        next_groups = api.Groups.index(page=page)
+        next_groups = endpoint.Groups.index(page=page)
         while next_groups:
             groups.extend(next_groups)
             page += 1
             try:
-                next_groups = api.Groups.index(page=page)
+                next_groups = endpoint.Groups.index(page=page)
             except errors.InvalidResponseError:
                 next_groups = None
         return FilterList(Group(**g) for g in groups)
@@ -362,7 +188,7 @@ class Group(Recipient):
     def refresh(self):
         """Refresh the group information from the API.
         """
-        self.__init__(**api.Groups.show(self.id))
+        self.__init__(**endpoint.Groups.show(self.id))
 
     def update(self, name=None, description=None, image_url=None, share=None):
         """Change group information.
@@ -373,7 +199,7 @@ class Group(Recipient):
         :param share: whether to generate a share URL
         :type share: :obj:`bool`
         """
-        api.Groups.update(name=name, description=description,
+        endpoint.Groups.update(name=name, description=description,
                           image_url=image_url, share=share)
         self.refresh()
 
@@ -398,7 +224,7 @@ class Group(Recipient):
         :rtype: str
         """
         ids = (Member.identify(m) for m in members)
-        r = api.Members.add(self.id, *ids)
+        r = endpoint.Members.add(self.id, *ids)
         return r['results_id']
 
     def remove(self, member):
@@ -410,7 +236,7 @@ class Group(Recipient):
         :rtype: bool
         """
         try:
-            api.Members.remove(self.id, member.user_id)
+            endpoint.Members.remove(self.id, member.user_id)
         except errors.InvalidResponse as e:
             return e.args[0].status_code == status.OK
         return True
@@ -420,7 +246,7 @@ class Member(Recipient):
     """A GroupMe member.
     """
     def __init__(self, **kwargs):
-        super().__init__(api.DirectMessages, 'direct_messages',
+        super().__init__(endpoint.DirectMessages, 'direct_messages',
                          'user_id', **kwargs)
         self.id = kwargs.get('id')
         self.user_id = kwargs.get('user_id')
@@ -582,7 +408,7 @@ class Message(ApiResponse):
         :rtype: bool
         """
         try:
-            api.Likes.create(self._conversation_id, self.id)
+            endpoint.Likes.create(self._conversation_id, self.id)
         except errors.InvalidResponse as e:
             return e.args[0].status_code == status.OK
         return True
@@ -594,7 +420,7 @@ class Message(ApiResponse):
         :rtype: bool
         """
         try:
-            api.Likes.destroy(self._conversation_id, self.id)
+            endpoint.Likes.destroy(self._conversation_id, self.id)
         except errors.InvalidResponse as e:
             return e.args[0].status_code == status.OK
         return True
@@ -651,7 +477,7 @@ class Bot(ApiResponse):
         :returns: the new bot
         :rtype: :class:`Bot<groupy.objects.Bot>`
         """
-        bot = api.Bots.create(name, group.group_id, avatar_url, callback_url)
+        bot = endpoint.Bots.create(name, group.group_id, avatar_url, callback_url)
         return cls(**bot)
 
     @classmethod
@@ -661,7 +487,7 @@ class Bot(ApiResponse):
         :returns: a list of your bots
         :rtype: :class:`FilterList<groupy.objects.FilterList>`
         """
-        return FilterList(Bot(**b) for b in api.Bots.index())
+        return FilterList(Bot(**b) for b in endpoint.Bots.index())
 
     def post(self, text, picture_url=None):
         """Post a message to the group of the bot.
@@ -672,7 +498,7 @@ class Bot(ApiResponse):
         :rtype: bool
         """
         try:
-            api.Bot.post(self.bot_id, text, picture_url)
+            endpoint.Bot.post(self.bot_id, text, picture_url)
         except errors.InvalidResponse as e:
             return e.args[0].status_code == status.CREATED
         return True
@@ -684,7 +510,7 @@ class Bot(ApiResponse):
         :rtype: bool
         """
         try:
-            api.Bot.destroy(self.bot_id)
+            endpoint.Bot.destroy(self.bot_id)
         except errors.InvalidResponse as e:
             return e.args[0].status_code == status.OK
         return True
@@ -723,7 +549,7 @@ class User(ApiResponse):
         :returns: your user information
         :rtype: :class:`dict`
         """
-        return cls(**api.Users.me())
+        return cls(**endpoint.Users.me())
 
     @classmethod
     def enable_sms(cls, duration=4, registration_token=None):
@@ -741,7 +567,7 @@ class User(ApiResponse):
         :rtype: :obj:`bool`
         """
         try:
-            api.Sms.create(duration, registration_token)
+            endpoint.Sms.create(duration, registration_token)
         except errors.InvalidResponse as e:
             return e.args[0].status_code == status.CREATED
         return True
@@ -757,106 +583,8 @@ class User(ApiResponse):
         :rtype: :obj:`bool`
         """
         try:
-            api.Sms.delete()
+            endpoint.Sms.delete()
         except errors.InvalidResponse as e:
             return e.args[0].status_code == status.OK
         return True
-
-
-
-class Attachment:
-    def __init__(self, type):
-        self.type = type
-        
-    def as_dict(self):
-        return self.__dict__
-        
-
-class GenericAttachment(Attachment):
-    def __init__(self, type, **kwargs):
-        super().__init__(type)
-        for k in kwargs:
-            setattr(self, k, kwargs[k])
-
-
-class Image(Attachment):
-    def __init__(self, url, source_url=None):
-        super().__init__('image')
-        self.url = url
-        self.source_url = source_url
-        
-    def __repr__(self):
-        return "Image(url={!r})".format(self.url)
-        
-    @classmethod
-    def file(cls, image):
-        return cls(api.Images.create(image)['url'])
-        
-    def download(self):
-        return api.Images.download(self.url)
-
-
-class Location(Attachment):
-    def __init__(self, name, lat, lng, foursquare_venue_id=None):
-        super().__init__('location')
-        self.name = name
-        self.lat = lat
-        self.lng = lng
-        self.foursquare_venue_id = foursquare_venue_id
-        
-    def __repr__(self):
-        return "Location(name={!r}, lat={!r}, lng={!r})".format(
-                self.name, self.lat, self.lng)
-        
-
-class Emoji(Attachment):
-    def __init__(self, placeholder, charmap):
-        super().__init__('emoji')
-        self.placeholder = placeholder
-        self.charmap = charmap
-        
-    def __repr__(self):
-        return "Emoji(placeholder={!r}, charmap={!r})".format(
-            self.placeholder, self.charmap)
-
-
-class Split(Attachment):
-    def __init__(self, token):
-        super().__init__('split')
-        self.token = token
-
-    def __repr__(self):
-        return "Split(token={!r})".format(self.token)
-
-
-class Mentions(Attachment):
-    def __init__(self, user_ids, loci=None):
-        super().__init__('mentions')
-        self.loci = loci
-        self.user_ids = user_ids
-
-    def __repr__(self):
-        return "Mentions({!r})".format(self.user_ids)
-
-
-class AttachmentFactory:
-    _factories = {
-        'image': Image,
-        'location': Location,
-        'emoji': Emoji,
-        'mentions': Mentions,
-        'split': Split
-    }
-
-    @classmethod
-    def create(cls, **kwargs):
-        t = kwargs.pop('type', None)
-        try:
-            return cls._factories[t](**kwargs)
-        except TypeError:
-            print('type: {}'.format(t))
-            print(json.dumps(kwargs, indent=2))
-        except KeyError:
-            return GenericAttachment(t, **kwargs)        
-        
 

@@ -1,27 +1,13 @@
-"""
-.. module:: api
-   :platform: Unix, Windows
-   :synopsis: Module containing methods for every API endpoint.
-
-.. moduleauthor:: Robert Grant <rhgrant10@gmail.com>
-
-The ``api`` module is a basic abstraction of the GroupMe API.
-
-"""
-
-from . import config
+from .. import config
 from . import errors
 
 import requests
 
-from StringIO import StringIO
-import PIL
+from io import BytesIO
+from PIL import Image as PImage
 import time
 import json
 
-
-__all__ = ['Endpoint', 'Groups', 'Members', 'Messages', 'DirectMessages',
-    'Likes', 'Users', 'Sms']
 
 class Endpoint:
     '''An API endpoint capable of building a url and extracting data from the
@@ -595,4 +581,5 @@ class Images(Endpoint):
     @classmethod
     def download(cls, url):
         r = requests.get(url)
-        return PIL.Image.open(StringIO(r.content))
+        image = BytesIO(r.content)
+        return PImage.open(image)
