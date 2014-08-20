@@ -29,9 +29,10 @@ The most basic operation is listing things.
     >>> members = groupy.Member.list()
     >>> bots = groupy.Bot.list()
 
-The object lists are returned as a :class:`~groupy.object.listers.FilterList`.
-These behave just like the built-in :class:`list` does with some convenient
-functionality: :obj:`~groupy.object.listers.FilterList.first` and
+The object lists are returned as a 
+:class:`~groupy.object.listers.FilterList`\ . These behave just like the
+built-in :class:`list` does with some convenient functionality:
+:obj:`~groupy.object.listers.FilterList.first` and
 :obj:`~groupy.object.listers.FilterList.last`.
 
 .. code-block:: python
@@ -41,15 +42,15 @@ functionality: :obj:`~groupy.object.listers.FilterList.first` and
     >>> groups.last == groups[-1]
     True
 
-However, the most useful feature of a :class:`~groupy.object.listers.FilterList`
-is its :func:`~groupy.object.listers.FilterList.filter` method. It parses
-whatever keyword arguments are passed to it and filters the list such that only
-the items meeting all criteria are included. The keywords correspond to object
-properties, but also indicate how to test the relation to the value of the
-keyword argument. Thus a keyword-value pair such as ``name='Bob'`` would keep
-only those items with a ``name`` property equal to ``"Bob"``, whereas a pair
-like ``age__lt=20`` keeps only those items with an ``age`` property *less than*
-``20``.
+The most useful feature of a  :class:`~groupy.object.listers.FilterList`\ ,
+however, is its :func:`~groupy.object.listers.FilterList.filter` method. It
+parses whatever keyword arguments are passed to it and filters the list such
+that only the items meeting all criteria are included. The keywords correspond
+to object properties, but also indicate how to test the relation to the value
+of the keyword argument. Thus a keyword-value pair such as ``name='Bob'`` would
+keep only those items with a ``name`` property equal to ``"Bob"``, whereas a
+pair like ``age__lt=20`` keeps only those items with an ``age`` property *less
+than* ``20``.
 
 Some simple examples: 
 
@@ -147,7 +148,7 @@ former to retrieve all messages in a group:
     True
 
 Often you'll want to post a new message to a group. New messages can be posted
-to a group using its :func:`~groupy.object.responses.Group.post` method.
+to a group using its :func:`~groupy.object.responses.Recipient.post` method.
 
 .. code-block:: python
 
@@ -233,7 +234,7 @@ Instead, :class:`~groupy.object.responses.Message`\ s are listed either from
 :class:`~groupy.object.responses.Member` instances.
 
 To list the messages from a group, use a group's 
-:func:`~groupy.object.responses.Group.messages` method.
+:func:`~groupy.object.responses.Recipient.messages` method.
 
 .. code-block:: python
 
@@ -242,7 +243,7 @@ To list the messages from a group, use a group's
     >>> messages = group.messages()
 
 To list the messages from a member, use a member's 
-:func:`~groupy.object.responses.Member.messages` method.
+:func:`~groupy.object.responses.Recipient.messages` method.
 
 .. code-block:: python
 
@@ -378,8 +379,8 @@ Lastly, *all* the members you've seen thus far can be listed directly.
     Although many attributes of a member are specific to a particular group,
     members listed in this fashion are taken from a single group with one
     exception: the nickname of each member listed from
-    :func:`group.objects.Member.list` is the most frequent of the names that
-    the member uses among the groups of which you are both members.
+    :func:`~groupy.object.responses.Member.list` is the most frequent of the
+    names that the member uses among the groups of which you are both members.
 
 Each member has a user ID, a nickname, and a URL indicating their avatar image
 that are specific to the group from which the member was listed.

@@ -329,7 +329,7 @@ class Member(Recipient):
         - ``user_id`` or ``email`` or ``phone_number``
         
         If an identification cannot be created then raise an
-        :exc:`~exceptions.AttributeError`.
+        :exc:`AttributeError`.
 
         :param member: either a :class:`~groupy.object.responses.Member` or a
             :class:`dict` with the required keys

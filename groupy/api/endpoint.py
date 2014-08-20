@@ -47,7 +47,8 @@ class Endpoint:
 
         This method essentially strips the actual response of the envelope.
 
-        :param requests.Response r: the HTTP response from an API call
+        :param r: the HTTP response from an API call
+        :type r: :class:`requests.Response`
         :returns: API response data
         :rtype: JSON
         """

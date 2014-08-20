@@ -109,7 +109,7 @@ class MessagePager(FilterList):
         """Return the newest message in the list.
 
         :returns: the newest message in the list
-        :rtype: :class:`~groupy.object.responses.Messages`
+        :rtype: :class:`~groupy.object.responses.Message`
         """
         return self.last if self.backward else self.first
 

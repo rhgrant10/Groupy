@@ -35,3 +35,15 @@ The ``responses`` Module
 .. automodule:: groupy.object.responses
 	:members:
 
+The ``attachments`` Module
+==========================
+
+.. automodule:: groupy.object.attachments
+	:members:
+
+
+The ``listers`` Module
+======================
+
+.. automodule:: groupy.object.listers
+	:members:
