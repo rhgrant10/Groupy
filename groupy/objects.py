@@ -791,6 +791,9 @@ class Image(Attachment):
     @classmethod
     def file(cls, image):
         return cls(api.Images.create(image)['url'])
+        
+    def download(self):
+        return api.Images.download(self.url)
 
 
 class Location(Attachment):

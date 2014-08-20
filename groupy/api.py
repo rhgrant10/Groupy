@@ -9,12 +9,16 @@ The ``api`` module is a basic abstraction of the GroupMe API.
 
 """
 
+from . import config
+from . import errors
+
 import requests
+
+from StringIO import StringIO
+import PIL
 import time
 import json
 
-from . import config
-from . import errors
 
 __all__ = ['Endpoint', 'Groups', 'Members', 'Messages', 'DirectMessages',
     'Likes', 'Users', 'Sms']
@@ -587,3 +591,8 @@ class Images(Endpoint):
             files={'file': image}
         )
         return cls.response(r)
+
+    @classmethod
+    def download(cls, url):
+        r = requests.get(url)
+        return PIL.Image.open(StringIO(r.content))
