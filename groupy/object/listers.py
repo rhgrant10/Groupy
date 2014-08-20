@@ -40,10 +40,10 @@ class FilterList(list):
         - ``__ge``: greater than or equal to
 
         Use of any operator listed here results in a
-        :class:`InvalidOperatorError<groupy.errors.InvalidOperatorError>`.
+        :class:`~groupy.api.errors.InvalidOperatorError`.
 
         :return: a new list with potentially less items than the original
-        :rtype: :class:`FilterList<groupy.objects.FilterList>`
+        :rtype: :class:`~groupy.object.listers.FilterList`
         """
         kvops = []
         for k, v in kwargs.items():
@@ -62,6 +62,8 @@ class FilterList(list):
 
     @property
     def first(self):
+        """The first element in the list.
+        """
         try:
             return self[0]
         except IndexError:
@@ -69,6 +71,8 @@ class FilterList(list):
 
     @property
     def last(self):
+        """The last element in the list.
+        """
         try:
             return self[-1]
         except IndexError:
@@ -96,7 +100,7 @@ class MessagePager(FilterList):
         """Return the oldest message in the list.
 
         :returns: the oldest message in the list
-        :rtype: :class:`Message<groupy.objects.Message>`
+        :rtype: :class:`~groupy.object.responses.Message`
         """
         return self.first if self.backward else self.last
 
@@ -105,7 +109,7 @@ class MessagePager(FilterList):
         """Return the newest message in the list.
 
         :returns: the newest message in the list
-        :rtype: :class:`Message<groupy.objects.Message>`
+        :rtype: :class:`~groupy.object.responses.Messages`
         """
         return self.last if self.backward else self.first
 
@@ -122,7 +126,7 @@ class MessagePager(FilterList):
         """Return the next (newer) page of messages.
 
         :returns: a newer page of messages
-        :rtype: :class:`MessagePager<groupy.objects.MessagePager>`
+        :rtype: :class:`~groupy.object.listers.MessagePager`
         """
         return self.group.messages(after=self.newest.id)
 
@@ -130,7 +134,7 @@ class MessagePager(FilterList):
         """Return the previous (older) page of messages.
         
         :returns: an older page of messages
-        :rtype: :class:`MessagePager<groupy.objects.MessagePager>`
+        :rtype: :class:`~groupy.object.listers.MessagePager`
         """
         return self.group.messages(before=self.oldest.id)
 

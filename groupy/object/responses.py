@@ -167,7 +167,7 @@ class Group(Recipient):
             ``False`` (default) lists current groups
         :type former: :obj:`bool`
         :returns: a list of groups
-        :rtype: :class:`FilterList<groupy.objects.FilterList>`
+        :rtype: :class:`~groupy.object.listers.FilterList`
         """
         # Former groups come as a single page.
         if former:
@@ -208,7 +208,7 @@ class Group(Recipient):
         """Return a list of the members in the group.
 
         :returns: the members of the group
-        :rtype: :class:`FilterList<groupy.objects.FilterList>`
+        :rtype: :class:`~groupy.object.listers.FilterList`
         """
         return FilterList(self._members)
 
@@ -216,7 +216,7 @@ class Group(Recipient):
         """Add a member to a group.
 
         Each member can be either an instance of 
-        :class:`Member<groupy.objects.Member>` or a :class:`dict` containing 
+        :class:`~groupy.object.responses.Member` or a :class:`dict` containing 
         ``nickname`` and one of ``email``, ``phone_number``, or ``user_id``.
 
         :param members: members to add to the group
@@ -232,7 +232,7 @@ class Group(Recipient):
         """Remove a member from the group.
 
         :param member: the member to remove
-        :type member: :class:`Member<groupy.objects.Member>`
+        :type member: :class:`~groupy.object.responses.Member`
         :returns: ``True`` if successful, ``False`` otherwise
         :rtype: bool
         """
@@ -329,9 +329,9 @@ class Member(Recipient):
         - ``user_id`` or ``email`` or ``phone_number``
         
         If an identification cannot be created then raise an
-        :exc:`AttributeError<exceptions.AttributeError>`.
+        :exc:`~exceptions.AttributeError`.
 
-        :param member: either a :class:`Member<groupy.objects.Member>` or a
+        :param member: either a :class:`~groupy.object.responses.Member` or a
             :class:`dict` with the required keys
         :returns: the identification of member
         :rtype: :class:`dict`
@@ -359,7 +359,7 @@ class Message(ApiResponse):
     """A GroupMe message.
 
     :param recipient: the reciever of the message
-    :type recipient: :class:`Recipient<groupy.objects.Recipient>`
+    :type recipient: :class:`~groupy.object.responses.Recipient`
     """
     _user = None
     
@@ -427,11 +427,11 @@ class Message(ApiResponse):
         return True
 
     def likes(self):
-        """Return a :class:`FilterList<groupy.objects.FilterList>` of the
+        """Return a :class:`~groupy.object.listers.FilterList` of the
         members that like the message.
         
         :returns: a list of the members who "liked" this message
-        :rtype: :class:`FilterList<groupy.objects.FilterList>`
+        :rtype: :class:`~groupy.object.listers.FilterList`
         """
         try:
             liked = filter(
@@ -470,13 +470,13 @@ class Bot(ApiResponse):
         
         :param str name: the name of the bot
         :param group: the group to which the bot will belong
-        :type group: :class:`Bot<groupy.objects.Bot>`
+        :type group: :class:`~groupy.object.responses.Bot`
         :param str avatar_url: the URL for a GroupMe image to be used as the
             bot's avatar
         :param str callback_url: the URL to which each group message will be
             POSTed
         :returns: the new bot
-        :rtype: :class:`Bot<groupy.objects.Bot>`
+        :rtype: :class:`~groupy.object.responses.Bot`
         """
         bot = endpoint.Bots.create(name, group.group_id, avatar_url, callback_url)
         return cls(**bot)
@@ -486,7 +486,7 @@ class Bot(ApiResponse):
         """Return a list of your bots.
 
         :returns: a list of your bots
-        :rtype: :class:`FilterList<groupy.objects.FilterList>`
+        :rtype: :class:`~groupy.object.listers.FilterList`
         """
         return FilterList(Bot(**b) for b in endpoint.Bots.index())
 

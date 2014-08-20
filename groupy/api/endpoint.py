@@ -49,7 +49,7 @@ class Endpoint:
 
         :param requests.Response r: the HTTP response from an API call
         :returns: API response data
-        :rtype: json
+        :rtype: JSON
         """
         try:
             data = r.json()
