@@ -11,26 +11,27 @@ The ``config`` Module
 .. automodule:: groupy.config
 	:members:
 
-The ``api`` Module
-==================
+The ``endpoint`` Module
+=======================
 
-.. automodule:: groupy.api
-	:members:
-
-The ``objects`` Module
-======================
-
-.. automodule:: groupy.objects
+.. automodule:: groupy.api.endpoint
 	:members:
 
 The ``errors`` Module
 =====================
 
-.. automodule:: groupy.errors
+.. automodule:: groupy.api.errors
 	:members:
 
 The ``status`` Module
 =====================
 
-.. automodule:: groupy.status
+.. automodule:: groupy.api.status
 	:members:
+
+The ``responses`` Module
+========================
+
+.. automodule:: groupy.object.responses
+	:members:
+

@@ -17,9 +17,10 @@ way, let's get started!
 Listing Things
 ==============
 
-The most basic operation is listing things. :class:`~groupy.objects.Group`\ s,
-:class:`~groupy.objects.Member`\ s, and :class:`~groupy.objects.Bot`\ s can be
-listed directly.
+The most basic operation is listing things.
+:class:`~groupy.object.responses.Group`\ s,
+:class:`~groupy.object.responses.Member`\ s, and
+:class:`~groupy.object.responses.Bot`\ s can be listed directly.
 
 .. code-block:: python
 
@@ -28,10 +29,10 @@ listed directly.
     >>> members = groupy.Member.list()
     >>> bots = groupy.Bot.list()
 
-The object lists are returned as a :class:`~groupy.objects.FilterList`. These
-behave just like the built-in :class:`list` does with some convenient
-functionality: :obj:`~groupy.objects.FilterList.first` and
-:obj:`~groupy.objects.FilterList.last`.
+The object lists are returned as a :class:`~groupy.object.listers.FilterList`.
+These behave just like the built-in :class:`list` does with some convenient
+functionality: :obj:`~groupy.object.listers.FilterList.first` and
+:obj:`~groupy.object.listers.FilterList.last`.
 
 .. code-block:: python
 
@@ -40,10 +41,10 @@ functionality: :obj:`~groupy.objects.FilterList.first` and
     >>> groups.last == groups[-1]
     True
 
-However, the most useful feature of a :class:`~groupy.objects.FilterList` is
-its :func:`~groupy.objects.FilterList.filter` method. It parses whatever
-keyword arguments are passed to it and filters the list such that only the
-items meeting all criteria are included. The keywords correspond to object
+However, the most useful feature of a :class:`~groupy.object.listers.FilterList`
+is its :func:`~groupy.object.listers.FilterList.filter` method. It parses
+whatever keyword arguments are passed to it and filters the list such that only
+the items meeting all criteria are included. The keywords correspond to object
 properties, but also indicate how to test the relation to the value of the
 keyword argument. Thus a keyword-value pair such as ``name='Bob'`` would keep
 only those items with a ``name`` property equal to ``"Bob"``, whereas a pair
@@ -93,8 +94,9 @@ Some simple examples:
 Groups
 ======
 
-From a :class:`~groupy.objects.Group`, you can list its 
-:class:`~groupy.objects.Member`\ s and :class:`~groupy.objects.Message`\ s.
+From a :class:`~groupy.object.responses.Group`, you can list its 
+:class:`~groupy.object.responses.Member`\ s and
+:class:`~groupy.object.responses.Message`\ s.
 
 .. code-block:: python
 
@@ -112,13 +114,13 @@ of members in a group should be a familiar task.
     >>> len(members)
     5
 
-:class:`~groupy.objects.Message`\ s, however, are a different matter. Since
-there may be thousands of messages in a group, messages are returned in pages.
-The default (and maximum) number of messages per page is 100. To determine the
-total number of messages in a group, simply access the ``message_count``
-attribute. Additional pages of messages can be obtained using 
-:func:`~groupy.objects.MessagePager.older` and
-:func:`~groupy.objects.MessagePager.newer`.
+:class:`~groupy.object.responses.Message`\ s, however, are a different matter.
+Since there may be thousands of messages in a group, messages are returned in
+pages. The default (and maximum) number of messages per page is 100. To
+determine the total number of messages in a group, simply access the
+``message_count`` attribute. Additional pages of messages can be obtained using
+:func:`~groupy.object.listers.MessagePager.older` and
+:func:`~groupy.object.listers.MessagePager.newer`.
 
 .. code-block:: python
 
@@ -130,9 +132,9 @@ attribute. Additional pages of messages can be obtained using
     >>> newer = messages.newer()
 
 There are also methods for collecting a newer or older page of messages into
-one list: :func:`~groupy.objects.MessagePager.iolder` and
-:func:`~groupy.objects.MessagePager.inewer`. An example of using the former to
-retrieve all messages in a group:
+one list: :func:`~groupy.object.listers.MessagePager.iolder` and
+:func:`~groupy.object.listers.MessagePager.inewer`. An example of using the
+former to retrieve all messages in a group:
 
 .. code-block:: python
 
@@ -145,7 +147,7 @@ retrieve all messages in a group:
     True
 
 Often you'll want to post a new message to a group. New messages can be posted
-to a group using its :func:`~groupy.objects.Group.post` method.
+to a group using its :func:`~groupy.object.responses.Group.post` method.
 
 .. code-block:: python
 
@@ -160,8 +162,8 @@ to a group using its :func:`~groupy.objects.Group.post` method.
     Posting a message does not affect ``message_count``. However, retrieving
     any page of messages *does* update it.
 
-:class:`~groupy.objects.Group`\ s have many attributes, some of which can be
-changed.
+:class:`~groupy.object.responses.Group`\ s have many attributes, some of which
+can be changed.
 
 .. code-block:: python
 
@@ -180,8 +182,8 @@ changed.
     >>> group.description
     'The old family group'
 
-Some :class:`~groupy.objects.Group`\ s also have a ``share_url`` that others
-can visit to join the group.
+Some :class:`~groupy.object.responses.Group`\ s also have a ``share_url`` that
+others can visit to join the group.
 
 .. code-block:: python
 
@@ -204,8 +206,8 @@ same way as other group information.
 
     The ``SHARE_TOKEN`` is specific to each group's share link.
 
-The remainder of a :class:`~groupy.objects.Group`\ s aattributes cannot be
-changed. Some more important ones are shown below.
+The remainder of a :class:`~groupy.object.responses.Group`\ s aattributes cannot
+be changed. Some more important ones are shown below.
 
 .. code-block:: python
 
@@ -222,14 +224,16 @@ changed. Some more important ones are shown below.
 Messages
 ========
 
-Unlike :class:`~groupy.objects.Group`\ s, :class:`~groupy.objects.Member`\ s,
-and :class:`~groupy.objects.Bot`\ s, :class:`~groupy.objects.Message`\ s
-*cannot* be listed directly. Instead, :class:`~groupy.objects.Message`\ s are
-listed either from :class:`~groupy.objects.Group` or
-:class:`~groupy.objects.Member` instances.
+Unlike :class:`~groupy.object.responses.Group`\ s,
+:class:`~groupy.object.responses.Member`\ s, and
+:class:`~groupy.object.responses.Bot`\ s,
+:class:`~groupy.object.responses.Message`\ s *cannot* be listed directly.
+Instead, :class:`~groupy.object.responses.Message`\ s are listed either from
+:class:`~groupy.object.responses.Group` or
+:class:`~groupy.object.responses.Member` instances.
 
 To list the messages from a group, use a group's 
-:func:`~groupy.objects.Group.messages` method.
+:func:`~groupy.object.responses.Group.messages` method.
 
 .. code-block:: python
 
@@ -238,7 +242,7 @@ To list the messages from a group, use a group's
     >>> messages = group.messages()
 
 To list the messages from a member, use a member's 
-:func:`~groupy.objects.Member.messages` method.
+:func:`~groupy.object.responses.Member.messages` method.
 
 .. code-block:: python
 
@@ -315,8 +319,8 @@ Lastly, each message contains a list of user IDs to indicate which members have
     ['2345678901', '3456789012']
 
 Because often more information about the member is desired, a list of actual
-:class:`~groupy.objects.Member` instances can be retrieved using the
-:func:`~groupy.objects.Message.likes` method.
+:class:`~groupy.object.responses.Member` instances can be retrieved using the
+:func:`~groupy.object.responses.Message.likes` method.
 
 .. code-block:: python
 
@@ -341,8 +345,8 @@ Messages can also be liked and unliked.
 Members
 =======
 
-:class:`~groupy.objects.Member` instances represent other GroupMe users.
-Finding members can be accomplished in one of three ways.
+:class:`~groupy.object.responses.Member` instances represent other GroupMe
+users. Finding members can be accomplished in one of three ways.
 
 Firstly, members may be listed from a group. This lists just the members of a
 particular group.

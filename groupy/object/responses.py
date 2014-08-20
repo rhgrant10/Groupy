@@ -9,6 +9,7 @@ from collections import Counter
 
 import time
 
+__all__ = ['Recipient', 'Group', 'Member', 'Message', 'Bot', 'User']
 
 class ApiResponse(object):
     """Base class for all API responses.
@@ -29,7 +30,7 @@ class Recipient(ApiResponse):
     Recipients can post and recieve messages.
 
     :param endpoint: the API endpoint for messages
-    :type endpoint: :class:`Endpoint<groupy.objects.Endpoint>`
+    :type endpoint: :class:`~groupy.api.endpoint.Endpoint`
     :param str mkey: the :class:`dict` key under which the endpoint returns
         messages
     :param str idkey: the :class:`dict` key whose value represents the key for
@@ -95,7 +96,7 @@ class Recipient(ApiResponse):
         :param str after: a reference message ID
         :param int limit: maximum number of messages to include in the page
         :returns: a page of messages
-        :rtype: :class:`MessagePager<groupy.objects.MessagePager>`
+        :rtype: :class:`~groupy.object.listers.MessagePager`
         """
         # Messages obtained with the 'after' parameter are in reversed order.
         backward = after is not None
@@ -263,7 +264,7 @@ class Member(Recipient):
         """List all known members regardless of group membership.
         
         :returns: a list of all known members
-        :rtype: :class:`~groupy.objects.FilterList
+        :rtype: :class:`~groupy.objects.FilterList`
         """
         groups = Group.list()
         members = {}
