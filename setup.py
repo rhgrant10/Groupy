@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
     name = 'Groupy',
     packages = ['Groupy'], # this must be the same as the name above
-    version = '0.4.0',
+    version = '0.5.0',
     description = 'The simple yet powerful wrapper for the GroupMe API',
     author = 'Robert Grant',
     author_email = 'rhgrant10@gmail.com',

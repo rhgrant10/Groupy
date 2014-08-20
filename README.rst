@@ -22,11 +22,11 @@ Get the full documentation on `Read the Docs`_!
 
     import groupy
 
-    # list the groups you're in or the groups you're not in anymore
+    # list groups
     groups = groupy.Group.list()
     former_groups = groupy.Group.list(former=True)
 
-    # list the members in a group
+    # list group members
     group = groups[0]
     members = group.members()
     
@@ -35,10 +35,13 @@ Get the full documentation on `Read the Docs`_!
     group2.add(members[0])
     group2.remove(members[0])
 
-    # list the 100 most recent messages in a group
+    # list recent messages
     messages = group.messages()
 
-    # older messages (and once in existence, newer ones as well) can be obtained easily.
+    # list recent messages from another member
+    direct_messages = member.messages()
+
+    # older and newer messages
     older_messages = messages.older()
     newer_messages = messages.newer()
 
@@ -47,34 +50,28 @@ Get the full documentation on `Read the Docs`_!
     while all_messages.iolder():
       pass
 
-    # post a message to a group
+    # post a message
     group.post('Hello world!')
+    member = members[0]
+    member.post('Hello individual!')
 
     # include an image with the message
     img = groupy.Image.file(open('imagefilepath', 'rb'))
     group.post('Here is the pic you took :-)', img)
 
-    # messages have either text, attachments, or both
+    # inspect messages
     message = messages.newest
     print(message.text)
     for a in message.attachments:
       print(a)
 
-    # ...and can be liked and unliked
+    # like/unlike messages
     message.like()
     message.unlike()
 
     # list the members that liked a message
     for member in message.likes():
       print(member.nickname)
-
-    # list the messages from another member (direct messages)
-    members = group.members()
-    member = members[0]
-    direct_messages = member.messages()
-
-    # post a message to another member (direct message)
-    member.post('Hey are you available today?')
 
     # get information about yourself
     my = groupy.User.get()
@@ -84,6 +81,13 @@ Get the full documentation on `Read the Docs`_!
 
 Version History
 ===============
+
+v0.5.0
+------
+
+- Image attachments support downloading the actual image
+- Modules reorganized
+- Updated documentation
 
 v0.4.0
 ------
