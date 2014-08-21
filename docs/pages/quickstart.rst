@@ -144,6 +144,7 @@ former to retrieve all messages in a group:
     >>> messages = group.messages()
     >>> while messages.iolder():
     ...       pass
+    ... 
     >>> len(messages) == group.message_count
     True
 
@@ -155,7 +156,7 @@ to a group using its :func:`~groupy.object.responses.Recipient.post` method.
     >>> from group import Group
     >>> group = Group.list().first
     >>> group.post('Hello to you')
-    >>> print(group.messages().newest.text)
+    >>> group.messages().newest.text
     'Hello to you'
 
 .. note::

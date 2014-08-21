@@ -30,31 +30,118 @@ Locations
 ^^^^^^^^^
 
 Location attachments are the simplest of all attachment types. Each includes
-a name, a latitude, and a longitude.
+a name, a latitude, and a longitude. Some location attachments also contain a
+``foursqure_venue_id``.
 
 .. code-block:: python
 
-	>>> loc = groupy.Location.create('My house', lat=34, lng=-84.3)
+	>>> from groupy import attachments
+	>>> loc = attachments.Location.create('My house', lat=34, lng=-84.3)
 
-Some location attachments also contain a ``foursqure_venue_id``.
 
 Images
 ^^^^^^
 
 Image attachments are unique in that they do not actually contain the image
-data.
+data. Instead, they specify the URL from which you can obtain the actual image.
+To create a new image from a local file object, use the
+:func:`groupy.object.attachments.Image.file` method.
 
-Emojis
-^^^^^^
+.. code-block:: python
 
-Emojis are relatively undocumented but frequently appear in messages.
+	>>> from groupy import attachments
+	>>> img_a = attachments.Image.file(open(filename, 'rb'))
+	>>> img_a
+	Image(url='http://i.groupme.com/a01b23c45d56e78f90a01b12c3456789')
+
+We can see that the image has been uploaded in exchange for a URL via the
+GroupMe image service.
+
+To fetch the actual image from an image attachment, simply use its
+:func:`groupy.object.attachment.Image.download` method. The image is returned as
+a :class:`PIL.Image.Image`, so saving it to a file is very easy.
+
+.. code-block:: python
+
+	>>> img_f = img_a.download()
+	>>> img_f.save(filename)
+
 
 Mentions
 ^^^^^^^^
 
-Mentions are a new type of attachment and is yet undocumented.
+Mentions are a new type of attachment and have yet to be documented. However,
+they are simple to understand.
+
+Mentions capture the details necessary to highlight "@" mentions of members in
+groups. They contain a list of ``loci`` and an equal-sized list of ``user_ids``.
+Let's find a good example to demonstrate mentions.
+
+.. code-block:: python
+
+	>>> from groupy import Group
+	>>> message = None
+	>>> mention = None
+	>>> for g in Group.list():
+	...   for m in g.messages():
+	...     for a in m.attachments:
+	...       if a.type == 'mentions' and len(a.user_ids) > 1:
+	...         message = m
+	...         mention = a
+	...         break
+	>>> message.text
+	'@Bill hey I saw you with @Zoe Childs at the park!'
+	>>> mention.user_ids
+	['1234567', '5671234']
+	>>> mention.loci
+	[[0, 5], [25, 11]]
+	>>> for uid, locus in zip(mention.user_ids, mention.loci):
+	...   uid, message.text[locus[0]:sum(locus)]
+	...
+	('1234567', '@Bill')
+	('5671234', '@Zoe Childs')
+	
+
+Emojis
+^^^^^^
+
+Emojis are relatively undocumented but frequently appear in messages. More
+documentation will come as more is learned.
 
 Splits
 ^^^^^^
 
-This type of attachment is not only largely undocumented, it is depreciated.
+Although this type of attachment is also undocumented, it is depreciated.
+**Groupy**, however, still supports them due to their presence in older
+messages.
+
+Sending Attachments
+-------------------
+
+To send an attachment along with a message, simply append it to the
+:func:`~groupy.object.responses.Recipient.post` method as another argument.
+
+.. code-block:: python
+
+	>>> from groupy import Group
+	>>> from groupy.attachment import Location
+	>>> loc = Location.create('My house', lat=33, lng=-84)
+	>>> group = Group.list().first
+	>>> group.post("Hey meet me here", loc)
+
+If there are several attachments you'd like to send in a single message, simply
+keep appending them!
+
+.. code-block:: python
+
+	>>> from groupy.attachment import Image
+	>>> img = Image.file('front-door.png')
+	>>> group.post("Hey meet me here", loc, img)
+
+Alternatively, you can collect them into a :class:`tuple` or a :class:`list`.
+
+.. code-block:: python
+
+	>>> attachments = [img, loc]
+	>>> group.post("Hey meet me here", *attachments)
+
