@@ -45,7 +45,7 @@ Images
 Image attachments are unique in that they do not actually contain the image
 data. Instead, they specify the URL from which you can obtain the actual image.
 To create a new image from a local file object, use the
-:func:`groupy.object.attachments.Image.file` method.
+:func:`~groupy.object.attachments.Image.file` method.
 
 .. code-block:: python
 
