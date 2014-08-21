@@ -80,21 +80,21 @@ To create a new image from a local file object, use the
 .. code-block:: python
 
 	>>> from groupy import attachments
-	>>> img_a = attachments.Image.file(open(filename, 'rb'))
-	>>> img_a
+	>>> image_attachment = attachments.Image.file(open(filename, 'rb'))
+	>>> image_attachment
 	Image(url='http://i.groupme.com/a01b23c45d56e78f90a01b12c3456789')
 
 We can see that the image has been uploaded in exchange for a URL via the
 GroupMe image service.
 
 To fetch the actual image from an image attachment, simply use its
-:func:`groupy.object.attachment.Image.download` method. The image is returned as
-a :class:`PIL.Image.Image`, so saving it to a file is very easy.
+:func:`~groupy.object.attachments.Image.download` method. The image is returned
+as a :class:`Pillow Image<PIL.Image.Image>`, so saving it to a file is simple.
 
 .. code-block:: python
 
-	>>> img_f = img_a.download()
-	>>> img_f.save(filename)
+	>>> image_file = image_attachment.download()
+	>>> image_file.save(filename)
 
 
 Mentions
@@ -125,12 +125,23 @@ Let's find a good example to demonstrate mentions.
 	['1234567', '5671234']
 	>>> mention.loci
 	[[0, 5], [25, 11]]
+	
+As you can see, each element in ``loci`` has two integers, the first of which
+indicates the position of the start of the mention in the text, and the second
+of which indicates the length of the mention. The strings in ``user_ids``
+correspond by index to the elements in ``loci``. That means you can use the
+``loci`` to index into the message text to extract the part of the text that
+belongs to the mention, as well as obtain the member mentioned by their
+``user_id``.
+
+.. code-block:: python
+
 	>>> for uid, locus in zip(mention.user_ids, mention.loci):
 	...   uid, message.text[locus[0]:sum(locus)]
 	...
 	('1234567', '@Bill')
 	('5671234', '@Zoe Childs')
-	
+
 
 Emojis
 ^^^^^^
