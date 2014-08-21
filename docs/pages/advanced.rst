@@ -111,8 +111,9 @@ documentation will come as more is learned.
 Splits
 ^^^^^^
 
-Although this type of attachment is also undocumented, it is depreciated.
-**Groupy**, however, still supports them due to their presence in older
+Although this type of attachment is undocumented, it is also depreciated. It was
+part of GroupMe's bill splitting feature that no longer appears in their
+clients. **Groupy**, however, still supports them due to their presence in older
 messages.
 
 Sending Attachments
