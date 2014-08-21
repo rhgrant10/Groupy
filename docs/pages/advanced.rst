@@ -8,20 +8,50 @@ complex aspects of **Groupy**.
 Attachments
 ===========
 
-:class:`~groupy.objects.Message`\ s can contain various types of
-:class:`~groupy.objects.Attachment`\ s. Currently, **Groupy** supports
-the following types of attachments:
+:class:`~groupy.object.responses.Message`\ s can contain various types of
+:class:`~groupy.object.attachments.Attachment`\ s. Currently, **Groupy**
+supports the following types of attachments:
 
-- :class:`~groupy.objects.Image` - for images
-- :class:`~groupy.objects.Location` - for locations
-- :class:`~groupy.objects.Split` - [*]_
-- :class:`~groupy.objects.Emoji` - for emoticons
-- :class:`~groupy.objects.Mentions` - for "@" mentions
+- :class:`~groupy.object.attachments.Image` - for images
+- :class:`~groupy.object.attachments.Location` - for locations
+- :class:`~groupy.object.attachments.Mentions` - for "@" mentions
+- :class:`~groupy.object.attachments.Emoji` - for emoticons
+- :class:`~groupy.object.attachments.Split` [*]_
 
-.. [*] This type of attachment will be depreciated soon.
+.. [*] Split attachments are depreciated.
 
 Each of these classes has a :func:`create` method that accepts arguments
 specific to it's class.
+
+Sending Attachments
+-------------------
+
+To send an attachment along with a message, simply append it to the
+:func:`~groupy.object.responses.Recipient.post` method as another argument.
+
+.. code-block:: python
+
+	>>> from groupy import Group
+	>>> from groupy.attachment import Location
+	>>> loc = Location.create('My house', lat=33, lng=-84)
+	>>> group = Group.list().first
+	>>> group.post("Hey meet me here", loc)
+
+If there are several attachments you'd like to send in a single message, simply
+keep appending them!
+
+.. code-block:: python
+
+	>>> from groupy.attachment import Image
+	>>> img = Image.file('front-door.png')
+	>>> group.post("Hey meet me here", loc, img)
+
+Alternatively, you can collect them into a :class:`tuple` or a :class:`list`.
+
+.. code-block:: python
+
+	>>> attachments = [img, loc]
+	>>> group.post("Hey meet me here", *attachments)
 
 Types
 -----
@@ -45,7 +75,7 @@ Images
 Image attachments are unique in that they do not actually contain the image
 data. Instead, they specify the URL from which you can obtain the actual image.
 To create a new image from a local file object, use the
-:func:`groupy.object.attachments.Image.file` method.
+:func:`~groupy.object.attachments.Image.file` method.
 
 .. code-block:: python
 
@@ -108,41 +138,18 @@ Emojis
 Emojis are relatively undocumented but frequently appear in messages. More
 documentation will come as more is learned.
 
+Emoji attachments have a ``placeholder`` and a ``charmap``. The placeholder is
+a high code-point unicode character designed to mark the location of the emoji
+in the text of the message. The ``charmap`` serves as some sort of translation
+or lookup tool for obtaining the actual emoji.
+
 Splits
 ^^^^^^
 
 Although this type of attachment is undocumented, it is also depreciated. It was
-part of GroupMe's bill splitting feature that no longer appears in their
+part of GroupMe's bill-splitting feature that no longer appears in their
 clients. **Groupy**, however, still supports them due to their presence in older
 messages.
 
-Sending Attachments
--------------------
-
-To send an attachment along with a message, simply append it to the
-:func:`~groupy.object.responses.Recipient.post` method as another argument.
-
-.. code-block:: python
-
-	>>> from groupy import Group
-	>>> from groupy.attachment import Location
-	>>> loc = Location.create('My house', lat=33, lng=-84)
-	>>> group = Group.list().first
-	>>> group.post("Hey meet me here", loc)
-
-If there are several attachments you'd like to send in a single message, simply
-keep appending them!
-
-.. code-block:: python
-
-	>>> from groupy.attachment import Image
-	>>> img = Image.file('front-door.png')
-	>>> group.post("Hey meet me here", loc, img)
-
-Alternatively, you can collect them into a :class:`tuple` or a :class:`list`.
-
-.. code-block:: python
-
-	>>> attachments = [img, loc]
-	>>> group.post("Hey meet me here", *attachments)
+Split attachments have a single attribute: ``token``.
 
