@@ -31,9 +31,11 @@ The most basic operation is listing things.
 
 The object lists are returned as a 
 :class:`~groupy.object.listers.FilterList`\ . These behave just like the
-built-in :class:`list` does with some convenient functionality:
-:obj:`~groupy.object.listers.FilterList.first` and
-:obj:`~groupy.object.listers.FilterList.last`.
+built-in :class:`list` does with some convenient additions. 
+
+You can read more about the types of lists used by **Groupy** in the
+:doc:`advanced` section, but for the remainder of this page, the following truth
+should suffice.
 
 .. code-block:: python
 
@@ -42,55 +44,6 @@ built-in :class:`list` does with some convenient functionality:
     >>> groups.last == groups[-1]
     True
 
-The most useful feature of a  :class:`~groupy.object.listers.FilterList`\ ,
-however, is its :func:`~groupy.object.listers.FilterList.filter` method. It
-parses whatever keyword arguments are passed to it and filters the list such
-that only the items meeting all criteria are included. The keywords correspond
-to object properties, but also indicate how to test the relation to the value
-of the keyword argument. Thus a keyword-value pair such as ``name='Bob'`` would
-keep only those items with a ``name`` property equal to ``"Bob"``, whereas a
-pair like ``age__lt=20`` keeps only those items with an ``age`` property *less
-than* ``20``.
-
-Some simple examples: 
-
-.. code-block:: python
-
-    >>> from groupy import Group
-    >>> groups = Group.list()
-    >>> for g in groups:
-    ...     print(g.name)
-    ...
-    My Family
-    DevTeam #6
-    Friday Night Trivia
-    >>> for g in groups.filter(name__contains='am'):
-    ...     print(g.name)
-    My Family
-    DevTeam #6
-    >>> 
-    >>> members = groups.first.members()
-    >>> for m in members:
-    ...     print(m.nickname)
-    ... 
-    Dan the Man
-    Manuel
-    Fred
-    Dan
-    >>> for m in members.filter(nickname='Dan'):
-    ...     print(m.nickname)
-    ... 
-    Dan
-    >>> for m in members.filter(nickname__contains='Dan'):
-    ...     print(m.nickname)
-    ... 
-    Dan the Man
-    Dan
-    >>> for m in members.filter(nickname__ge='F'):
-    ...     print(m.nickname)
-    ... 
-    Manuel
-    Fred
 
 Groups
 ======
