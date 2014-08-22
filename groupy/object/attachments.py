@@ -118,8 +118,7 @@ class Emoji(Attachment):
     
     :param str placeholder: a high-point/invisible character indicating the
         position of the emoticon
-    :param charmap: a list of lists containing pack_ids and offsets
-    :type charmap: :class:`list`
+    :param list charmap: a list of lists containing pack IDs and offsets
     """
     def __init__(self, placeholder, charmap):
         super().__init__('emoji')
@@ -160,10 +159,8 @@ class Mentions(Attachment):
     
         The length of ``user_ids`` must be equal to the length of ``loci``!
     
-    :param user_ids: a list of user IDs
-    :type user_ids: :class:`list`
-    :param loci: a list of ``(start, length)`` elements
-    :type loci: :class:`list`
+    :param list user_ids: a list of user IDs
+    :param list loci: a list of ``(start, length)`` elements
     """
     def __init__(self, user_ids, loci=None):
         super().__init__('mentions')

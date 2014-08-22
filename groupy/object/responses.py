@@ -86,8 +86,7 @@ class Recipient(ApiResponse):
         always returned, even if it contains only one element.
 
         :param str text: the message text
-        :param attachments: the attachments to include
-        :type attachments: :class:`list`
+        :param list attachments: the attachments to include
         :returns: a list of raw API responses (sorry!)
         :rtype: :class:`list`
         """
@@ -175,9 +174,8 @@ class Group(Recipient):
     def list(cls, former=False):
         """List all of your current or former groups.
 
-        :param former: ``True`` if former groups should be listed, 
+        :param bool former: ``True`` if former groups should be listed, 
             ``False`` (default) lists current groups
-        :type former: :obj:`bool`
         :returns: a list of groups
         :rtype: :class:`~groupy.object.listers.FilterList`
         """
@@ -209,8 +207,7 @@ class Group(Recipient):
         :param str name: the new name of the group
         :param str description: the new description of the group
         :param str image_url: the URL for the new group image
-        :param share: whether to generate a share URL
-        :type share: :obj:`bool`
+        :param bool share: whether to generate a share URL
         """
         endpoint.Groups.update(name=name, description=description,
                           image_url=image_url, share=share)
@@ -231,8 +228,7 @@ class Group(Recipient):
         :class:`~groupy.object.responses.Member` or a :class:`dict` containing 
         ``nickname`` and one of ``email``, ``phone_number``, or ``user_id``.
 
-        :param members: members to add to the group
-        :type members: :class:`list`
+        :param list members: members to add to the group
         :returns: the results ID of the add call
         :rtype: str
         """
@@ -558,14 +554,20 @@ class User(ApiResponse):
     def enable_sms(cls, duration=4, registration_token=None):
         """Enable SMS mode.
 
-        Enabling SMS mode causes GroupMe to send a text message for each
-        message sent to the group.
+        Each client has a unique registration token that allows it to recieve
+        push notifications. Enabling SMS mode causes GroupMe to suppress those
+        push notification and send SMS text messages instead for a number of
+        hours no greater than 48.
 
-        :param int duration: the number of hours for which to send text
-            messages
-        :param str registration_token: the push notification token for
-            for which messages should be suppressed; if omitted, the user
-            will recieve both push notifications as well as text messages
+        .. note::
+
+            If the ``registration_token`` is omitted, no push notifications will
+            be suppressed and the user will recieve *both* text messages *and*
+            push notifications.
+
+        :param int duration: the number of hours for which to send text messages
+        :param str registration_token: the push notification token for which
+            messages should be suppressed
         :returns: ``True`` if successful, ``False`` otherwise
         :rtype: :obj:`bool`
         """
