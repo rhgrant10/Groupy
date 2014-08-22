@@ -329,30 +329,20 @@ class Member(Recipient):
         - ``user_id`` or ``email`` or ``phone_number``
         
         If an identification cannot be created then raise an
-        :exc:`AttributeError`.
+        :exc:`ValueError`.
 
         :param member: either a :class:`~groupy.object.responses.Member` or a
             :class:`dict` with the required keys
         :returns: the identification of member
         :rtype: :class:`dict`
-        :raises AttributeError: if an identication cannot be made
+        :raises ValueError: if an identication cannot be made
         """
-        try:
+        if isinstance(member, cls):
             return member.identification()
-        except AttributeError:
-            try:
-                for id_type in ['user_id', 'email', 'phone_number']:
-                    if id_type in member:
-                        if 'guid' not in member:
-                            member['guid'] = cls._next_guid()
-                        return {
-                            'nickname': member['nickname'],
-                            'id_type': member[id_type],
-                            'guid': member['guid']
-                        }
-            except AttributeError:
-                raise AttributeError('no nickname')
-            raise AttributeError('no user_id, email, or phone_number')
+        elif isinstance(member, dict):
+            m = Member(**member)
+            return m.identification()
+        raise ValueError('no identification could be made')
 
 
 class Message(ApiResponse):
