@@ -86,8 +86,7 @@ class Recipient(ApiResponse):
         always returned, even if it contains only one element.
 
         :param str text: the message text
-        :param attachments: the attachments to include
-        :type attachments: :class:`list`
+        :param list attachments: the attachments to include
         :returns: a list of raw API responses (sorry!)
         :rtype: :class:`list`
         """
@@ -175,9 +174,8 @@ class Group(Recipient):
     def list(cls, former=False):
         """List all of your current or former groups.
 
-        :param former: ``True`` if former groups should be listed, 
+        :param bool former: ``True`` if former groups should be listed, 
             ``False`` (default) lists current groups
-        :type former: :obj:`bool`
         :returns: a list of groups
         :rtype: :class:`~groupy.object.listers.FilterList`
         """
@@ -209,8 +207,7 @@ class Group(Recipient):
         :param str name: the new name of the group
         :param str description: the new description of the group
         :param str image_url: the URL for the new group image
-        :param share: whether to generate a share URL
-        :type share: :obj:`bool`
+        :param bool share: whether to generate a share URL
         """
         endpoint.Groups.update(name=name, description=description,
                           image_url=image_url, share=share)
@@ -231,8 +228,7 @@ class Group(Recipient):
         :class:`~groupy.object.responses.Member` or a :class:`dict` containing 
         ``nickname`` and one of ``email``, ``phone_number``, or ``user_id``.
 
-        :param members: members to add to the group
-        :type members: :class:`list`
+        :param list members: members to add to the group
         :returns: the results ID of the add call
         :rtype: str
         """

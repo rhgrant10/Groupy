@@ -83,12 +83,9 @@ class MessagePager(FilterList):
     """A filterable, extendable page of messages.
 
     :param group: the group from which to page through messages
-    :type group: :class:`Group<groupy.objects.Group>`
-    :param messages: the initial page of messages
-    :type messages: :class:`list`
-    :param backward: ``True`` if the oldest message is at index 0, ``False``
-        otherwise
-    :type backward: :obj:`bool`
+    :type group: :class:`~groupy.object.responses.Group`
+    :param list messages: the initial page of messages
+    :param bool backward: whether the oldest message is at index 0
     """
     def __init__(self, group, messages, backward=False):
         super().__init__(messages)
@@ -116,8 +113,7 @@ class MessagePager(FilterList):
     def prepend(self, messages):
         """Prepend a list of messages to the list.
 
-        :param messages: the messages to prepend
-        :type messages: :class:`list`
+        :param list messages: the messages to prepend
         """
         for each in messages:
             self.insert(0, each)
