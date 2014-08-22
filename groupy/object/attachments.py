@@ -1,3 +1,14 @@
+"""
+.. module:: attachments
+    :platform: Unix, Windows
+    :synopsis: A module containing all attachment classes
+
+.. moduleauthor:: Robert Grant <rhgrant10@gmail.com>
+
+This module contains classes for the different types of attachments.
+
+"""
+
 from ..api import endpoint
 
 import json
