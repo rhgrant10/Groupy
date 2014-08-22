@@ -1,3 +1,15 @@
+"""
+.. module:: responses
+    :platform: Unix, Windows
+    :synopsis: A module containing all response classes
+
+.. moduleauthor:: Robert Grant <rhgrant10@gmail.com>
+
+This module contains classes that encapsulate the information returned in API
+responses.
+
+"""
+
 from ..api import status
 from ..api import errors
 from ..api import endpoint
