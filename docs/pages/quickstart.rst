@@ -172,7 +172,7 @@ can be changed.
     >>> group.name
     'My Family'
     >>> group.image_url
-    'http://i.groupme.com/a01b23c45d56e78f90a01b12c3456789'
+    'http://i.groupme.com/123456789'
     >>> group.description
     'Group of my family members - so we can keep up with each other.'
     >>> group.update(name="My Group of Family Members")
@@ -267,11 +267,11 @@ who posted it. Of course, messages can have text and attachments.
     >>> message.name
     'Kevin'
     >>> message.avatar_url
-    'http://i.groupme.com/a01b23c45d56e78f90a01b12c3456789'
+    'http://i.groupme.com/123456789'
     >>> message.text
     'Hello'
     >>> message.attachments
-    [Image(url='http://i.groupme.com/a01b23c45d56e78f90a01b12c3456789')]
+    [Image(url='http://i.groupme.com/123456789')]
 
 .. note::
 
@@ -395,7 +395,7 @@ that are specific to the group from which the member was listed.
     >>> member.nickname
     'Bill'
     >>> member.avatar_url
-    'http://i.groupme.com/a01b23c45d56e78f90a01b12c3456789'
+    'http://i.groupme.com/123456789'
 
 Members have one more property of interest: ``muted``. This indicates whether
 the member has that group muted.
@@ -468,7 +468,7 @@ It contains your GroupMe profile/account information and settings:
     >>> print(your_info.name)
     Billy Bob <-- the MAN!
     >>> print(your_info.image_url)
-    http://i.groupme.com/a01b23c45d56e78f90a01b12c3456789
+    http://i.groupme.com/123456789
     >>> print(your_info.sms)
     False
     >>> print(your_info.phone_number)

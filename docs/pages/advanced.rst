@@ -20,39 +20,6 @@ supports the following types of attachments:
 
 .. [*] Split attachments are depreciated.
 
-Each of these classes has a :func:`create` method that accepts arguments
-specific to it's class.
-
-Sending Attachments
--------------------
-
-To send an attachment along with a message, simply append it to the
-:func:`~groupy.object.responses.Recipient.post` method as another argument.
-
-.. code-block:: python
-
-	>>> from groupy import Group
-	>>> from groupy.attachment import Location
-	>>> loc = Location.create('My house', lat=33, lng=-84)
-	>>> group = Group.list().first
-	>>> group.post("Hey meet me here", loc)
-
-If there are several attachments you'd like to send in a single message, simply
-keep appending them!
-
-.. code-block:: python
-
-	>>> from groupy.attachment import Image
-	>>> img = Image.file('front-door.png')
-	>>> group.post("Hey meet me here", loc, img)
-
-Alternatively, you can collect them into a :class:`tuple` or a :class:`list`.
-
-.. code-block:: python
-
-	>>> attachments = [img, loc]
-	>>> group.post("Hey meet me here", *attachments)
-
 Types
 -----
 
@@ -66,8 +33,13 @@ a name, a latitude, and a longitude. Some location attachments also contain a
 .. code-block:: python
 
 	>>> from groupy import attachments
-	>>> loc = attachments.Location.create('My house', lat=34, lng=-84.3)
-
+	>>> loc = attachments.Location('My house', lat=34, lng=-84)
+	>>> loc
+	Location('My house', lat=34, lng=-84)
+	>>> loc.name
+	'My house'
+	>>> loc.lat, loc.lng
+	(34, -84)
 
 Images
 ^^^^^^
@@ -82,7 +54,9 @@ To create a new image from a local file object, use the
 	>>> from groupy import attachments
 	>>> image_attachment = attachments.Image.file(open(filename, 'rb'))
 	>>> image_attachment
-	Image(url='http://i.groupme.com/a01b23c45d56e78f90a01b12c3456789')
+	Image(url='http://i.groupme.com/123456789')
+	>>> image_attachment.url
+	'http://i.groupme.com/123456789'
 
 We can see that the image has been uploaded in exchange for a URL via the
 GroupMe image service.
@@ -142,6 +116,15 @@ belongs to the mention, as well as obtain the member mentioned by their
 	('1234567', '@Bill')
 	('5671234', '@Zoe Childs')
 
+To create a mention, simply pass in a :class:`list` of user IDs and an
+equally-sized :class:`list` of loci.
+
+.. code-block:: python
+
+	>>> from groupy.attachments import Mentions
+	>>> Mentions(['1234567', '2345671'], [[0, 4], [5, 3]])
+	Mentions(['1234567', '2345671'])
+
 
 Emojis
 ^^^^^^
@@ -164,3 +147,33 @@ messages.
 
 Split attachments have a single attribute: ``token``.
 
+
+Sending Attachments
+-------------------
+
+To send an attachment along with a message, simply append it to the
+:func:`~groupy.object.responses.Recipient.post` method as another argument.
+
+.. code-block:: python
+
+	>>> from groupy import Group
+	>>> from groupy.attachment import Location
+	>>> loc = Location.create('My house', lat=33, lng=-84)
+	>>> group = Group.list().first
+	>>> group.post("Hey meet me here", loc)
+
+If there are several attachments you'd like to send in a single message, simply
+keep appending them!
+
+.. code-block:: python
+
+	>>> from groupy.attachment import Image
+	>>> img = Image.file('front-door.png')
+	>>> group.post("Hey meet me here", loc, img)
+
+Alternatively, you can collect them into a :class:`tuple` or a :class:`list`.
+
+.. code-block:: python
+
+	>>> attachments = [img, loc]
+	>>> group.post("Hey meet me here", *attachments)
