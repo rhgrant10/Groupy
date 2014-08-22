@@ -554,14 +554,20 @@ class User(ApiResponse):
     def enable_sms(cls, duration=4, registration_token=None):
         """Enable SMS mode.
 
-        Enabling SMS mode causes GroupMe to send a text message for each
-        message sent to the group.
+        Each client has a unique registration token that allows it to recieve
+        push notifications. Enabling SMS mode causes GroupMe to suppress those
+        push notification and send SMS text messages instead for a number of
+        hours no greater than 48.
 
-        :param int duration: the number of hours for which to send text
-            messages
-        :param str registration_token: the push notification token for
-            for which messages should be suppressed; if omitted, the user
-            will recieve both push notifications as well as text messages
+        .. note::
+
+            If the ``registration_token`` is omitted, no push notifications will
+            be suppressed and the user will recieve *both* text messages *and*
+            push notifications.
+
+        :param int duration: the number of hours for which to send text messages
+        :param str registration_token: the push notification token for which
+            messages should be suppressed
         :returns: ``True`` if successful, ``False`` otherwise
         :rtype: :obj:`bool`
         """
