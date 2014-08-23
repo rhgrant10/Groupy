@@ -211,6 +211,15 @@ class Group(Recipient):
         return cls(**endpoint.Groups.create(name=name, description=description,
                                             image_url=image_url, share=share))
 
+    def destroy(self):
+        """Disband (destroy) a group that you created.
+        """
+        try:
+            endpoint.Groups.destroy(self.group_id)
+        except errors.InvalidResponseError as e:
+            return e.args[0].status_code == status.OK
+        return True
+
     def refresh(self):
         """Refresh the group information from the API.
         """
