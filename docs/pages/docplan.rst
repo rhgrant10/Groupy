@@ -17,18 +17,20 @@ UserListMembers
 
 .. code-block:: python
 
-	>>> from groupy import Member
+	>>> from groupy import Member, Group
 	>>> Member.list()
 
 UserListBots
 ------------
+
+Currently: 
 
 .. code-block:: python
 
 	>>> from groupy import Bot
 	>>> Bot.list()
 
-*UserCreateGroup*
+UserCreateGroup
 -----------------
 
 .. code-block:: python
@@ -157,19 +159,113 @@ UserRemoveGroupMember
 
 
 UserPostGroupMessage
+--------------------
+
+.. code-block:: python
+
+	>>> from groupy import Group
+	>>> group = Group.list().first
+	>>> group.post("Hello")
+
 UserPostMemberMessage
+---------------------
+
+.. code-block:: python
+
+	>>> from groupy import Member
+	>>> member = Member.list().first
+	>>> member.post("Hello")
 
 UserLikeMessage
+---------------
+
+.. code-block:: python
+
+	>>> from groupy import Group
+	>>> group = Group.list().first
+	>>> message = group.messages().newest
+	>>> message.like()
+
 UserUnlikeMessage
+-----------------
+
+.. code-block:: python
+
+	>>> from groupy import Group
+	>>> group = Group.list().first
+	>>> message = group.messages().newest
+	>>> message.unlike()
 
 UserGetUser
+-----------
+
+.. code-block:: python
+
+	>>> from groupy import User
+	>>> me = User.get()
+
 UserEnableSms
+-------------
+
+.. code-block:: python
+
+	>>> from groupy import User
+	>>> User.enable_sms(duration=4, registration_token='TOKEN')
+
 UserDisableSms
+--------------
+
+.. code-block:: python
+
+	>>> from groupy import User
+	>>> User.disable_sms()
 
 UserCreateBot
+-------------
+
+Currently: 
+
+.. code-block:: python
+
+	>>> from groupy import Bot, Group
+	>>> group = Group.list().first
+	>>> bot = Bot.create(name='name', group)
+
+Eventually: 
+
+.. code-block:: python
+
+	>>> from groupy import Group
+	>>> group = Group.list().first
+	>>> bot = group.create_bot(name='name')
+
 UserUpdateBot
+-------------
+
+.. code-block:: python
+
+	>>> from groupy import Bot
+	>>> bot = Bot.list().first
+	>>> bot.update(name='name', ...)
+
 UserDestroyBot
+--------------
+
+.. code-block:: python
+
+	>>> from groupy import Bot
+	>>> bot = Bot.list().first
+	>>> bot.destroy()
+	>>> del bot
+
 BotPostMessage
+--------------
+
+.. code-block:: python
+
+	>>> from groupy import Bot
+	>>> bot = Bot.list().first
+	>>> bot.post("Hello")
 
 
 Advanced Usage
