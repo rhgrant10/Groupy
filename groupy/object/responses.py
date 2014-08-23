@@ -144,7 +144,7 @@ class Group(Recipient):
         self.created_at = datetime.fromtimestamp(kwargs.get('created_at'))
         self.updated_at = datetime.fromtimestamp(kwargs.get('updated_at'))
         ca = messages.get('last_message_created_at')
-        if ca >= 0:
+        if ca is not None and ca >= 0:
             self.last_message_created_at = datetime.fromtimestamp(ca)
             self.last_message_id = messages.get('last_message_id')
         else:
@@ -195,6 +195,21 @@ class Group(Recipient):
             except errors.InvalidResponseError:
                 next_groups = None
         return FilterList(Group(**g) for g in groups)
+
+
+    @classmethod
+    def create(cls, name, description=None, image_url=None, share=True):
+        """Create a new group.
+
+        :param str name: the group name
+        :param str description: the group description
+        :param str image_url: the GroupMe image service URL for a group avatar
+        :param bool share: whether to generate a join link
+        :returns: the newly created group
+        :rtype: :class:`~groupy.object.responses.Group`
+        """
+        return cls(**endpoint.Groups.create(name=name, description=description,
+                                            image_url=image_url, share=share))
 
     def refresh(self):
         """Refresh the group information from the API.
