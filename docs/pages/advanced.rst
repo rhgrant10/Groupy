@@ -9,7 +9,7 @@ Filter Lists
 ============
 
 :class:`~groupy.object.listers.FilterList`\ s are exactly like the built-in
-:class:`list` but with some convienient additions.
+:class:`list` but with some convenient additions.
 
 ``first`` and ``last``
 ----------------------

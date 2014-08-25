@@ -367,7 +367,7 @@ class Member(Recipient):
             :class:`dict` with the required keys
         :returns: the identification of member
         :rtype: :class:`dict`
-        :raises ValueError: if an identication cannot be made
+        :raises ValueError: if an identification cannot be made
         """
         if isinstance(member, cls):
             return member.identification()

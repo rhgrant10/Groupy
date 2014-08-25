@@ -56,7 +56,7 @@ class Image(Attachment):
     
         Use the direct initializer *if and only if* the image already has a
         known GroupMe image service URL. Otherwise, use the
-        :func:`~groupy.object.attachments.Image.create` method.
+        :func:`~groupy.object.attachments.Image.file` method.
     
     :param str url: the URL at which the image can be fetched from the GroupMe
         image service
@@ -82,6 +82,11 @@ class Image(Attachment):
         return cls(endpoint.Images.create(image)['url'])
         
     def download(self):
+        """Download the image data of the image attachment.
+        
+        :returns: the actual image the image attachment references
+        :rtype: :class:`PIL.Image.Image`
+        """
         return endpoint.Images.download(self.url)
 
 
@@ -149,7 +154,7 @@ class Split(Attachment):
 class Mentions(Attachment):
     """An attachment that specifies "@" mentions.
     
-    Mentions are a new addition to the types of attachemnts. Each contains two
+    Mentions are a new addition to the types of attachments. Each contains two
     parallel lists: ``user_ids`` and ``loci``. The elements in ``loci`` specify
     the start index and length of the mention, while the elements in
     ``user_ids`` specify by user_id which user was mentioned in the
