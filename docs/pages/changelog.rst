@@ -1,0 +1,78 @@
+==========
+Change Log
+==========
+
+v0.5.1 (August 25, 2014)
+========================
+
+*Groups*
+
+- Added a classmethod for creating a new group
+- Added an instance method for destorying a group
+
+*Members*
+
+- Fixed member identification on dictionaries
+
+*User*
+
+- Fixed the enable/disable SMS methods (now classmethods as they should be)
+
+*Documentation*
+
+- Added some module docstrings
+- Added API docs for all attachment classes
+- Added docs for split attachments
+- Moved FilterList docs into the Advanced Usage section
+- Rewrote API docs for enabling SMS mode
+- Fixed bad sphinx references
+- Fixed typos
+- Updated feature list
+- Added miscellanous sections to the README
+
+v0.5.0 (August 20, 2014)
+========================
+
+- Added support for downloaded the image of an image attachment
+- Reorganized modules and project structure
+- Updated documentation
+
+v0.4.0 (August 18, 2014)
+========================
+
+- Added ability to list all known members
+- Re-wrote attachemnts classes
+
+v0.3.1 (August 14, 2014)
+========================
+
+- Fixed bug when adding members to a group
+- Many additions to the documentation
+
+v0.3.0 (August 12, 2014)
+========================
+
+- Added post and messages methods to members
+- Added after_id parameter for direct messages
+- Fixed liking and unliking direct messages
+- Fixed listing former groups
+- Fixed group lists being limited to a max of 500 items
+- Documentation now available on `Read the Docs`_!
+
+v0.2.0 (August 11, 2014)
+========================
+
+- Added MessagePager class for returning lists of messages
+
+v0.1.3 (August 10, 2014)
+========================
+
+- Added attachment class
+- Added basic documentation
+- Fixed the automatic splitting of long texts
+- Fixed invalid response error issue
+
+v0.1.0 (August 9, 2014)
+=======================
+
+- Initial release

@@ -13,127 +13,19 @@ Installation
 4) Paste your token into ``~/.groupy.key``.
 5) Copy ``Groupy/groupy`` into your package directory for ``Python3``.
 
-Usage
-=====
+Help
+====
 
-Get the full documentation on `Read the Docs`_!
+Read the `full documentation`_ for help using **Groupy**.
 
-.. code-block:: python
+.. _full documentation: http://groupy.readthedocs.org/en/latest/
 
-    import groupy
+Contribution Guidlines
+======================
 
-    # list groups
-    groups = groupy.Group.list()
-    former_groups = groupy.Group.list(former=True)
+Please feel free to help! You can...
 
-    # list group members
-    group = groups[0]
-    members = group.members()
-    
-    # add and remove members from a group
-    group2 = groups[1]
-    group2.add(members[0])
-    group2.remove(members[0])
-
-    # list recent messages
-    messages = group.messages()
-
-    # list recent messages from another member
-    direct_messages = member.messages()
-
-    # older and newer messages
-    older_messages = messages.older()
-    newer_messages = messages.newer()
-
-    # collect all messages from a group
-    all_messages = group.messages()
-    while all_messages.iolder():
-      pass
-
-    # post a message
-    group.post('Hello world!')
-    member = members[0]
-    member.post('Hello individual!')
-
-    # include an image with the message
-    img = groupy.Image.file(open('imagefilepath', 'rb'))
-    group.post('Here is the pic you took :-)', img)
-
-    # inspect messages
-    message = messages.newest
-    print(message.text)
-    for a in message.attachments:
-      print(a)
-
-    # like/unlike messages
-    message.like()
-    message.unlike()
-
-    # list the members that liked a message
-    for member in message.likes():
-      print(member.nickname)
-
-    # get information about yourself
-    my = groupy.User.get()
-    print(my.nickname)
-    print(my.user_id)
-    print(my.email)
-
-Version History
-===============
-
-v0.5.0
-------
-
-- Image attachments support downloading the actual image
-- Modules reorganized
-- Updated documentation
-
-v0.4.0
-------
-
-- All known members can now be listed directly
-- Re-wrote attachemnts classes
-
-v0.3.1
-------
-
-- Fixed bug when adding members to a group
-- Many additions to the docs
-
-v0.3.0
-------
-
-- Liking/unliking works on direct messages
-- Member instances can send and recieve direct messages
-- Listing former groups now works correctly
-- Listing groups and former groups is no longer limited to the first 500
-- The direct message API now accepts the ``after_id`` parameter
-- Documentation now on `Read the Docs`_!
-
-v0.2.0
-------
-
-- Messages are returned in a message pager
-
-v0.1.3
-------
-
-- Added class for representing a message attachment
-- Fixed the automatic splitting of long texts
-
-v0.1.2
-------
-
-- Fixed ``InvalidResponseError`` bug
-- Updated documentation
-
-v0.1.1
-------
-- Added basic documentation
-
-v0.1.0
-------
-- Initial release
-
-.. _Read the Docs: http://groupy.readthedocs.org/en/latest/
+- submit new issues
+- fix bugs and submit a pull request
+- suggest new features
+- implement planned features
