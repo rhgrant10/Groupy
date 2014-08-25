@@ -36,19 +36,43 @@ to get done!
 Features
 --------
 
+Groups
+^^^^^^
+
+- Create, update, and destroy your own groups
 - List and filter your current and former groups
-- Create, destroy, and update your groups
-- Add members to and remove members from groups
-- List and filter messages from groups and members
-- Post new messages to groups
-- Send direct messages to members
-- List and filter the members of a group
+- Add and remove members from your current groups
+- List and filter group members
+- List and filter group messages
+
+Members
+^^^^^^^
+
+- List and filter all known members
+- List and filter direct messages
+- Post direct messages to members
+
+Mesages
+^^^^^^^
+
+- Collect all messages from a group or member
 - Like and unlike messages (even direct messages!)
+- List and filter members who liked a message
+- Inspect and create attachments
+
+Bots
+^^^^
+
 - List and filter your bots
 - Use your bots to post messages
 - Create, update, and destroy bots
+
+Users
+^^^^^
+
 - Get your user information
 - Enable and disable SMS mode
+
 
 Table of Contents
 -----------------
