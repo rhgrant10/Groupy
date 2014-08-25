@@ -25,8 +25,7 @@ class Endpoint:
         :param str path: a suffix for the final URL. If *args* are present,
             this should be a python format string pertaining to the given
             *args*.
-        :param args: a list of arguments for the format string *path*.
-        :type args: :class:`list`
+        :param list args: a list of arguments for the format string *path*.
         :returns: a complete URL
         :rtype: str
         """
@@ -99,9 +98,7 @@ class Groups(Endpoint):
 
         :param int page: the page of groups to return
         :param int per_page: the number of groups in the page
-        :param former: ``True`` if former groups should be listed instead of
-            current groups, ``False`` otherwise
-        :type former: :obj:`bool`
+        :param bool former: whether to list former groups instead
         :returns: a list of groups
         :rtype: :class:`list`
         """
@@ -122,9 +119,7 @@ class Groups(Endpoint):
         :param str name: the name of the new group
         :param str description: the description of the new group
         :param str image_url: the group avatar image as a GroupMe image URL
-        :param share: ``True`` if a link to join should be generated, ``False``
-            otherwise
-        :type share: :obj:`bool`
+        :param bool share: whether to generate a join link for the group
         :returns: the new group
         :rtype: :class:`dict`
         """
@@ -147,9 +142,7 @@ class Groups(Endpoint):
         :param str group_id: the ID of the group to update
         :param str name: the new name of the group
         :param str description: the new description of the group
-        :param share: True if a share link should be generated, False
-            otherwise
-        :type share: :obj:`bool`
+        :param bool share: whether to generate a join link for the group
         :param str image_url: the GroupMe image URL for the new group avatar.
         :returns: the modified group
         :rtype: :class:`dict`
@@ -195,9 +188,8 @@ class Members(Endpoint):
 
         :param str group_id: the ID of the group to which the members should
             be added
-        :param members: the members to add.
-        :type members: :class:`list`
-        :returns: the ``results_id`` for this request
+        :param list members: the members to add.
+        :returns: the results ID for this request
         :rtype: :class:`dict`
         """
         r = requests.post(
@@ -212,7 +204,7 @@ class Members(Endpoint):
 
         :param str group_id: the ID of the group to which the add call was made
         :param str result_id: the GUID returned by the add call
-        :returns: a list of successfully added members
+        :returns: the successfully added members
         :rtype: :class:`list`
         """
         r = requests.get(
@@ -297,8 +289,7 @@ class Messages(Endpoint):
 
         :param str group_id: the ID of the group in which to create the message
         :param str text: the text of the message
-        :param attachments: a list of attachments to include
-        :type attachments: :class:`list`
+        :param list attachments: a list of attachments to include
         :returns: the created message
         :rtype: :class:`dict`
         """
@@ -348,8 +339,7 @@ class DirectMessages(Endpoint):
 
         :param str recipient_id: the ID of the recipient
         :param str text: the message text
-        :param attachments: a list of attachments to include
-        :type attachments: :class:`list`
+        :param list attachments: a list of attachments to include
         :returns: the created direct message
         :rtype: :class:`dict`
         """

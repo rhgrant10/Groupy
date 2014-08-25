@@ -1,3 +1,15 @@
+"""
+.. module:: responses
+    :platform: Unix, Windows
+    :synopsis: A module containing all response classes
+
+.. moduleauthor:: Robert Grant <rhgrant10@gmail.com>
+
+This module contains classes that encapsulate the information returned in API
+responses.
+
+"""
+
 from ..api import status
 from ..api import errors
 from ..api import endpoint
@@ -74,8 +86,7 @@ class Recipient(ApiResponse):
         always returned, even if it contains only one element.
 
         :param str text: the message text
-        :param attachments: the attachments to include
-        :type attachments: :class:`list`
+        :param list attachments: the attachments to include
         :returns: a list of raw API responses (sorry!)
         :rtype: :class:`list`
         """
@@ -133,7 +144,7 @@ class Group(Recipient):
         self.created_at = datetime.fromtimestamp(kwargs.get('created_at'))
         self.updated_at = datetime.fromtimestamp(kwargs.get('updated_at'))
         ca = messages.get('last_message_created_at')
-        if ca >= 0:
+        if ca is not None and ca >= 0:
             self.last_message_created_at = datetime.fromtimestamp(ca)
             self.last_message_id = messages.get('last_message_id')
         else:
@@ -163,9 +174,8 @@ class Group(Recipient):
     def list(cls, former=False):
         """List all of your current or former groups.
 
-        :param former: ``True`` if former groups should be listed, 
+        :param bool former: ``True`` if former groups should be listed, 
             ``False`` (default) lists current groups
-        :type former: :obj:`bool`
         :returns: a list of groups
         :rtype: :class:`~groupy.object.listers.FilterList`
         """
@@ -186,6 +196,30 @@ class Group(Recipient):
                 next_groups = None
         return FilterList(Group(**g) for g in groups)
 
+
+    @classmethod
+    def create(cls, name, description=None, image_url=None, share=True):
+        """Create a new group.
+
+        :param str name: the group name
+        :param str description: the group description
+        :param str image_url: the GroupMe image service URL for a group avatar
+        :param bool share: whether to generate a join link
+        :returns: the newly created group
+        :rtype: :class:`~groupy.object.responses.Group`
+        """
+        return cls(**endpoint.Groups.create(name=name, description=description,
+                                            image_url=image_url, share=share))
+
+    def destroy(self):
+        """Disband (destroy) a group that you created.
+        """
+        try:
+            endpoint.Groups.destroy(self.group_id)
+        except errors.InvalidResponseError as e:
+            return e.args[0].status_code == status.OK
+        return True
+
     def refresh(self):
         """Refresh the group information from the API.
         """
@@ -197,8 +231,7 @@ class Group(Recipient):
         :param str name: the new name of the group
         :param str description: the new description of the group
         :param str image_url: the URL for the new group image
-        :param share: whether to generate a share URL
-        :type share: :obj:`bool`
+        :param bool share: whether to generate a share URL
         """
         endpoint.Groups.update(name=name, description=description,
                           image_url=image_url, share=share)
@@ -219,8 +252,7 @@ class Group(Recipient):
         :class:`~groupy.object.responses.Member` or a :class:`dict` containing 
         ``nickname`` and one of ``email``, ``phone_number``, or ``user_id``.
 
-        :param members: members to add to the group
-        :type members: :class:`list`
+        :param list members: members to add to the group
         :returns: the results ID of the add call
         :rtype: str
         """
@@ -329,30 +361,20 @@ class Member(Recipient):
         - ``user_id`` or ``email`` or ``phone_number``
         
         If an identification cannot be created then raise an
-        :exc:`AttributeError`.
+        :exc:`ValueError`.
 
         :param member: either a :class:`~groupy.object.responses.Member` or a
             :class:`dict` with the required keys
         :returns: the identification of member
         :rtype: :class:`dict`
-        :raises AttributeError: if an identication cannot be made
+        :raises ValueError: if an identification cannot be made
         """
-        try:
+        if isinstance(member, cls):
             return member.identification()
-        except AttributeError:
-            try:
-                for id_type in ['user_id', 'email', 'phone_number']:
-                    if id_type in member:
-                        if 'guid' not in member:
-                            member['guid'] = cls._next_guid()
-                        return {
-                            'nickname': member['nickname'],
-                            'id_type': member[id_type],
-                            'guid': member['guid']
-                        }
-            except AttributeError:
-                raise AttributeError('no nickname')
-            raise AttributeError('no user_id, email, or phone_number')
+        elif isinstance(member, dict):
+            m = Member(**member)
+            return m.identification()
+        raise ValueError('no identification could be made')
 
 
 class Message(ApiResponse):
@@ -556,14 +578,20 @@ class User(ApiResponse):
     def enable_sms(cls, duration=4, registration_token=None):
         """Enable SMS mode.
 
-        Enabling SMS mode causes GroupMe to send a text message for each
-        message sent to the group.
+        Each client has a unique registration token that allows it to recieve
+        push notifications. Enabling SMS mode causes GroupMe to suppress those
+        push notification and send SMS text messages instead for a number of
+        hours no greater than 48.
 
-        :param int duration: the number of hours for which to send text
-            messages
-        :param str registration_token: the push notification token for
-            for which messages should be suppressed; if omitted, the user
-            will recieve both push notifications as well as text messages
+        .. note::
+
+            If the ``registration_token`` is omitted, no push notifications will
+            be suppressed and the user will recieve *both* text messages *and*
+            push notifications.
+
+        :param int duration: the number of hours for which to send text messages
+        :param str registration_token: the push notification token for which
+            messages should be suppressed
         :returns: ``True`` if successful, ``False`` otherwise
         :rtype: :obj:`bool`
         """

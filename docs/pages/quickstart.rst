@@ -31,9 +31,11 @@ The most basic operation is listing things.
 
 The object lists are returned as a 
 :class:`~groupy.object.listers.FilterList`\ . These behave just like the
-built-in :class:`list` does with some convenient functionality:
-:obj:`~groupy.object.listers.FilterList.first` and
-:obj:`~groupy.object.listers.FilterList.last`.
+built-in :class:`list` does with some convenient additions. 
+
+You can read more about the types of lists used by **Groupy** in the
+:doc:`advanced` section, but for the remainder of this page, the following truth
+should suffice.
 
 .. code-block:: python
 
@@ -42,55 +44,6 @@ built-in :class:`list` does with some convenient functionality:
     >>> groups.last == groups[-1]
     True
 
-The most useful feature of a  :class:`~groupy.object.listers.FilterList`\ ,
-however, is its :func:`~groupy.object.listers.FilterList.filter` method. It
-parses whatever keyword arguments are passed to it and filters the list such
-that only the items meeting all criteria are included. The keywords correspond
-to object properties, but also indicate how to test the relation to the value
-of the keyword argument. Thus a keyword-value pair such as ``name='Bob'`` would
-keep only those items with a ``name`` property equal to ``"Bob"``, whereas a
-pair like ``age__lt=20`` keeps only those items with an ``age`` property *less
-than* ``20``.
-
-Some simple examples: 
-
-.. code-block:: python
-
-    >>> from groupy import Group
-    >>> groups = Group.list()
-    >>> for g in groups:
-    ...     print(g.name)
-    ...
-    My Family
-    DevTeam #6
-    Friday Night Trivia
-    >>> for g in groups.filter(name__contains='am'):
-    ...     print(g.name)
-    My Family
-    DevTeam #6
-    >>> 
-    >>> members = groups.first.members()
-    >>> for m in members:
-    ...     print(m.nickname)
-    ... 
-    Dan the Man
-    Manuel
-    Fred
-    Dan
-    >>> for m in members.filter(nickname='Dan'):
-    ...     print(m.nickname)
-    ... 
-    Dan
-    >>> for m in members.filter(nickname__contains='Dan'):
-    ...     print(m.nickname)
-    ... 
-    Dan the Man
-    Dan
-    >>> for m in members.filter(nickname__ge='F'):
-    ...     print(m.nickname)
-    ... 
-    Manuel
-    Fred
 
 Groups
 ======
@@ -105,7 +58,7 @@ From a :class:`~groupy.object.responses.Group`, you can list its
     >>> groups = Group.list()
     >>> group = groups.first
     >>> messages = group.messages()
-    >>> members = group.memers()
+    >>> members = group.members()
 
 A group returns all of its members in a single list. So determining the number
 of members in a group should be a familiar task.
@@ -144,6 +97,7 @@ former to retrieve all messages in a group:
     >>> messages = group.messages()
     >>> while messages.iolder():
     ...       pass
+    ... 
     >>> len(messages) == group.message_count
     True
 
@@ -155,7 +109,7 @@ to a group using its :func:`~groupy.object.responses.Recipient.post` method.
     >>> from group import Group
     >>> group = Group.list().first
     >>> group.post('Hello to you')
-    >>> print(group.messages().newest.text)
+    >>> group.messages().newest.text
     'Hello to you'
 
 .. note::
@@ -171,7 +125,7 @@ can be changed.
     >>> group.name
     'My Family'
     >>> group.image_url
-    'http://i.groupme.com/a01b23c45d56e78f90a01b12c3456789'
+    'http://i.groupme.com/123456789'
     >>> group.description
     'Group of my family members - so we can keep up with each other.'
     >>> group.update(name="My Group of Family Members")
@@ -207,8 +161,8 @@ same way as other group information.
 
     The ``SHARE_TOKEN`` is specific to each group's share link.
 
-The remainder of a :class:`~groupy.object.responses.Group`\ s aattributes cannot
-be changed. Some more important ones are shown below.
+The remainder of a :class:`~groupy.object.responses.Group`\ s attributes cannot
+be changed. Some of the more important attributes are shown below.
 
 .. code-block:: python
 
@@ -252,51 +206,52 @@ To list the messages from a member, use a member's
     >>> messages = member.messages()
 
 Messages have several properties. Let's look at a few of them. Messages have a
-timestamp indicating when the message was created.
+timestamp indicating when the message was created as a
+:class:`datetime.datetime` instance, as well as information about the member
+who posted it. Of course, messages can have text and attachments. 
 
 .. code-block:: python
 
     >>> message = messages.newest
-    >>> message.created_at
+    >>> print(message.created_at)
     2014-4-29 12:19:05
-
-As with other API objects, timestamp data is returned as 
-:class:`datetime.datetime` instances.
-
-Messages also contain information about the member who posted it.
-
     >>> message.user_id
     '0123456789'
     >>> message.name
     'Kevin'
     >>> message.avatar_url
-    'http://i.groupme.com/a01b23c45d56e78f90a01b12c3456789'
-
-Of course, messages have text and attachments. A message may or may not have
-text or attachments, but every message must have one or the other.
-
+    'http://i.groupme.com/123456789'
     >>> message.text
     'Hello'
     >>> message.attachments
-    [Image(url='http://i.groupme.com/a01b23c45d56e78f90a01b12c3456789')]
+    [Image(url='http://i.groupme.com/123456789')]
+
+.. note::
+
+    Not every message will have text and not every message will have
+    attachments but every message must have one or the other.
 
 .. note::
 
     Although the majority of messages will have just one attachment, there is
-    no limit on the number of attachments. In fact, despite most clients being
-    incapable of displaying them, the API doesn't even limit the number of each
-    kind of attachment. For example, a single message might have two images,
-    three locations, and one emoji.
+    no limit on the number of attachments. In fact, despite that most clients
+    are incapable of displaying more than one of each type of attachment, the
+    API doesn't limit the types of attachments in any way. For example, a
+    single message might have two images, three locations, and one emoji, but
+    it's not likely that any client would show them all or handle the message
+    without error.
 
 There are multiple types of messages. System messages are messages that are not
 sent by a member, but generated by member actions. Many things generate system
-messages, including member changes, group updates (name, avatar, etc.), member
-changes (nickname, avatar, etc.), and changing the topic.
+messages, including membership changes (entering/leaving, adding/removing),
+group updates (name, avatar, etc.), and member updates (nickname, avatar,
+etc.), and changing the topic.
 
 Additionally there are group messages and direct messages. Group messages are
 messages in a group, whereas direct messages are messages between two members.
 
-Each message has a few properties that can be used to differentiate the types.
+Each message has a few properties that can be used to differentiate among the
+types.
 
     >>> message.group_id
     '1234567890'
@@ -393,7 +348,7 @@ that are specific to the group from which the member was listed.
     >>> member.nickname
     'Bill'
     >>> member.avatar_url
-    'http://i.groupme.com/a01b23c45d56e78f90a01b12c3456789'
+    'http://i.groupme.com/123456789'
 
 Members have one more property of interest: ``muted``. This indicates whether
 the member has that group muted.
@@ -466,7 +421,7 @@ It contains your GroupMe profile/account information and settings:
     >>> print(your_info.name)
     Billy Bob <-- the MAN!
     >>> print(your_info.image_url)
-    http://i.groupme.com/a01b23c45d56e78f90a01b12c3456789
+    http://i.groupme.com/123456789
     >>> print(your_info.sms)
     False
     >>> print(your_info.phone_number)
@@ -511,7 +466,7 @@ with a specific group.
     >>> bot = Bot.create('R2D2', group)
 
 ``bot`` is now the newly created bot and is ready to be used. If you want, you
-can also specify a callback URL *(recommened)*, as well as an image URL to be
+can also specify a callback URL *(recommended)*, as well as an image URL to be
 used for the bot's avatar.
 
 Just about the only thing a bot can do is post a message to a group. **Groupy**
