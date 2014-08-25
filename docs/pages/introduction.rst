@@ -56,8 +56,8 @@ Members
 - List and filter direct messages
 - Post direct messages to members
 
-Mesages
-^^^^^^^
+Messages
+^^^^^^^^
 
 - Collect all messages from a group or member
 - Like and unlike messages (even direct messages!)

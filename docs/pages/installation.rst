@@ -27,10 +27,10 @@ Lastly, ensure you're running Python >= 3! Now you're ready to install Groupy!
 .. _GroupMe account: http://groupme.com
 .. _developer portal: https://dev.groupme.com/session/new
 
-Installing
-==========
+Instructions
+============
 
-Below are instructions for various ways of installating.
+Below are instructions for various ways of performing installation.
 
 Using ``pip``
 -------------
@@ -102,7 +102,7 @@ encountering problems after installing.
 *It says no such package when I import groupy...*
 
     Check whether you copied the ``groupy`` package into the correct python
-    pacakge directory. It must be a directory on your ``sys.path``.
+    package directory. It must be a directory on your ``sys.path``.
 
 *I get an unauthorized error when I try to do anything...*
 

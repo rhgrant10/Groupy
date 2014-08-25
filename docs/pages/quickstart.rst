@@ -58,7 +58,7 @@ From a :class:`~groupy.object.responses.Group`, you can list its
     >>> groups = Group.list()
     >>> group = groups.first
     >>> messages = group.messages()
-    >>> members = group.memers()
+    >>> members = group.members()
 
 A group returns all of its members in a single list. So determining the number
 of members in a group should be a familiar task.
@@ -161,8 +161,8 @@ same way as other group information.
 
     The ``SHARE_TOKEN`` is specific to each group's share link.
 
-The remainder of a :class:`~groupy.object.responses.Group`\ s aattributes cannot
-be changed. Some more important ones are shown below.
+The remainder of a :class:`~groupy.object.responses.Group`\ s attributes cannot
+be changed. Some of the more important attributes are shown below.
 
 .. code-block:: python
 
@@ -466,7 +466,7 @@ with a specific group.
     >>> bot = Bot.create('R2D2', group)
 
 ``bot`` is now the newly created bot and is ready to be used. If you want, you
-can also specify a callback URL *(recommened)*, as well as an image URL to be
+can also specify a callback URL *(recommended)*, as well as an image URL to be
 used for the bot's avatar.
 
 Just about the only thing a bot can do is post a message to a group. **Groupy**

@@ -7,8 +7,8 @@ v0.5.1 (August 25, 2014)
 
 *Groups*
 
-- Added a classmethod for creating a new group
-- Added an instance method for destorying a group
+- Added a class method for creating a new group
+- Added an instance method for destroying a group
 
 *Members*
 
@@ -16,7 +16,7 @@ v0.5.1 (August 25, 2014)
 
 *User*
 
-- Fixed the enable/disable SMS methods (now classmethods as they should be)
+- Fixed the enable/disable SMS methods (now class methods as they should be)
 
 *Documentation*
 
@@ -27,8 +27,8 @@ v0.5.1 (August 25, 2014)
 - Rewrote API docs for enabling SMS mode
 - Fixed bad sphinx references
 - Fixed typos
+- Added miscellaneous sections to the README
 - Updated feature list
-- Added miscellanous sections to the README
 
 v0.5.0 (August 20, 2014)
 ========================
@@ -41,7 +41,7 @@ v0.4.0 (August 18, 2014)
 ========================
 
 - Added ability to list all known members
-- Re-wrote attachemnts classes
+- Re-wrote attachments classes
 
 v0.3.1 (August 14, 2014)
 ========================
@@ -76,3 +76,5 @@ v0.1.0 (August 9, 2014)
 =======================
 
 - Initial release
+
+.. _Read the Docs: http://groupy.readthedocs.org/en/latest
