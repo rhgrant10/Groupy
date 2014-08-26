@@ -479,6 +479,26 @@ class Message(ApiResponse):
                 elif i == self.recipient_id:
                     liked.append(self._recipient)
         return FilterList(liked)
+        
+    def is_from_me(self):
+        """Return ``True`` if the message was sent by you.
+        """
+        return self.user_id == self._user.user_id
+        
+    def is_liked_by_me(self):
+        """Return ``True`` if the message was liked by you.
+        """
+        return self._user.user_id in self.favorited_by
+        
+    def metions_me(self):
+        """Return ``True`` if the message "@" mentions you.
+        """
+        for a in self.attachments:
+            if a.type == 'mentions' and self._user.user_id in a.user_ids:
+                return True
+        return False
+
+    
 
 
 class Bot(ApiResponse):
