@@ -412,6 +412,18 @@ class Message(ApiResponse):
             participants = [self._user.user_id, recipient.user_id]
             self._conversation_id = '+'.join(sorted(participants))
 
+    @property
+    def recipient(self):
+        """Return the source of the message.
+        
+        If the message is a direct message, this returns a member. Otherwise,
+        it returns a group.
+        
+        :returns: the source of the message
+        :rtype: :class:`~groupy.object.responses.Recipient`
+        """
+        return self._recipient
+    
     def __repr__(self):
         msg = "{}: {}".format(self.name, self.text or "")
         if self.attachments:
