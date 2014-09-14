@@ -412,6 +412,18 @@ class Message(ApiResponse):
             participants = [self._user.user_id, recipient.user_id]
             self._conversation_id = '+'.join(sorted(participants))
 
+    @property
+    def recipient(self):
+        """Return the source of the message.
+        
+        If the message is a direct message, this returns a member. Otherwise,
+        it returns a group.
+        
+        :returns: the source of the message
+        :rtype: :class:`~groupy.object.responses.Recipient`
+        """
+        return self._recipient
+    
     def __repr__(self):
         msg = "{}: {}".format(self.name, self.text or "")
         if self.attachments:
@@ -422,7 +434,7 @@ class Message(ApiResponse):
     def __len__(self):
         """Return the length of the message text.
         """
-        return len(self.text)
+        return len(self.text) if self.text else 0
 
     def like(self):
         """Like the message.
@@ -467,6 +479,26 @@ class Message(ApiResponse):
                 elif i == self.recipient_id:
                     liked.append(self._recipient)
         return FilterList(liked)
+        
+    def is_from_me(self):
+        """Return ``True`` if the message was sent by you.
+        """
+        return self.user_id == self._user.user_id
+        
+    def is_liked_by_me(self):
+        """Return ``True`` if the message was liked by you.
+        """
+        return self._user.user_id in self.favorited_by
+        
+    def metions_me(self):
+        """Return ``True`` if the message "@" mentions you.
+        """
+        for a in self.attachments:
+            if a.type == 'mentions' and self._user.user_id in a.user_ids:
+                return True
+        return False
+
+    
 
 
 class Bot(ApiResponse):
