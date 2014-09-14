@@ -35,9 +35,10 @@ Below are instructions for various ways of performing installation.
 Using ``pip``
 -------------
 
-.. note::
+.. code-block:: console
 
-	Installation via ``pip`` coming soon!
+    $ pip3 install GroupyAPI
+
 
 From Source
 -----------

@@ -7,11 +7,11 @@ The simple yet powerful GroupMe API wrapper for Python 3.
 Installation
 ============
 
-1) Login at ``https://dev.groupme.com/session/new``.
-2) Click "Bots" menu button at the top.
-3) Click "Click here to reveal" then copy your token.
-4) Paste your token into ``~/.groupy.key``.
-5) Copy ``Groupy/groupy`` into your package directory for ``Python3``.
+1) ``pip3 install GroupyAPI``
+2) Login at ``https://dev.groupme.com/session/new``.
+3) Click "Bots" menu button at the top.
+4) Click "Click here to reveal" then copy your token.
+5) Paste your token into ``~/.groupy.key``.
 
 Help
 ====
