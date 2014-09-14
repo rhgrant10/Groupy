@@ -9,4 +9,5 @@ setup(
     url = 'https://github.com/rhgrant10/Groupy', # use the URL to the github repo
     keywords = ['api', 'GroupMe'], # arbitrary keywords
     classifiers = [],
+    long_description=open('README.rst', 'r').read()
 )
