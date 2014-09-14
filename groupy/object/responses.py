@@ -434,7 +434,7 @@ class Message(ApiResponse):
     def __len__(self):
         """Return the length of the message text.
         """
-        return len(self.text)
+        return len(self.text) if self.text else 0
 
     def like(self):
         """Like the message.
