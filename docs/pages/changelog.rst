@@ -2,6 +2,21 @@
 Change Log
 ==========
 
+v0.5.3 (September 19, 2014)
+===========================
+
+- Fix packaging bug that caused inner packages to not be installed via `pip3`
+
+v0.5.2 (September 14, 2014)
+===========================
+
+- Now installable via `pip3`:
+
+    .. code-block:: console
+    
+        $ pip3 install GroupyAPI
+
+
 v0.5.1 (August 25, 2014)
 ========================
 
