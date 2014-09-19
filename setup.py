@@ -2,9 +2,9 @@ from distutils.core import setup
 setup(
     name = 'GroupyAPI',
     packages = ['groupy', 'groupy.object', 'groupy.api'],
-    version = '0.5.4',
+    version = '0.5.5',
     install_requires = [
-        'requests==2.3.0'
+        'requests==2.3.0',
         'Pillow==2.5.3'
     ],
     description = 'The simple yet powerful wrapper for the GroupMe API',
