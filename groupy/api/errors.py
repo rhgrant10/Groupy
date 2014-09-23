@@ -22,6 +22,10 @@ class InvalidResponseError(GroupMeError):
     pass
 
 
+class ApiError(GroupMeError):
+    pass
+
+
 class InvalidOperatorError(NotImplementedError):
     """Error thrown when an unsupported filter is used.
     """
