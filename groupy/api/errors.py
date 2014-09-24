@@ -12,21 +12,18 @@ GroupMe API.
 
 class GroupMeError(Exception):
     """A general GroupMe error.
-    """
-    pass
-
-
-class InvalidResponseError(GroupMeError):
-    """Error representing an unparsable response from the API.
+    
+    All exceptions raised by Groupy are descendents of this exception.
     """
     pass
 
 
 class ApiError(GroupMeError):
+    """Error raised when errors are returned in a GroupMe response."""
     pass
 
 
-class InvalidOperatorError(NotImplementedError):
+class InvalidOperatorError(GroupMeError):
     """Error thrown when an unsupported filter is used.
     """
     pass

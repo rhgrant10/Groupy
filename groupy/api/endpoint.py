@@ -550,7 +550,7 @@ class Images(Endpoint):
         try:
             data = r.json()
         except ValueError:
-            raise errors.InvalidResponseError(r)
+            raise errors.ApiError(r)
         return data['payload']
 
     @classmethod
