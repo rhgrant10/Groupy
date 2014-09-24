@@ -1,0 +1,14 @@
+language: python
+python:
+  - "3.4"
+# command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
+install:
+  - wget https://github.com/dropbox/responses/tarball/master
+  - mkdir ../responses
+  - tar xf master -C ../responses --strip-components=1
+  - cd ../responses
+  - pip install .
+  - cd -
+  - pip install .
+# command to run tests, e.g. python setup.py test
+script:  python -m unittest -v

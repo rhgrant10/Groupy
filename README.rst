@@ -2,6 +2,12 @@
 Groupy
 ======
 
+.. image:: https://pypip.in/v/GroupyAPI/badge.png
+	:target: https://pypi.python.org/pypi/GroupyAPI
+
+.. image:: https://travis-ci.org/rhgrant10/Groupy.svg?branch=dev
+	:target: https://travis-ci.org/rhgrant10/Groupy
+
 The simple yet powerful GroupMe API wrapper for Python 3.
 
 Installation

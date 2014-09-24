@@ -54,9 +54,9 @@ class Endpoint:
         try:
             data = r.json()
         except ValueError:
-            raise errors.InvalidResponseError(r)
+            raise errors.ApiError(r)
         if data['meta'].get("errors"):
-            raise errors.GroupMeError(data['meta'])
+            raise errors.ApiError(data['meta'])
         return data["response"]
 
     @staticmethod
@@ -550,7 +550,7 @@ class Images(Endpoint):
         try:
             data = r.json()
         except ValueError:
-            raise errors.InvalidResponseError(r)
+            raise errors.ApiError(r)
         return data['payload']
 
     @classmethod
