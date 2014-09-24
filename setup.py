@@ -4,6 +4,7 @@ setup(
     packages = ['groupy', 'groupy.object', 'groupy.api'],
     version = '0.5.5',
     install_requires = [
+        'responses=0.2.2'
         'requests==2.3.0',
         'Pillow==2.5.3'
     ],
