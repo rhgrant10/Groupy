@@ -2,6 +2,9 @@
 Groupy
 ======
 
+.. image:: https://travis-ci.org/rhgrant10/Groupy.svg?branch=dev
+	:target: https://travis-ci.org/rhgrant10/Groupy
+
 The simple yet powerful GroupMe API wrapper for Python 3.
 
 Installation
