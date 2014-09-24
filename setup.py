@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
     name = 'GroupyAPI',
     packages = ['groupy', 'groupy.object', 'groupy.api'],
-    version = '0.5.6dev',
+    version = '0.5.6',
     install_requires = [
         'responses==0.2.2',
         'requests==2.3.0',
