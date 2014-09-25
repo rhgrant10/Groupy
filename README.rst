@@ -8,7 +8,7 @@ Groupy
 .. image:: https://travis-ci.org/rhgrant10/Groupy.svg?branch=dev
 	:target: https://travis-ci.org/rhgrant10/Groupy
 
-.. image:: image:: https://readthedocs.org/projects/groupy/badge/?version=latest
+.. image:: https://readthedocs.org/projects/groupy/badge/?version=latest
 	:target: https://groupy.readthedocs.org/en/latest
 
 
