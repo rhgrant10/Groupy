@@ -497,7 +497,7 @@ class Sms(Endpoint):
 
     SMS mode can be enabled or disabled.
     """
-    url = '/'.join([Endpoint.url, 'users/sms_mode'])
+    url = '/'.join([Endpoint.url, 'users', 'sms_mode'])
 
     @classmethod
     def create(cls, duration=4, registration_id=None):
@@ -573,4 +573,7 @@ class Images(Endpoint):
     def download(cls, url):
         r = requests.get(url)
         image = BytesIO(r.content)
-        return PImage.open(image)
+        try:
+            return PImage.open(image)
+        except OSError:
+            return None
