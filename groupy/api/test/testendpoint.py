@@ -7,8 +7,9 @@ import requests
 import responses
 import json
 import re
-from unittest import mock
-
+import urllib
+import builtins
+from mock import mock_open, patch
 
 def fake_response(response=None, code=200, errors=None):
     r = requests.Response()
@@ -129,127 +130,243 @@ class ClampTests(unittest.TestCase):
 
         
 class CorrectUrlTests(unittest.TestCase):
-    def assert_url_correct(self, method, url_re, request, args, kwargs):
-        responses.add(method, re.compile(url_re))
+    def assert_url_correct(self, method, url_, request, *args, **kwargs):
+        # Mock the request.
+        responses.add(method, url_)
+        
         # Make the request. ApiErrors are ok.
         try:
             request(*args, **kwargs)
         except errors.ApiError:
             pass
-        requested_url, param_str = \
-            responses.calls[0].request.url.split('?', 1)
-        self.assertRegex(requested_url, url_re)
-        params = list(kwargs.keys()) + ['token']
-        for i, p in enumerate(self.pregexes(*params)):
-            self.assertRegex(
-                param_str, p, 'missing param {!r}'.format(params[i]))
+            
+        # Split the params from the URL.
+        parts = responses.calls[0].request.url.split('?', 1)
+        if len(parts) == 1:
+            requested_url, param_str = parts[0], None
+        else:
+            requested_url, param_str = parts
 
-    @staticmethod
-    def pregexes(*param_names):
-        return list(map(
-            lambda p: re.compile(r'\b{}=[-a-zA-Z0-9.+%_]+'.format(p)),
-            param_names
-        ))
-
+        # Check the URL.
+        self.assertEqual(requested_url, url_)
+        
+        # Check the params. Allow for the API token to be found.
+        if param_str is None:
+            return
+        kvparams = map(lambda s: s.split('='), param_str.split('&'))
+        for k, v in filter(lambda i: i[0] != 'token', kvparams):
+            self.assertIn(k, kwargs)
+            self.assertEqual(str(kwargs[k]), urllib.parse.unquote(v))
+            
     @responses.activate
     def test_group_index(self):
         self.assert_url_correct(
             responses.GET,
-            r'^{}/groups'.format(config.API_URL),
+            'https://api.groupme.com/v3/groups',
             endpoint.Groups.index,
-            [], {'page': 12, 'per_page': 34}
+                page=12, per_page=34
         )
     
     @responses.activate
     def test_groups_show(self):
         self.assert_url_correct(
             responses.GET,
-            r'{}/groups/\d+'.format(config.API_URL),
-            endpoint.Groups.show,
-            [23], {}
+            'https://api.groupme.com/v3/groups/1',
+            endpoint.Groups.show, '1'
         )
 
     @responses.activate
     def test_groups_create(self):
         self.assert_url_correct(
             responses.POST,
-            r'{}/groups'.format(config.API_URL),
+            'https://api.groupme.com/v3/groups',
             endpoint.Groups.create,
-            [],
-            {
-                'name': 'name',
-                'description': 'description one',
-                'image_url': 'http://i.groupme.com/someimage.png',
-                'share': True
-            }
+                name='name', description='one',
+                image_url='http://i.groupme.com/someimage.png',
+                share=True
         )
     
     @responses.activate
     def test_groups_update(self):
         self.assert_url_correct(
             responses.POST,
-            r'{}/groups/\d+/update'.format(config.API_URL),
-            endpoint.Groups.update,
-            ['123456789'],
-            {
-                'name': 'name',
-                'description': 'description one',
-                'image_url': 'http://i.groupme.com/someimage.png',
-                'share': True
-            }
+            'https://api.groupme.com/v3/groups/1/update',
+            endpoint.Groups.update, '1',
+                name='name',
+                description='one',
+                image_url='http://i.groupme.com/someimage.png',
+                share=True
         )
         
     @responses.activate
     def test_groups_destroy(self):
         self.assert_url_correct(
             responses.POST,
-            r'{}/groups/\d+/destroy'.format(config.API_URL),
-            endpoint.Groups.destroy,
-            ['123456789'],
-            {}
-        )
-        
-    @responses.activate
-    def test_messages_index(self):
-        self.assert_url_correct(
-            responses.GET, 
-            r'{}/groups/\d+/messages'.format(config.API_URL),
-            endpoint.Messages.index,
-            [12], {}
+            'https://api.groupme.com/v3/groups/1/destroy',
+            endpoint.Groups.destroy, '1'
         )
         
     @responses.activate
     def test_members_add(self):
         self.assert_url_correct(responses.POST,
-            r'{}/groups/\d+/members/add'.format(config.API_URL),
-            endpoint.Members.add,
-            [12, {'members': [{
-                'user_id': '1234567',
-                'nickname': 'Fred',
-                'guid': '1234567890'}]}],
-            {}
+            'https://api.groupme.com/v3/groups/1/members/add',
+            endpoint.Members.add, '1'
         )
 
     @responses.activate
     def test_members_results(self):
         self.assert_url_correct(
             responses.GET,
-            r'{}/groups/\d+/members/results/\d+'.format(config.API_URL),
-            endpoint.Members.results,
-            [12, 34], {}
+            'https://api.groupme.com/v3/groups/1/members/results/2',
+            endpoint.Members.results, '1', '2'
         )
     
     @responses.activate
     def test_members_remove(self):
         self.assert_url_correct(
             responses.POST,
-            r'{}/groups/\d+/members/\d+/remove'.format(config.API_URL),
-            endpoint.Members.remove,
-            [12, 34], {}
+            'https://api.groupme.com/v3/groups/1/members/2/remove',
+            endpoint.Members.remove, '1', '2'
         )
     
-    
+    @responses.activate
+    def test_messages_index(self):
+        self.assert_url_correct(
+            responses.GET, 
+            'https://api.groupme.com/v3/groups/1/messages',
+            endpoint.Messages.index, '1',
+                limit=100
+        )
+        
+    @responses.activate
+    def test_messages_create(self):
+        self.assert_url_correct(
+            responses.POST,
+            'https://api.groupme.com/v3/groups/1/messages',
+            endpoint.Messages.create, '1', 'Hello test'
+        )
+        
+    @responses.activate
+    def test_direct_messages_index(self):
+        self.assert_url_correct(
+            responses.GET,
+            'https://api.groupme.com/v3/direct_messages',
+            endpoint.DirectMessages.index,
+                other_user_id='1',
+                before_id='2',
+                since_id='3',
+                after_id='4'
+        )
+        
+    @responses.activate
+    def test_direct_messages_create(self):
+        self.assert_url_correct(
+            responses.POST,
+            'https://api.groupme.com/v3/direct_messages',
+            endpoint.DirectMessages.create, '1', 'Hello test'
+        )
+        
+    @responses.activate
+    def test_likes_create(self):
+        self.assert_url_correct(
+            responses.POST,
+            'https://api.groupme.com/v3/messages/1/2/like',
+            endpoint.Likes.create, '1', '2'
+        )
+        
+    @responses.activate
+    def test_likes_destroy(self):
+        self.assert_url_correct(
+            responses.POST,
+            'https://api.groupme.com/v3/messages/1/2/unlike',
+            endpoint.Likes.destroy, '1', '2'
+        )
+        
+    @responses.activate
+    def test_bots_index(self):
+        self.assert_url_correct(
+            responses.GET,
+            'https://api.groupme.com/v3/bots',
+            endpoint.Bots.index
+        )
+        
+    @responses.activate
+    def test_bots_create(self):
+        self.assert_url_correct(
+            responses.POST,
+            'https://api.groupme.com/v3/bots',
+            endpoint.Bots.create,
+                name='name',
+                group_id='group_id',
+                avatar_url='avatar_url',
+                callback_url='callback_url'
+        )
+        
+    @responses.activate
+    def test_bots_post(self):
+        self.assert_url_correct(
+            responses.POST,
+            'https://api.groupme.com/v3/bots/post',
+            endpoint.Bots.post,
+                bot_id='bot_id',
+                text='Hello',
+                picture_url='picture_url'
+        )
+        
+    @responses.activate
+    def test_bots_destroy(self):
+        self.assert_url_correct(
+            responses.POST,
+            'https://api.groupme.com/v3/bots/destroy',
+            endpoint.Bots.destroy,
+                bot_id='bot_id'
+        )
+        
+    @responses.activate
+    def test_users_me(self):
+        self.assert_url_correct(
+            responses.GET,
+            'https://api.groupme.com/v3/users/me',
+            endpoint.Users.me
+        )
+        
+    @responses.activate
+    def test_sms_enable(self):
+        self.assert_url_correct(
+            responses.POST,
+            'https://api.groupme.com/v3/users/sms_mode',
+            endpoint.Sms.create,
+                duration=1,
+                registration_id='2'
+        )
+        
+    @responses.activate
+    def test_sms_disable(self):
+        self.assert_url_correct(
+            responses.POST,
+            'https://api.groupme.com/v3/users/sms_mode/delete',
+            endpoint.Sms.delete
+        )
       
+    @responses.activate
+    def test_images_create(self):
+        with patch('builtins.open', mock_open()):
+            self.assert_url_correct(
+                responses.POST,
+                'https://image.groupme.com/pictures',
+                endpoint.Images.create,
+                    image=open('nosuchfile')
+            )
+        
+    @responses.activate
+    def test_images_download(self):
+        self.assert_url_correct(
+            responses.GET,
+            'https://i.groupme.com/123456789.jpg',
+            endpoint.Images.download,
+                url='https://i.groupme.com/123456789.jpg'
+        )
+    
     
 if __name__ == '__main__':
     unittest.main()

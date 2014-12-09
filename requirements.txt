@@ -1,4 +1,3 @@
-Groupy
-responses=0.2.2
+responses==0.3.0
 requests==2.3.0
 Pillow==2.5.3

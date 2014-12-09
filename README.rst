@@ -8,6 +8,10 @@ Groupy
 .. image:: https://travis-ci.org/rhgrant10/Groupy.svg?branch=dev
 	:target: https://travis-ci.org/rhgrant10/Groupy
 
+.. image:: https://readthedocs.org/projects/groupy/badge/?version=latest
+	:target: https://groupy.readthedocs.org/en/latest
+
+
 The simple yet powerful GroupMe API wrapper for Python 3.
 
 Installation
