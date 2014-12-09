@@ -55,3 +55,6 @@ MANIFEST
 
 # Pycharm
 .idea*
+
+# temp files
+*~
