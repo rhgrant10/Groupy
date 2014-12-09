@@ -2,6 +2,15 @@
 Change Log
 ==========
 
+v0.5.8 (December 9, 2014)
+=========================
+
+- Fixed problems with `requirements.txt` and `setup.py` that caused problems installing from `pip`
+- Re-wrote many of the unittests (still in progress)
+- Added Travis-CI and PyPI badges to the readme
+- Bumped requirement for dropbox's `responses` to 0.3.0
+- Now uses `setup` from `setuptools` rather than `distutils.core`
+
 v0.5.3 (September 19, 2014)
 ===========================
 
