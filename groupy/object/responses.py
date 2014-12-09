@@ -553,7 +553,7 @@ class Bot(ApiResponse):
         :rtype: bool
         """
         try:
-            endpoint.Bot.post(self.bot_id, text, picture_url)
+            endpoint.Bots.post(self.bot_id, text, picture_url)
         except errors.InvalidResponse as e:
             return e.args[0].status_code == status.CREATED
         return True
@@ -565,7 +565,7 @@ class Bot(ApiResponse):
         :rtype: bool
         """
         try:
-            endpoint.Bot.destroy(self.bot_id)
+            endpoint.Bots.destroy(self.bot_id)
         except errors.InvalidResponse as e:
             return e.args[0].status_code == status.OK
         return True
