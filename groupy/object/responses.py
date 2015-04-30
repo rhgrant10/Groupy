@@ -9,7 +9,7 @@ This module contains classes that encapsulate the information returned in API
 responses.
 
 """
-
+from .. import config
 from ..api import status
 from ..api import errors
 from ..api import endpoint
@@ -213,6 +213,10 @@ class Group(Recipient):
 
     def destroy(self):
         """Disband (destroy) a group that you created.
+
+        If unsuccessful, this raises an :exc:`~groupy.api.errors.ApiError`
+
+        :returns: :data:`~groupy.api.status.OK`
         """
         try:
             endpoint.Groups.destroy(self.group_id)
@@ -267,11 +271,13 @@ class Group(Recipient):
 
         :param member: the member to remove
         :type member: :class:`~groupy.object.responses.Member`
-        :returns: ``True`` if successful, or raises an ApiError.
+        :returns: ``True`` if successful
         :rtype: bool
+        :raises groupy.api.errors.ApiError: if removal is not successful
         """
+        gmember = self.members().filter(user_id=member.user_id)
         try:
-            endpoint.Members.remove(self.id, member.id)
+            endpoint.Members.remove(self.id, gmember.id)
         except errors.ApiError as e:
             if e.args[0]['code'] != status.OK:
                 raise
@@ -443,8 +449,9 @@ class Message(ApiResponse):
     def like(self):
         """Like the message.
 
-        :returns: ``True`` if successful, or raises an ApiError.
+        :returns: ``True`` if successful
         :rtype: bool
+        :raises groupy.api.errors.ApiError: if unsuccessful
         """
         try:
             endpoint.Likes.create(self._conversation_id, self.id)
@@ -457,8 +464,9 @@ class Message(ApiResponse):
     def unlike(self):
         """Unlike the message.
 
-        :returns: ``True`` if successful, or raises an ApiError.
+        :returns: ``True`` if successful
         :rtype: bool
+        :raises groupy.api.errors.ApiError: if unsuccessful
         """
         try:
             endpoint.Likes.destroy(self._conversation_id, self.id)
@@ -490,23 +498,27 @@ class Message(ApiResponse):
 
     def is_from_me(self):
         """Return ``True`` if the message was sent by you.
+
+        :rtype: bool
         """
         return self.user_id == self._user.user_id
 
     def is_liked_by_me(self):
         """Return ``True`` if the message was liked by you.
+
+        :rtype: bool
         """
         return self._user.user_id in self.favorited_by
 
     def metions_me(self):
         """Return ``True`` if the message "@" mentions you.
+
+        :rtype: bool
         """
         for a in self.attachments:
             if a.type == 'mentions' and self._user.user_id in a.user_ids:
                 return True
         return False
-
-
 
 
 class Bot(ApiResponse):
@@ -557,8 +569,9 @@ class Bot(ApiResponse):
 
         :param str text: the message text
         :param str picture_url: the GroupMe image URL for an image
-        :returns: ``True`` if successful, or raises an ApiError.
+        :returns: ``True`` if successful
         :rtype: bool
+        :raises groupy.api.errors.ApiError: if unsuccessful
         """
         try:
             endpoint.Bot.post(self.bot_id, text, picture_url)
@@ -571,8 +584,9 @@ class Bot(ApiResponse):
     def destroy(self):
         """Destroy the bot.
 
-        :returns: ``True`` if successful, or raises an ApiError.
+        :returns: ``True`` if successful
         :rtype: bool
+        :raises groupy.api.errors.ApiError: if unsuccessful
         """
         try:
             endpoint.Bot.destroy(self.bot_id)
@@ -636,8 +650,9 @@ class User(ApiResponse):
         :param int duration: the number of hours for which to send text messages
         :param str registration_token: the push notification token for which
             messages should be suppressed
-        :returns: ``True`` if successful, or raises an ApiError.
+        :returns: ``True`` if successful
         :rtype: :obj:`bool`
+        :raises groupy.api.errors.ApiError: if unsuccessful
         """
         try:
             endpoint.Sms.create(duration, registration_token)
@@ -654,8 +669,9 @@ class User(ApiResponse):
         Disabling SMS mode causes push notifications to resume and SMS text
         messages to be discontinued.
 
-        :returns: ``True`` if successful, or raises an ApiError.
+        :returns: ``True`` if successful
         :rtype: :obj:`bool`
+        :raises groupy.api.errors.ApiError: if unsuccessful
         """
         try:
             endpoint.Sms.delete()
