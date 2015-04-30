@@ -44,12 +44,13 @@ class Endpoint:
     def response(cls, r):
         """Extract the data from the API response *r*.
 
-        This method essentially strips the actual response of the envelope.
+        This method essentially strips the actual response of the envelope while
+        raising an ApiError if it contains one or more errors.
 
         :param r: the HTTP response from an API call
         :type r: :class:`requests.Response`
         :returns: API response data
-        :rtype: JSON
+        :rtype: json
         """
         try:
             data = r.json()
@@ -164,9 +165,10 @@ class Groups(Endpoint):
 
         .. note::
 
-            If you are not the owner of a group, you can not destroy it.
+            If you are not the owner of a group, you cannot destroy it.
 
         :param str group_id: the ID of the group to destroy/leave
+        :rtype: :class:`dict`
         """
         r = requests.post(
             cls.build_url('{}/destroy', group_id)

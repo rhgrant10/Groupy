@@ -9,7 +9,7 @@ This module contains classes that encapsulate the information returned in API
 responses.
 
 """
-
+from .. import config
 from ..api import status
 from ..api import errors
 from ..api import endpoint
@@ -115,9 +115,9 @@ class Recipient(ApiResponse):
         try:
             r = self._endpoint.index(self._idkey, before_id=before,
                                     since_id=since, after_id=after)
-        except errors.InvalidResponseError as e:
+        except errors.ApiErrorError as e:
             # NOT_MODIFIED, in this case, means no more messages.
-            if e.args[0].status_code == status.NOT_MODIFIED:
+            if e.args[0]['code'] == status.NOT_MODIFIED:
                 return None
             raise e
         # Update the message count and grab the messages.
@@ -153,7 +153,7 @@ class Group(Recipient):
         self.message_count = messages.get('count')
         self._members = [Member(**m) for m in members]
         self.share_url = kwargs.get('share_url')
-        
+
         # Undocumented properties.
         # 'max_members' for groups, 'max_memberships' for former groups.
         for k in ['max_members', 'max_memberships']:
@@ -174,7 +174,7 @@ class Group(Recipient):
     def list(cls, former=False):
         """List all of your current or former groups.
 
-        :param bool former: ``True`` if former groups should be listed, 
+        :param bool former: ``True`` if former groups should be listed,
             ``False`` (default) lists current groups
         :returns: a list of groups
         :rtype: :class:`~groupy.object.listers.FilterList`
@@ -192,7 +192,7 @@ class Group(Recipient):
             page += 1
             try:
                 next_groups = endpoint.Groups.index(page=page)
-            except errors.InvalidResponseError:
+            except errors.ApiError:
                 next_groups = None
         return FilterList(Group(**g) for g in groups)
 
@@ -213,11 +213,17 @@ class Group(Recipient):
 
     def destroy(self):
         """Disband (destroy) a group that you created.
+
+        If unsuccessful, this raises an :exc:`~groupy.api.errors.ApiError`
+
+        :returns: :data:`~groupy.api.status.OK`
         """
         try:
             endpoint.Groups.destroy(self.group_id)
-        except errors.InvalidResponseError as e:
-            return e.args[0].status_code == status.OK
+        except errors.ApiErrorError as e:
+            if e.args[0]['code'] != status.OK:
+                raise
+            return e.args[0]['code']
         return True
 
     def refresh(self):
@@ -248,8 +254,8 @@ class Group(Recipient):
     def add(self, *members):
         """Add a member to a group.
 
-        Each member can be either an instance of 
-        :class:`~groupy.object.responses.Member` or a :class:`dict` containing 
+        Each member can be either an instance of
+        :class:`~groupy.object.responses.Member` or a :class:`dict` containing
         ``nickname`` and one of ``email``, ``phone_number``, or ``user_id``.
 
         :param list members: members to add to the group
@@ -265,13 +271,17 @@ class Group(Recipient):
 
         :param member: the member to remove
         :type member: :class:`~groupy.object.responses.Member`
-        :returns: ``True`` if successful, ``False`` otherwise
+        :returns: ``True`` if successful
         :rtype: bool
+        :raises groupy.api.errors.ApiError: if removal is not successful
         """
+        gmember = self.members().filter(user_id=member.user_id)
         try:
-            endpoint.Members.remove(self.id, member.user_id)
-        except errors.InvalidResponse as e:
-            return e.args[0].status_code == status.OK
+            endpoint.Members.remove(self.id, gmember.id)
+        except errors.ApiError as e:
+            if e.args[0]['code'] != status.OK:
+                raise
+            return e.args[0]['code']
         return True
 
 
@@ -294,7 +304,7 @@ class Member(Recipient):
     @classmethod
     def list(cls):
         """List all known members regardless of group membership.
-        
+
         :returns: a list of all known members
         :rtype: :class:`~groupy.objects.FilterList`
         """
@@ -359,7 +369,7 @@ class Member(Recipient):
 
         - ``nickname``
         - ``user_id`` or ``email`` or ``phone_number``
-        
+
         If an identification cannot be created then raise an
         :exc:`ValueError`.
 
@@ -384,11 +394,11 @@ class Message(ApiResponse):
     :type recipient: :class:`~groupy.object.responses.Recipient`
     """
     _user = None
-    
+
     def __init__(self, recipient, **kwargs):
         super().__init__()
         self._recipient = recipient
-        
+
         self.id = kwargs.get('id')
         self.source_guid = kwargs.get('source_guid')
         self.created_at = datetime.fromtimestamp(kwargs.get('created_at'))
@@ -402,7 +412,7 @@ class Message(ApiResponse):
         self.favorited_by = kwargs.get('favorited_by')
         self.attachments = [
             AttachmentFactory.create(**a) for a in kwargs.get('attachments')]
-        
+
         # Determine the conversation id (different for direct messages)
         try:    # assume group message
             self._conversation_id = recipient.group_id
@@ -415,15 +425,15 @@ class Message(ApiResponse):
     @property
     def recipient(self):
         """Return the source of the message.
-        
+
         If the message is a direct message, this returns a member. Otherwise,
         it returns a group.
-        
+
         :returns: the source of the message
         :rtype: :class:`~groupy.object.responses.Recipient`
         """
         return self._recipient
-    
+
     def __repr__(self):
         msg = "{}: {}".format(self.name, self.text or "")
         if self.attachments:
@@ -439,31 +449,37 @@ class Message(ApiResponse):
     def like(self):
         """Like the message.
 
-        :returns: ``True`` if successful, ``False`` otherwise
+        :returns: ``True`` if successful
         :rtype: bool
+        :raises groupy.api.errors.ApiError: if unsuccessful
         """
         try:
             endpoint.Likes.create(self._conversation_id, self.id)
-        except errors.InvalidResponse as e:
-            return e.args[0].status_code == status.OK
+        except errors.ApiError as e:
+            if e.args[0]['code'] != status.OK:
+                raise
+            return e.args[0]['code']
         return True
 
     def unlike(self):
         """Unlike the message.
 
-        :returns: ``True`` if successful, ``False`` otherwise
+        :returns: ``True`` if successful
         :rtype: bool
+        :raises groupy.api.errors.ApiError: if unsuccessful
         """
         try:
             endpoint.Likes.destroy(self._conversation_id, self.id)
-        except errors.InvalidResponse as e:
-            return e.args[0].status_code == status.OK
+        except errors.ApiError as e:
+            if e.args[0]['code'] != status.OK:
+                raise
+            return e.args[0]['code']
         return True
 
     def likes(self):
         """Return a :class:`~groupy.object.listers.FilterList` of the
         members that like the message.
-        
+
         :returns: a list of the members who "liked" this message
         :rtype: :class:`~groupy.object.listers.FilterList`
         """
@@ -479,26 +495,30 @@ class Message(ApiResponse):
                 elif i == self.recipient_id:
                     liked.append(self._recipient)
         return FilterList(liked)
-        
+
     def is_from_me(self):
         """Return ``True`` if the message was sent by you.
+
+        :rtype: bool
         """
         return self.user_id == self._user.user_id
-        
+
     def is_liked_by_me(self):
         """Return ``True`` if the message was liked by you.
+
+        :rtype: bool
         """
         return self._user.user_id in self.favorited_by
-        
+
     def metions_me(self):
         """Return ``True`` if the message "@" mentions you.
+
+        :rtype: bool
         """
         for a in self.attachments:
             if a.type == 'mentions' and self._user.user_id in a.user_ids:
                 return True
         return False
-
-    
 
 
 class Bot(ApiResponse):
@@ -521,7 +541,7 @@ class Bot(ApiResponse):
     @classmethod
     def create(cls, name, group, avatar_url=None, callback_url=None):
         """Create a new bot.
-        
+
         :param str name: the name of the bot
         :param group: the group to which the bot will belong
         :type group: :class:`~groupy.object.responses.Bot`
@@ -549,25 +569,31 @@ class Bot(ApiResponse):
 
         :param str text: the message text
         :param str picture_url: the GroupMe image URL for an image
-        :returns: ``True`` if successful, ``False`` otherwise
+        :returns: ``True`` if successful
         :rtype: bool
+        :raises groupy.api.errors.ApiError: if unsuccessful
         """
         try:
             endpoint.Bot.post(self.bot_id, text, picture_url)
-        except errors.InvalidResponse as e:
-            return e.args[0].status_code == status.CREATED
+        except errors.ApiError as e:
+            if e.args[0]['code'] != status.CREATED:
+                raise
+            return e.args[0]['code']
         return True
 
     def destroy(self):
         """Destroy the bot.
 
-        :returns: ``True`` if successful, ``False`` otherwise
+        :returns: ``True`` if successful
         :rtype: bool
+        :raises groupy.api.errors.ApiError: if unsuccessful
         """
         try:
             endpoint.Bot.destroy(self.bot_id)
-        except errors.InvalidResponse as e:
-            return e.args[0].status_code == status.OK
+        except errors.ApiError as e:
+            if e.args[0]['code'] != status.OK:
+                raise
+            return e.args[0]['code']
         return True
 
 
@@ -590,13 +616,13 @@ class User(ApiResponse):
 
     def __repr__(self):
         return self.name
-        
+
     @property
     def nickname(self):
         """Your user name.
         """
         return self.name
-    
+
     @classmethod
     def get(cls):
         """Return your user information.
@@ -624,13 +650,16 @@ class User(ApiResponse):
         :param int duration: the number of hours for which to send text messages
         :param str registration_token: the push notification token for which
             messages should be suppressed
-        :returns: ``True`` if successful, ``False`` otherwise
+        :returns: ``True`` if successful
         :rtype: :obj:`bool`
+        :raises groupy.api.errors.ApiError: if unsuccessful
         """
         try:
             endpoint.Sms.create(duration, registration_token)
-        except errors.InvalidResponse as e:
-            return e.args[0].status_code == status.CREATED
+        except errors.ApiError as e:
+            if e.args[0]['code'] != status.CREATED:
+                raise
+            return e.args[0]['code']
         return True
 
     @classmethod
@@ -640,12 +669,15 @@ class User(ApiResponse):
         Disabling SMS mode causes push notifications to resume and SMS text
         messages to be discontinued.
 
-        :returns: ``True`` if successful, ``False`` otherwise
+        :returns: ``True`` if successful
         :rtype: :obj:`bool`
+        :raises groupy.api.errors.ApiError: if unsuccessful
         """
         try:
             endpoint.Sms.delete()
-        except errors.InvalidResponse as e:
-            return e.args[0].status_code == status.OK
+        except errors.ApiError as e:
+            if e.args[0]['code'] != status.OK:
+                raise
+            return e.args[0]['code']
         return True
 

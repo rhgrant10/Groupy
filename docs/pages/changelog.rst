@@ -2,6 +2,13 @@
 Change Log
 ==========
 
+v0.6.0 (April 25, 2015)
+=========================
+
+- Fixed code in `responses.py` that was still using the old exception class name
+- Changed the `Member.remove()` method to correctly use the `id` of the member rather than the `user_id`
+- Slight beefing up of some documentation
+
 v0.5.8 (December 9, 2014)
 =========================
 

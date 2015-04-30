@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='GroupyAPI',
     packages=['groupy', 'groupy.object', 'groupy.api'],
-    version='0.5.8',
+    version='0.6.0',
     install_requires=[
         "responses==0.3.0",
         "requests==2.3.0",
