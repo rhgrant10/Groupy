@@ -269,13 +269,24 @@ class Group(Recipient):
     def remove(self, member):
         """Remove a member from the group.
 
+        .. note::
+
+            The group must contain the member to be removed. This will *not* be
+            the case if the group information has not been requested since the
+            member was *added*. When in doubt, use the
+            :func:`~groupy.object.responses.Group.refresh` method to update the
+            internal list of members before attempting to remove them.
+
         :param member: the member to remove
         :type member: :class:`~groupy.object.responses.Member`
         :returns: ``True`` if successful
         :rtype: bool
         :raises groupy.api.errors.ApiError: if removal is not successful
         """
-        gmember = self.members().filter(user_id=member.user_id)
+        # Use the member from this group because they have the correct id.
+        gmember = self.members().filter(user_id=member.user_id).first
+        if not gmember or not gmember.id:
+            return False
         try:
             endpoint.Members.remove(self.id, gmember.id)
         except errors.ApiError as e:
@@ -327,6 +338,9 @@ class Member(Recipient):
 
     def __repr__(self):
         return self.nickname
+
+    def __bool__(self):
+        return True
 
     @property
     def guid(self):
