@@ -251,7 +251,7 @@ class Group(Recipient):
         """
         return FilterList(self._members)
 
-    def add(self, *members):
+    def add(self, *members, refresh=False):
         """Add a member to a group.
 
         Each member can be either an instance of
@@ -259,14 +259,18 @@ class Group(Recipient):
         ``nickname`` and one of ``email``, ``phone_number``, or ``user_id``.
 
         :param list members: members to add to the group
+        :param bool refresh: ``True`` if the group information should be
+            automatically refreshed from the API, ``False`` by default
         :returns: the results ID of the add call
         :rtype: str
         """
         ids = (Member.identify(m) for m in members)
         r = endpoint.Members.add(self.id, *ids)
+        if refersh:
+            self.refresh()
         return r['results_id']
 
-    def remove(self, member):
+    def remove(self, member, refresh=False):
         """Remove a member from the group.
 
         .. note::
@@ -278,6 +282,8 @@ class Group(Recipient):
             internal list of members before attempting to remove them.
 
         :param member: the member to remove
+        :param bool refresh: ``True`` if the group information should be
+            automatically refreshed from the API, ``False`` by default
         :type member: :class:`~groupy.object.responses.Member`
         :returns: ``True`` if successful
         :rtype: bool
@@ -292,7 +298,8 @@ class Group(Recipient):
         except errors.ApiError as e:
             if e.args[0]['code'] != status.OK:
                 raise
-            return e.args[0]['code']
+        if refersh:
+            self.refresh()
         return True
 
 
