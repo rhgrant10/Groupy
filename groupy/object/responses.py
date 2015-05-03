@@ -588,11 +588,9 @@ class Bot(ApiResponse):
         :raises groupy.api.errors.ApiError: if unsuccessful
         """
         try:
-            endpoint.Bot.post(self.bot_id, text, picture_url)
+            endpoint.Bots.post(self.bot_id, text, picture_url)
         except errors.ApiError as e:
-            if e.args[0]['code'] != status.CREATED:
-                raise
-            return e.args[0]['code']
+            return e.args[0].status_code == status.CREATED
         return True
 
     def destroy(self):
@@ -603,11 +601,9 @@ class Bot(ApiResponse):
         :raises groupy.api.errors.ApiError: if unsuccessful
         """
         try:
-            endpoint.Bot.destroy(self.bot_id)
+            endpoint.Bots.destroy(self.bot_id)
         except errors.ApiError as e:
-            if e.args[0]['code'] != status.OK:
-                raise
-            return e.args[0]['code']
+            return e.args[0].status_code == status.OK
         return True
 
 
