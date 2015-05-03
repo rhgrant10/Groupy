@@ -573,7 +573,8 @@ class Bot(ApiResponse):
         :returns: the new bot
         :rtype: :class:`~groupy.object.responses.Bot`
         """
-        bot = endpoint.Bots.create(name, group.group_id, avatar_url, callback_url)
+        bot = endpoint.Bots.create(name, group.group_id,
+                                   avatar_url, callback_url)
         return cls(**bot)
 
     @classmethod
