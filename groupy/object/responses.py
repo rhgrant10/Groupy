@@ -604,7 +604,8 @@ class Bot(ApiResponse):
         try:
             endpoint.Bots.destroy(self.bot_id)
         except errors.ApiError as e:
-            return e.args[0].status_code == status.OK
+            if e.args[0].status_code != status.OK:
+                raise
         return True
 
 
