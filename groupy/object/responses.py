@@ -590,7 +590,8 @@ class Bot(ApiResponse):
         try:
             endpoint.Bots.post(self.bot_id, text, picture_url)
         except errors.ApiError as e:
-            return e.args[0].status_code == status.CREATED
+            if e.args[0].status_code >= status.BAD_REQUEST:
+                raise
         return True
 
     def destroy(self):
