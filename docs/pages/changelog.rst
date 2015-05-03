@@ -2,7 +2,14 @@
 Change Log
 ==========
 
-v0.6.0 (April 25, 2015)
+v0.6.2 (May 3, 2015)
+=========================
+
+- Fixed problem when posting messages as a bot
+- Added `refresh` option for automatically updating group information after addition/removal of members
+- Updated documentation
+
+v0.6.1 (April 25, 2015)
 =========================
 
 - Fixed code in `responses.py` that was still using the old exception class name
