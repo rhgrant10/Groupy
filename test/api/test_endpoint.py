@@ -1,16 +1,17 @@
+import re
+import json
+import urllib
+import builtins
 import unittest
 import requests
 import responses
-import json
-import re
-import urllib
-import builtins
 
-from mock import mock_open, patch
+from unittest.mock import patch
+from unittest.mock import mock_open
 
 from groupy import config
-from groupy.api import endpoint
 from groupy.api import errors
+from groupy.api import endpoint
 
 
 def fake_response(response=None, code=200, errors=None):
