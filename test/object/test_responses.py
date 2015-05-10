@@ -28,7 +28,7 @@ from groupy.object.responses import Recipient
 
 
 class RecipientPostShortMessageTests(unittest.TestCase):
-    @mock.patch('groupy.api.endpoint.Endpoint', create_autospec=True)
+    @mock.patch('groupy.api.endpoint.Endpoint')
     def setUp(self, mock_endpoint):
         self.recipient = Recipient(mock_endpoint(), 'm', 'i', i='idkey', m='mkey')
         self.recipient.post('test message')
@@ -42,7 +42,7 @@ class RecipientPostShortMessageTests(unittest.TestCase):
 
 
 class RecipientPostLongMessageTests(unittest.TestCase):
-    @mock.patch('groupy.api.endpoint.Endpoint', create_autospec=True)
+    @mock.patch('groupy.api.endpoint.Endpoint')
     def setUp(self, mock_endpoint):
         self.recipient = Recipient(mock_endpoint(), 'm', 'i', i='idkey', m='mkey')
         self.chunks = ('x' * 450, 'x' * 100)
@@ -60,7 +60,7 @@ class RecipientPostLongMessageTests(unittest.TestCase):
 @mock.patch('groupy.object.responses.Message')
 @mock.patch('groupy.object.responses.MessagePager')
 class RecipientMessagesTests(unittest.TestCase):
-    @mock.patch('groupy.api.endpoint.Endpoint', create_autospec=True)
+    @mock.patch('groupy.api.endpoint.Endpoint')
     def setUp(self, mock_endpoint):
         self.recipient = Recipient(mock_endpoint(), 'm', 'i', i='idkey', m='mkey')
 
