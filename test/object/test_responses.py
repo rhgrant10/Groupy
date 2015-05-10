@@ -58,7 +58,7 @@ class RecipientPostLongMessageTests(unittest.TestCase):
 
 
 @mock.patch('groupy.object.responses.Message')
-@mock.patch('groupy.object.responses.MessagePager')
+@mock.patch('groupy.object.responses.MessagePager', autospec=True)
 class RecipientMessagesTests(unittest.TestCase):
     @mock.patch('groupy.api.endpoint.Endpoint')
     def setUp(self, mock_endpoint):
@@ -73,3 +73,8 @@ class RecipientMessagesTests(unittest.TestCase):
         self.recipient._endpoint.index.assert_called_once_with(
             'idkey', after_id=None, since_id=None, before_id=None
         )
+
+    def test_messages_returns_MessagePager(self, MockMessagePager, M):
+        messages = self.recipient.messages()
+        self.assertEqual(messages.__class__, groupy.object.listers.MessagePager)
+
