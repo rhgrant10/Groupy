@@ -79,3 +79,30 @@ class RecipientMessagesTests(unittest.TestCase):
         messages = self.recipient.messages()
         self.assertEqual(messages.__class__, groupy.object.listers.MessagePager)
 
+    def test_messages_after_index_arguments_use_after_id(self, MockMP, MockM):
+        messages = self.recipient.messages(after=123)
+        self.mock_index.assert_called_once_with('idkey', after_id=123,
+                                                since_id=None, before_id=None)
+
+    def test_messages_before_index_arguments_use_before_id(self, MockMP, MockM):
+        messages = self.recipient.messages(before=123)
+        self.mock_index.assert_called_once_with('idkey', after_id=None,
+                                                since_id=None, before_id=123)
+
+    def test_messages_since_index_arguments_use_since_id(self, MockMP, MockM):
+        messages = self.recipient.messages(since=123)
+        self.mock_index.assert_called_once_with('idkey', after_id=None,
+                                                since_id=123, before_id=None)
+
+    def test_messages_before_and_after_raises_ValueError(self, MockMP, MockM):
+        with self.assertRaises(ValueError):
+            messages = self.recipient.messages(before=12, after=34)
+
+    def test_messages_before_and_since_raises_ValueError(self, MockMP, MockM):
+        with self.assertRaises(ValueError):
+            messages = self.recipient.messages(before=12, since=34)
+
+    def test_messages_since_and_after_raises_ValueError(self, MockMP, MockM):
+        with self.assertRaises(ValueError):
+            messages = self.recipient.messages(since=12, after=34)
+
