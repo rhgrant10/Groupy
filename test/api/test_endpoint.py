@@ -1,15 +1,18 @@
-from .. import endpoint
-from .. import errors
-from ... import config
-
+import re
+import json
+import urllib
+import builtins
 import unittest
 import requests
 import responses
-import json
-import re
-import urllib
-import builtins
-from mock import mock_open, patch
+
+from unittest.mock import patch
+from unittest.mock import mock_open
+
+from groupy import config
+from groupy.api import errors
+from groupy.api import endpoint
+
 
 def fake_response(response=None, code=200, errors=None):
     r = requests.Response()
@@ -20,7 +23,7 @@ def fake_response(response=None, code=200, errors=None):
         content_ = json.dumps(envelope(response, code, errors))
     r._content = content_.encode('utf-8')
     return r
-    
+
 
 def envelope(response=None, code=200, errors=None):
     """Return a response envelope."""
@@ -37,7 +40,7 @@ class UrlBuildingTests(unittest.TestCase):
     def test_valid_input(self):
         def url(*args):
             return '/'.join([config.API_URL] + list(args))
-            
+
         cases = {
             (None, ()): url(),
             (1, ()): url('1'),
@@ -56,7 +59,7 @@ class UrlBuildingTests(unittest.TestCase):
                 url = endpoint.Endpoint.build_url(path, *args)
                 url_no_qs = url.split('?', 1)[0]
                 self.assertEqual(url_no_qs, correct_url)
-                
+
     def test_invalid_input(self):
         cases = {
             ('{}', ()): IndexError,
@@ -68,7 +71,7 @@ class UrlBuildingTests(unittest.TestCase):
                 with self.assertRaises(err):
                     url = endpoint.Endpoint.build_url(path, *args)
 
-    
+
 class ResponseExtractionTests(unittest.TestCase):
     def test_normal_response(self):
         correct = {'key': 'value'}
@@ -114,7 +117,7 @@ class ClampTests(unittest.TestCase):
             with self.subTest(value=value):
                 cvalue = endpoint.Endpoint.clamp(value, lower, upper)
                 self.assertEqual(cvalue, answer)
-            
+
     def test_inverted_bounds(self):
         cases = {
             ( 0,  1, -1):  1,
@@ -128,18 +131,18 @@ class ClampTests(unittest.TestCase):
                 cvalue = endpoint.Endpoint.clamp(value, lower, upper)
                 self.assertEqual(cvalue, answer)
 
-        
+
 class CorrectUrlTests(unittest.TestCase):
     def assert_url_correct(self, method, url_, request, *args, **kwargs):
         # Mock the request.
         responses.add(method, url_)
-        
+
         # Make the request. ApiErrors are ok.
         try:
             request(*args, **kwargs)
         except errors.ApiError:
             pass
-            
+
         # Split the params from the URL.
         parts = responses.calls[0].request.url.split('?', 1)
         if len(parts) == 1:
@@ -149,7 +152,7 @@ class CorrectUrlTests(unittest.TestCase):
 
         # Check the URL.
         self.assertEqual(requested_url, url_)
-        
+
         # Check the params. Allow for the API token to be found.
         if param_str is None:
             return
@@ -157,7 +160,7 @@ class CorrectUrlTests(unittest.TestCase):
         for k, v in filter(lambda i: i[0] != 'token', kvparams):
             self.assertIn(k, kwargs)
             self.assertEqual(str(kwargs[k]), urllib.parse.unquote(v))
-            
+
     @responses.activate
     def test_group_index(self):
         self.assert_url_correct(
@@ -166,7 +169,7 @@ class CorrectUrlTests(unittest.TestCase):
             endpoint.Groups.index,
                 page=12, per_page=34
         )
-    
+
     @responses.activate
     def test_groups_show(self):
         self.assert_url_correct(
@@ -185,7 +188,7 @@ class CorrectUrlTests(unittest.TestCase):
                 image_url='http://i.groupme.com/someimage.png',
                 share=True
         )
-    
+
     @responses.activate
     def test_groups_update(self):
         self.assert_url_correct(
@@ -197,7 +200,7 @@ class CorrectUrlTests(unittest.TestCase):
                 image_url='http://i.groupme.com/someimage.png',
                 share=True
         )
-        
+
     @responses.activate
     def test_groups_destroy(self):
         self.assert_url_correct(
@@ -205,7 +208,7 @@ class CorrectUrlTests(unittest.TestCase):
             'https://api.groupme.com/v3/groups/1/destroy',
             endpoint.Groups.destroy, '1'
         )
-        
+
     @responses.activate
     def test_members_add(self):
         self.assert_url_correct(responses.POST,
@@ -220,7 +223,7 @@ class CorrectUrlTests(unittest.TestCase):
             'https://api.groupme.com/v3/groups/1/members/results/2',
             endpoint.Members.results, '1', '2'
         )
-    
+
     @responses.activate
     def test_members_remove(self):
         self.assert_url_correct(
@@ -228,16 +231,16 @@ class CorrectUrlTests(unittest.TestCase):
             'https://api.groupme.com/v3/groups/1/members/2/remove',
             endpoint.Members.remove, '1', '2'
         )
-    
+
     @responses.activate
     def test_messages_index(self):
         self.assert_url_correct(
-            responses.GET, 
+            responses.GET,
             'https://api.groupme.com/v3/groups/1/messages',
             endpoint.Messages.index, '1',
                 limit=100
         )
-        
+
     @responses.activate
     def test_messages_create(self):
         self.assert_url_correct(
@@ -245,7 +248,7 @@ class CorrectUrlTests(unittest.TestCase):
             'https://api.groupme.com/v3/groups/1/messages',
             endpoint.Messages.create, '1', 'Hello test'
         )
-        
+
     @responses.activate
     def test_direct_messages_index(self):
         self.assert_url_correct(
@@ -257,7 +260,7 @@ class CorrectUrlTests(unittest.TestCase):
                 since_id='3',
                 after_id='4'
         )
-        
+
     @responses.activate
     def test_direct_messages_create(self):
         self.assert_url_correct(
@@ -265,7 +268,7 @@ class CorrectUrlTests(unittest.TestCase):
             'https://api.groupme.com/v3/direct_messages',
             endpoint.DirectMessages.create, '1', 'Hello test'
         )
-        
+
     @responses.activate
     def test_likes_create(self):
         self.assert_url_correct(
@@ -273,7 +276,7 @@ class CorrectUrlTests(unittest.TestCase):
             'https://api.groupme.com/v3/messages/1/2/like',
             endpoint.Likes.create, '1', '2'
         )
-        
+
     @responses.activate
     def test_likes_destroy(self):
         self.assert_url_correct(
@@ -281,7 +284,7 @@ class CorrectUrlTests(unittest.TestCase):
             'https://api.groupme.com/v3/messages/1/2/unlike',
             endpoint.Likes.destroy, '1', '2'
         )
-        
+
     @responses.activate
     def test_bots_index(self):
         self.assert_url_correct(
@@ -289,7 +292,7 @@ class CorrectUrlTests(unittest.TestCase):
             'https://api.groupme.com/v3/bots',
             endpoint.Bots.index
         )
-        
+
     @responses.activate
     def test_bots_create(self):
         self.assert_url_correct(
@@ -301,7 +304,7 @@ class CorrectUrlTests(unittest.TestCase):
                 avatar_url='avatar_url',
                 callback_url='callback_url'
         )
-        
+
     @responses.activate
     def test_bots_post(self):
         self.assert_url_correct(
@@ -312,7 +315,7 @@ class CorrectUrlTests(unittest.TestCase):
                 text='Hello',
                 picture_url='picture_url'
         )
-        
+
     @responses.activate
     def test_bots_destroy(self):
         self.assert_url_correct(
@@ -321,7 +324,7 @@ class CorrectUrlTests(unittest.TestCase):
             endpoint.Bots.destroy,
                 bot_id='bot_id'
         )
-        
+
     @responses.activate
     def test_users_me(self):
         self.assert_url_correct(
@@ -329,7 +332,7 @@ class CorrectUrlTests(unittest.TestCase):
             'https://api.groupme.com/v3/users/me',
             endpoint.Users.me
         )
-        
+
     @responses.activate
     def test_sms_enable(self):
         self.assert_url_correct(
@@ -339,7 +342,7 @@ class CorrectUrlTests(unittest.TestCase):
                 duration=1,
                 registration_id='2'
         )
-        
+
     @responses.activate
     def test_sms_disable(self):
         self.assert_url_correct(
@@ -347,7 +350,7 @@ class CorrectUrlTests(unittest.TestCase):
             'https://api.groupme.com/v3/users/sms_mode/delete',
             endpoint.Sms.delete
         )
-      
+
     @responses.activate
     def test_images_create(self):
         with patch('builtins.open', mock_open()):
@@ -357,7 +360,7 @@ class CorrectUrlTests(unittest.TestCase):
                 endpoint.Images.create,
                     image=open('nosuchfile')
             )
-        
+
     @responses.activate
     def test_images_download(self):
         self.assert_url_correct(
@@ -366,7 +369,7 @@ class CorrectUrlTests(unittest.TestCase):
             endpoint.Images.download,
                 url='https://i.groupme.com/123456789.jpg'
         )
-    
-    
+
+
 if __name__ == '__main__':
     unittest.main()
