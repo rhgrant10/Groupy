@@ -267,7 +267,18 @@ class Messages(Endpoint):
             1 and 100 inclusive)
         :returns: a :class:`dict` containing ``count`` and ``messages``
         :rtype: :class:`dict`
+        :raises ValueError: if more than one of ``before_id``, ``after_id`` or
+            ``since_id`` are specified
         """
+         # Check arguments.
+        not_None_args = []
+        for arg in (before_id, since_id, after_id):
+            if arg is not None:
+                not_None_args.append(arg)
+        if len(not_None_args) > 1:
+            raise ValueError("Only one of 'after_id', 'since_id', and "
+                             "'before_id' can be specified in a single call")
+
         limit = cls.clamp(limit, 1, 100)
         r = requests.get(
             cls.build_url('{}/messages', group_id),

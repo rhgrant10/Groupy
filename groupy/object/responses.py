@@ -102,13 +102,29 @@ class Recipient(ApiResponse):
     def messages(self, before=None, since=None, after=None, limit=None):
         """Return a page of messages from the recipient.
 
+        .. note::
+
+            Only one of ``before``, ``after``, or ``since`` can be specified in
+            a single call.
+
         :param str before: a reference message ID
         :param str since: a reference message ID
         :param str after: a reference message ID
         :param int limit: maximum number of messages to include in the page
         :returns: a page of messages
         :rtype: :class:`~groupy.object.listers.MessagePager`
+        :raises ValueError: if more than one of ``before``, ``after`` or
+            ``since`` are specified
         """
+        # Check arguments.
+        not_None_args = []
+        for arg in (before, since, after):
+            if arg is not None:
+                not_None_args.append(arg)
+        if len(not_None_args) > 1:
+            raise ValueError("Only one of 'after', 'since', and 'before' can "
+                             "be specified in a single call")
+
         # Messages obtained with the 'after' parameter are in reversed order.
         backward = after is not None
         # Fetch the messages.
