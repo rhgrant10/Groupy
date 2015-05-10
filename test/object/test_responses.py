@@ -63,6 +63,7 @@ class RecipientMessagesTests(unittest.TestCase):
     @mock.patch('groupy.api.endpoint.Endpoint')
     def setUp(self, mock_endpoint):
         self.recipient = Recipient(mock_endpoint(), 'm', 'i', i='idkey', m='mkey')
+        self.mock_index = self.recipient._endpoint.index
 
     def test_messages_calls_MessagePager_once(self, MockMessagePager, M):
         messages = self.recipient.messages()
@@ -70,7 +71,7 @@ class RecipientMessagesTests(unittest.TestCase):
 
     def test_messages_calls_endpoint_index_once(self, MockMessagePager, M):
         messages = self.recipient.messages()
-        self.recipient._endpoint.index.assert_called_once_with(
+        self.mock_index.assert_called_once_with(
             'idkey', after_id=None, since_id=None, before_id=None
         )
 
