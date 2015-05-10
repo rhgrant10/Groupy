@@ -30,7 +30,8 @@ from groupy.object.responses import Recipient
 class RecipientPostShortMessageTests(unittest.TestCase):
     @mock.patch('groupy.api.endpoint.Endpoint')
     def setUp(self, mock_endpoint):
-        self.recipient = Recipient(mock_endpoint(), 'm', 'i', i='idkey', m='mkey')
+        self.recipient = Recipient(mock_endpoint(), 'm', 'i',
+                                                    i='idkey', m='mkey')
         self.recipient.post('test message')
         self.mock_create = self.recipient._endpoint.create
 
@@ -44,8 +45,10 @@ class RecipientPostShortMessageTests(unittest.TestCase):
 class RecipientPostLongMessageTests(unittest.TestCase):
     @mock.patch('groupy.api.endpoint.Endpoint')
     def setUp(self, mock_endpoint):
-        self.recipient = Recipient(mock_endpoint(), 'm', 'i', i='idkey', m='mkey')
-        self.chunks = ('x' * 450, 'x' * 100)
+        # TODO: Fix this literal dependency!
+        self.chunks = ('x' * 1000, 'x' * 100)
+        self.recipient = Recipient(mock_endpoint(), 'm', 'i',
+                                                    i='idkey', m='mkey')
         self.recipient.post(''.join(self.chunks))
         self.mock_create = self.recipient._endpoint.create
 
@@ -57,25 +60,56 @@ class RecipientPostLongMessageTests(unittest.TestCase):
         self.mock_create.assert_has_calls(calls)
 
 
+class RecipientChunkifyTests(unittest.TestCase):
+    def test_text_shorter_than_chunk_size_remain_one_chunk(self):
+        chunks = Recipient._chunkify('x', 2)
+        self.assertEqual(len(chunks), 1)
+
+    def test_text_equal_to_chunk_size_remains_one_chunk(self):
+        chunks = Recipient._chunkify('xx', 2)
+        self.assertEqual(len(chunks), 1)
+
+    def test_text_longer_than_chunk_size_gets_split(self):
+        chunks = Recipient._chunkify('xxx', 2)
+        self.assertEqual(len(chunks), 2)
+
+    def test_text_as_None_returns_one_None_chunk(self):
+        chunks = Recipient._chunkify(None)
+        self.assertEqual(chunks, [None])
+
+    def test_empty_text_returns_one_None_chunk(self):
+        chunks = Recipient._chunkify('')
+        self.assertEqual(chunks, [None])
+
+    def test_chunkify_breaks_across_whitespace_if_possible(self):
+        chunks = Recipient._chunkify('abc 123', 5)
+        self.assertEqual(chunks, ['abc', '123'])
+
+    def test_chunkify_breaks_words_if_no_whitespace(self):
+        chunks = Recipient._chunkify('abc123', 5)
+        self.assertEqual(chunks, ['abc12', '3'])
+
+
 @mock.patch('groupy.object.responses.Message')
 @mock.patch('groupy.object.responses.MessagePager', autospec=True)
 class RecipientMessagesTests(unittest.TestCase):
     @mock.patch('groupy.api.endpoint.Endpoint')
     def setUp(self, mock_endpoint):
-        self.recipient = Recipient(mock_endpoint(), 'm', 'i', i='idkey', m='mkey')
+        self.recipient = Recipient(mock_endpoint(), 'm', 'i',
+                                                    i='idkey', m='mkey')
         self.mock_index = self.recipient._endpoint.index
 
-    def test_messages_calls_MessagePager_once(self, MockMessagePager, M):
+    def test_messages_calls_MessagePager_once(self, MockMP, MockM):
         messages = self.recipient.messages()
-        self.assertEqual(MockMessagePager.call_count, 1)
+        self.assertEqual(MockMP.call_count, 1)
 
-    def test_messages_calls_endpoint_index_once(self, MockMessagePager, M):
+    def test_messages_calls_endpoint_index_once(self, MockMP, MockM):
         messages = self.recipient.messages()
         self.mock_index.assert_called_once_with(
             'idkey', after_id=None, since_id=None, before_id=None
         )
 
-    def test_messages_returns_MessagePager(self, MockMessagePager, M):
+    def test_messages_returns_MessagePager(self, MockMP, MockM):
         messages = self.recipient.messages()
         self.assertEqual(messages.__class__, groupy.object.listers.MessagePager)
 

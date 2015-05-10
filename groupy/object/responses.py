@@ -9,6 +9,12 @@ This module contains classes that encapsulate the information returned in API
 responses.
 
 """
+import textwrap
+import time
+
+from datetime import datetime
+from collections import Counter
+
 from .. import config
 from ..api import status
 from ..api import errors
@@ -16,10 +22,6 @@ from ..api import endpoint
 from .listers import FilterList, MessagePager
 from .attachments import AttachmentFactory
 
-from datetime import datetime
-from collections import Counter
-
-import time
 
 __all__ = ['Recipient', 'Group', 'Member', 'Message', 'Bot', 'User']
 
@@ -57,20 +59,10 @@ class Recipient(ApiResponse):
 
     # Splits text into chunks so that each is less than the chunk_size.
     @staticmethod
-    def _chunkify(text, chunk_size=450):
-        if text is None:
+    def _chunkify(text, chunk_size=1000):
+        if not text:
             return [None]
-        chunks = []
-        while len(text) > chunk_size:
-            portion = text[:chunk_size]
-            # Find the index of the final whitespace character.
-            i = len(portion.rsplit(None, 1)[0])
-            # Append the chunk up to that character.
-            chunks.append(portion[:i].strip())
-            # Re-assign the text to all but the appended chunk.
-            text = text[i:].strip()
-        chunks.append(text)
-        return chunks
+        return textwrap.wrap(text, chunk_size)
 
     def __len__(self):
         """Return the number of messages in the recipient.
@@ -80,7 +72,7 @@ class Recipient(ApiResponse):
     def post(self, text, *attachments):
         """Post a message to the recipient.
 
-        Although the API limits messages to 450 characters, this method will
+        Although the API limits messages to 1000 characters, this method will
         split the text component into as many as necessary and include the
         attachments in the final message. Note that a list of messages sent is
         always returned, even if it contains only one element.
