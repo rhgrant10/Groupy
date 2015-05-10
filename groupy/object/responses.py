@@ -115,7 +115,7 @@ class Recipient(ApiResponse):
         try:
             r = self._endpoint.index(self._idkey, before_id=before,
                                     since_id=since, after_id=after)
-        except errors.ApiErrorError as e:
+        except errors.ApiError as e:
             # NOT_MODIFIED, in this case, means no more messages.
             if e.args[0]['code'] == status.NOT_MODIFIED:
                 return None
@@ -220,7 +220,7 @@ class Group(Recipient):
         """
         try:
             endpoint.Groups.destroy(self.group_id)
-        except errors.ApiErrorError as e:
+        except errors.ApiError as e:
             if e.args[0]['code'] != status.OK:
                 raise
             return e.args[0]['code']
