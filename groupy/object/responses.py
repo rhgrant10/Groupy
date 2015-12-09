@@ -266,7 +266,7 @@ class Group(Recipient):
         """
         ids = (Member.identify(m) for m in members)
         r = endpoint.Members.add(self.id, *ids)
-        if refersh:
+        if refresh:
             self.refresh()
         return r['results_id']
 
