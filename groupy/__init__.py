@@ -9,7 +9,7 @@
 """
 __author__ = 'Robert Grant'
 __email__ = 'rhgrant10@gmail.com'
-__version__ = '0.6.2'
+__version__ = '0.6.3'
 
 import os
 import warnings
