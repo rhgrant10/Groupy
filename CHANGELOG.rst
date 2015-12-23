@@ -2,6 +2,17 @@
 Change Log
 ==========
 
+v0.6.3 (December 23, 2015)
+==========================
+
+- Added support for `tox` (envs py34,py35)
+- Added support for `bumpversion`
+- Added `make` file for handy development
+- Moved to `nosetests` and `coverage`
+- Split requirements into regular and testing
+- Updated some of the installation/troubleshooting docs
+- Merged in open pull-requests for various oversights (kudos to ScufyfNrdHrdr, rAntonioH, and JacobAMason)
+
 v0.6.2 (May 3, 2015)
 =========================
 
