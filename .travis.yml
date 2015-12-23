@@ -13,3 +13,4 @@ deploy:
   on:
     tags: true
     repo: rhgrant10/Groupy
+    condition: $TOXENV == py35
