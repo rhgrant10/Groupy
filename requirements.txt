@@ -1,3 +1,2 @@
-responses==0.3.0
 requests==2.3.0
 Pillow==2.5.3
