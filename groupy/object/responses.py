@@ -298,7 +298,7 @@ class Group(Recipient):
         except errors.ApiError as e:
             if e.args[0]['code'] != status.OK:
                 raise
-        if refersh:
+        if refresh:
             self.refresh()
         return True
 
