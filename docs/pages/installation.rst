@@ -13,9 +13,8 @@ Got it? Great!
 Now you'll need to *obtain your access token* so you can make API requests:
 
 1. Login to the `developer portal`_.
-2. Click the "Bots" button on the top menu bar.
-3. Click the "Click here to reveal" button.
-4. Copy your access token.
+2. Click the "Access Token" button on the top menu bar.
+3. Your access token is displayed in bold text.
 
 You must also *create a key file*.
 
@@ -37,7 +36,7 @@ Using ``pip``
 
 .. code-block:: console
 
-    $ pip3 install GroupyAPI
+    $ pip install GroupyAPI
 
 
 From Source
@@ -88,11 +87,35 @@ Installation is a simple matter of unzipping the file and copying over the
 	$ cd Groupy-master
 	$ cp -r groupy /usr/lib/python3/dist-packages	# see note above
 
+.. note:: This is the least-recommended means of installing a python package!
+
 .. _Groupy from GitHub: http://github.com/rhgrant10/Groupy
 .. _why: http://git-scm.com/downloads
 .. _master branch: https://github.com/rhgrant10/Groupy/archive/master.zip
 .. _dev branch: https://github.com/rhgrant10/Groupy/archive/dev.zip
 .. _this StackOverflow question: http://stackoverflow.com/questions/122327/how-do-i-find-the-location-of-my-python-site-packages-directory
+
+For Development
+---------------
+
+So, you want to improve Groupy? Awesome! The easiest way to get started is by cloning the repository and then pip installing in development mode:
+
+.. code-block:: console
+
+    $ git clone git clone https://github.com/rhgrant10/Groupy.git
+    $ cd Groupy
+    $ pyvenv env
+    $ souce env/bin/activate
+    $ pip install -r requirements.txt && pip install -r testing_requirements.txt
+    $ pip install -e .
+
+Now you're all set to start hacking on the code. You probably want to see how the existing tests are doing:
+
+.. code-block:: console
+
+    $ tox
+
+.. note:: You do *not* need an API token to run tests.
 
 Troubleshooting
 ===============
@@ -100,14 +123,24 @@ Troubleshooting
 Sometimes things go wrong. Here are some common things to check when
 encountering problems after installing.
 
-*It says no such package when I import groupy...*
 
-    Check whether you copied the ``groupy`` package into the correct python
-    package directory. It must be a directory on your ``sys.path``.
+*It says no such package when I import groupy...*
+    Check whether you copied the ``groupy`` package into the correct python package directory. It must be a directory on your ``sys.path``.
 
 *I get an unauthorized error when I try to do anything...*
-
     Check whether your key file (``.groupy.key`` by default) contains your API
-    token, and that ``groupy/config.py`` contains a definition for
-    ``KEY_LOCATION`` that correctly specifies the location and name of your key
-    file.
+    token, and that the value for ``KEY_LOCATION`` in ``groupy.config`` correctly specifies the location and name of your key file.
+
+    .. code-block:: python
+
+        >>> import groupy
+        >>> groupy.config.KEY_LOCATION
+        '~/.groupy.key'
+
+
+*I get a weird error when installing Groupy... something about compiling Pillow...*
+    Make sure you've installed the developer packages for python. On debian systems:
+
+    .. code-block:: console
+
+        $ sudo apt-get install python-dev python3.4-dev
