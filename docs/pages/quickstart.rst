@@ -106,7 +106,7 @@ to a group using its :func:`~groupy.object.responses.Recipient.post` method.
 
 .. code-block:: python
 
-    >>> from group import Group
+    >>> from groupy import Group
     >>> group = Group.list().first
     >>> group.post('Hello to you')
     >>> group.messages().newest.text
