@@ -7,6 +7,10 @@
 .. moduleauthor:: Robert Grant <rhgrant10@gmail.com>
 
 """
+__author__ = 'Robert Grant'
+__email__ = 'rhgrant10@gmail.com'
+__version__ = '0.6.2'
+
 import os
 import warnings
 from . import config
