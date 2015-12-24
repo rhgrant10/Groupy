@@ -38,13 +38,13 @@ setup(
     license="Apache Software License, Version 2.0",
     keywords=['api', 'GroupMe'],
     classifiers=[
-        # 'Development Status :: 1 - Planning'
-        # 'Development Status :: 2 - Pre-Alpha'
-        # 'Development Status :: 3 - Alpha'
-        'Development Status :: 4 - Beta'
-        # 'Development Status :: 5 - Production/Stable'
-        # 'Development Status :: 6 - Mature'
-        # 'Development Status :: 7 - Inactive'
+        # 'Development Status :: 1 - Planning',
+        # 'Development Status :: 2 - Pre-Alpha',
+        # 'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
+        # 'Development Status :: 5 - Production/Stable',
+        # 'Development Status :: 6 - Mature',
+        # 'Development Status :: 7 - Inactive',
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
