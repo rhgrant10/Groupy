@@ -21,9 +21,6 @@ Table of Contents
 	pages/installation
 	pages/quickstart
 	pages/advanced
+	pages/contributing
 	pages/api
 	pages/changelog
-
-
-
-

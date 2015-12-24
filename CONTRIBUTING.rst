@@ -15,10 +15,12 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://github.com/rhgrant10/groupy/issues.
+Report bugs at https://github.com/rhgrant10/Groupy/issues.
 
 If you are reporting a bug, please include:
 
+* Your python version
+* Your groupy version
 * Your operating system name and version.
 * Any details about your local setup that might be helpful in troubleshooting.
 * Detailed steps to reproduce the bug.
@@ -45,7 +47,7 @@ articles, and such.
 Submit Feedback
 ~~~~~~~~~~~~~~~
 
-The best way to send feedback is to file an issue at https://github.com/rhgrant10/groupy/issues.
+The best way to send feedback is to file an issue at https://github.com/rhgrant10/Groupy/issues.
 
 If you are proposing a feature:
 
@@ -57,38 +59,44 @@ If you are proposing a feature:
 Get Started!
 ------------
 
-Ready to contribute? Here's how to set up `groupy` for local development.
+Ready to contribute? Here's how to set up `Groupy` for local development.
 
-1. Fork the `groupy` repo on GitHub.
+1. Fork the `Groupy repo on GitHub <https://github.com/rhgrant10/Groupy>`_.
 2. Clone your fork locally::
 
-    $ git clone git@github.com:your_name_here/groupy.git
+    $ git clone git@github.com:YOUR_NAME_HERE/Groupy.git
 
-3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
+3. Install your local copy into a virtualenv. Since 3.3, Python ships with its own virutal environment creator: `venv`. Usage is simple::
 
-    $ mkvirtualenv groupy
-    $ cd groupy/
-    $ python setup.py develop
+    $ cd Groupy/
+    $ pyvenv env
+    $ source env/bin/activate
+    $ pip install -r requirements.txt && pip install testing_requirements.txt
 
-4. Create a branch for local development::
+4. Create a branch *from the dev branch* for local development::
 
-    $ git checkout -b name-of-your-bugfix-or-feature
+    $ git checkout -b name-of-your-bugfix-or-feature dev
 
    Now you can make your changes locally.
 
-5. When you're done making changes, check that your changes pass flake8 and the tests, including testing other Python versions with tox::
+5. When you're done making changes, check that your changes pass flake8, have great coverage, and pass all tests on all supported versions of python. Sounds tough, but `tox` makes this easy::
 
-    $ flake8 groupy tests
-    $ python setup.py test
     $ tox
 
-   To get flake8 and tox, just pip install them into your virtualenv.
+Note that if you update ``requirements.txt`` or ``testing_requirements.txt`` you must tell tox to recreate its virtual environments using the ``-r`` flag::
+
+    $ tox -r
 
 6. Commit your changes and push your branch to GitHub::
 
     $ git add .
-    $ git commit -m "Your detailed description of your changes."
+    $ git commit
     $ git push origin name-of-your-bugfix-or-feature
+
+Please make sure to:
+
+- *not* to commit sensitive data or extra files. You can use ``git add -p`` to add parts of files if necessary.
+- follow `proper git commit message standards <http://chris.beams.io/posts/git-commit/>`_. In particular, the first line should be under 60 characters long, and any detail should begin on the 3rd line (the second line must be blank).
 
 7. Submit a pull request through the GitHub website.
 
@@ -97,19 +105,11 @@ Pull Request Guidelines
 
 Before you submit a pull request, check that it meets these guidelines:
 
-1. The pull request should include tests.
-2. If the pull request adds functionality, the docs should be updated. Put
-   your new functionality into a function with a docstring, and add the
+1. The pull request should include **tests**.
+2. If the pull request adds functionality, the **docs** should be updated. Put
+   your new functionality into a function with a **docstring**, and add the
    feature to the list in README.rst.
 3. The pull request should work for Python 3.4 and 3.5. Check
-   https://travis-ci.org/rhgrant10/groupy/pull_requests
+   https://travis-ci.org/rhgrant10/Groupy/pull_requests
    and make sure that the tests pass for all supported Python versions.
 
-Tips
-----
-
-To run a subset of tests::
-
-    $ python -m unittest tests.test_listeners.py
-
-where `test_listeners.py` can be any test file in `tests/`.
