@@ -2,7 +2,7 @@
 Groupy
 ======
 
-.. image:: https://pypip.in/v/GroupyAPI/badge.png
+.. image:: https://img.shields.io/pypi/v/GroupyAPI.svg
 	:target: https://pypi.python.org/pypi/GroupyAPI
 
 .. image:: https://travis-ci.org/rhgrant10/Groupy.svg?branch=dev
@@ -11,8 +11,7 @@ Groupy
 .. image:: https://readthedocs.org/projects/groupy/badge/?version=latest
 	:target: https://groupy.readthedocs.org/en/latest
 
-
-The simple yet powerful GroupMe API wrapper for Python 3.
+The simple yet powerful GroupMe API wrapper for Python.
 
 Installation
 ============
