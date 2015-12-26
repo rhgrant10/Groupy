@@ -38,6 +38,17 @@ class RecipientLengthTests(unittest.TestCase):
         self.assertEqual(len(self.recipient), 10)
 
 
+class RecipientPostEmptyMessageTests(unittest.TestCase):
+    @mock.patch('groupy.api.endpoint.Endpoint')
+    def setUp(self, mock_endpoint):
+        recipient = Recipient(mock_endpoint(), 'm', 'i', i='idkey', m='mkey')
+        self.recipient = recipient
+
+    def test_message_must_contain_text_or_attachments(self):
+        with self.assertRaises(ValueError):
+            self.recipient.post(text=None)
+
+
 class RecipientPostShortMessageTests(unittest.TestCase):
     @mock.patch('groupy.api.endpoint.Endpoint')
     def setUp(self, mock_endpoint):
