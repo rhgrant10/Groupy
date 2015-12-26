@@ -27,6 +27,17 @@ import groupy
 from groupy.object.responses import Recipient
 
 
+class RecipientLengthTests(unittest.TestCase):
+    @mock.patch('groupy.api.endpoint.Endpoint')
+    def setUp(self, mock_endpoint):
+        recipient = Recipient(mock_endpoint(), 'm', 'i', i='idkey', m='mkey')
+        recipient.message_count = 10
+        self.recipient = recipient
+
+    def test_length_is_zero_if_no_messages(self):
+        self.assertEqual(len(self.recipient), 10)
+
+
 class RecipientPostShortMessageTests(unittest.TestCase):
     @mock.patch('groupy.api.endpoint.Endpoint')
     def setUp(self, mock_endpoint):
