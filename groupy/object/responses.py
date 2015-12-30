@@ -583,7 +583,7 @@ class Bot(ApiResponse):
         """
         bot = endpoint.Bots.create(name, group.group_id,
                                    avatar_url, callback_url)
-        return cls(**bot)
+        return cls(**bot['bot'])
 
     @classmethod
     def list(cls):
