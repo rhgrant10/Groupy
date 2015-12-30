@@ -8,7 +8,6 @@ from PIL import Image as PImage
 import time
 import json
 
-
 class Endpoint:
     '''An API endpoint capable of building a url and extracting data from the
     response.
@@ -445,12 +444,15 @@ class Bots(Endpoint):
         """
         r = requests.post(
             cls.build_url(),
-            params={
-                'name': name,
-                'group_id': group_id,
-                'avatar_url': avatar_url,
-                'callback_url': callback_url
-            }
+            data=json.dumps({
+                "bot": {
+                    'name': name,
+                    'group_id': group_id,
+                    'avatar_url': avatar_url,
+                    'callback_url': callback_url
+                }
+            }),
+            headers={'content-type': 'application/json'}
         )
         return cls.response(r)
 
@@ -466,11 +468,12 @@ class Bots(Endpoint):
         """
         r = requests.post(
             cls.build_url('post'),
-            params={
+            data=json.dumps({
                 'bot_id': bot_id,
                 'text': text,
                 'picture_url': picture_url
-            }
+            }),
+            headers={'content-type': 'application/json'}
         )
         return cls.response(r)
 
