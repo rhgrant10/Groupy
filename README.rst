@@ -13,28 +13,12 @@ Groupy
 
 The simple yet powerful GroupMe API wrapper for Python.
 
-Installation
-============
+ - `Full Documentation`_
+     - `Installation`_
+     - `Basic Usage`_
+     - `Contributing`_
 
-1) ``pip3 install GroupyAPI``
-2) Login at ``https://dev.groupme.com/session/new``.
-3) Click "Bots" menu button at the top.
-4) Click "Click here to reveal" then copy your token.
-5) Paste your token into ``~/.groupy.key``.
-
-Help
-====
-
-Read the `full documentation`_ for help using **Groupy**.
-
-.. _full documentation: http://groupy.readthedocs.org/en/latest/
-
-Contribution Guidlines
-======================
-
-Please feel free to help! You can...
-
-- submit new issues
-- fix bugs and submit a pull request
-- suggest new features
-- implement planned features
+.. _Full Documentation: http://groupy.readthedocs.org/en/latest/
+.. _Installation: http://groupy.readthedocs.org/en/latest/pages/installation.html
+.. _Basic Usage: http://http://groupy.readthedocs.org/en/latest/pages/quickstart.html
+.. _Contributing: http://groupy.readthedocs.org/en/latest/pages/contributing.html
