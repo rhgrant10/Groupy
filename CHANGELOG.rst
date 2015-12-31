@@ -2,6 +2,18 @@
 Change Log
 ==========
 
+v0.6.4 (December 31, 2015)
+==========================
+
+- Fixed bugs with creating bots (kudos to qlyoung)
+- Fixed bugs with posting messages as bots (kudos again to qlyoung)
+- Fixed typo bugs in ``Group`` class (kudos to t3zla)
+- Fixed missing Python 3 trove classifier
+- Added documentation for contributions
+- Updated documentation for setup and installation
+- Added a couple more unit tests
+- Reconfigured tox test results to not clobber results from other environments
+
 v0.6.3 (December 23, 2015)
 ==========================
 
