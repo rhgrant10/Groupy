@@ -8,10 +8,8 @@
 This module contains classes for the different types of attachments.
 
 """
-
 from ..api import endpoint
 
-import json
 
 class Attachment:
     """Base class for attachments.
