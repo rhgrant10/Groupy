@@ -128,7 +128,7 @@ class MessagePager(FilterList):
 
     def older(self):
         """Return the previous (older) page of messages.
-        
+
         :returns: an older page of messages
         :rtype: :class:`~groupy.object.listers.MessagePager`
         """
@@ -136,7 +136,7 @@ class MessagePager(FilterList):
 
     def inewer(self):
         """Add in-place the next (newer) page of messages.
-        
+
         :returns: ``True`` if successful, ``False`` otherwise
         :rtype: :obj:`bool`
         """
@@ -151,7 +151,7 @@ class MessagePager(FilterList):
 
     def iolder(self):
         """Add in-place the previous (older) page of messages.
-        
+
         :returns: ``True`` if successful, ``False`` otherwise
         :rtype: :obj:`bool`
         """
