@@ -1,12 +1,13 @@
+import time
+import json
+from io import BytesIO
+
+import requests
+from PIL import Image as PImage
+
 from .. import config
 from . import errors
 
-import requests
-
-from io import BytesIO
-from PIL import Image as PImage
-import time
-import json
 
 class Endpoint:
     '''An API endpoint capable of building a url and extracting data from the
@@ -18,8 +19,7 @@ class Endpoint:
 
     @classmethod
     def build_url(cls, path=None, *args):
-        """Build and return a url extended with *path* and filled in with
-        *args*.
+        """Build and return a url extended by *path* and filled in with *args*.
 
         :param str path: a suffix for the final URL. If *args* are present,
             this should be a python format string pertaining to the given
@@ -36,6 +36,8 @@ class Endpoint:
             else:
                 url = '/'.join([cls.url, str(path)])
         except TypeError:
+            # This can only occur when cls.url is not a string! Give a better
+            # error message instead of letting this crap happen.
             url = cls.url
         return '?'.join([url, 'token={}'.format(config.API_KEY)])
 
@@ -43,8 +45,9 @@ class Endpoint:
     def response(cls, r):
         """Extract the data from the API response *r*.
 
-        This method essentially strips the actual response of the envelope while
-        raising an ApiError if it contains one or more errors.
+        This method essentially strips the actual response of the envelope
+        while raising an :class:`~errors.ApiError` if it contains one or more
+        errors.
 
         :param r: the HTTP response from an API call
         :type r: :class:`requests.Response`
@@ -87,9 +90,7 @@ class Groups(Endpoint):
         :returns: the group with the given *group_id*
         :rtype: :class:`dict`
         """
-        r = requests.get(
-            cls.build_url(group_id)
-        )
+        r = requests.get(cls.build_url(group_id))
         return cls.response(r)
 
     @classmethod
@@ -269,7 +270,7 @@ class Messages(Endpoint):
         :raises ValueError: if more than one of ``before_id``, ``after_id`` or
             ``since_id`` are specified
         """
-         # Check arguments.
+        # Check arguments.
         not_None_args = []
         for arg in (before_id, since_id, after_id):
             if arg is not None:
