@@ -25,6 +25,7 @@ from .attachments import AttachmentFactory
 
 __all__ = ['Recipient', 'Group', 'Member', 'Message', 'Bot', 'User']
 
+
 class ApiResponse(object):
     """Base class for all API responses.
 

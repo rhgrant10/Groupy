@@ -14,10 +14,10 @@ from ..api import endpoint
 class Attachment:
     """Base class for attachments.
 
-    :param str type: the type of the attachment
+    :param str type_: the type of the attachment
     """
-    def __init__(self, type):
-        self.type = type
+    def __init__(self, type_):
+        self.type = type_
 
     def as_dict(self):
         """Return the attachment as a dictionary.
@@ -38,8 +38,8 @@ class GenericAttachment(Attachment):
     """
     def __init__(self, type, **kwargs):
         super().__init__(type)
-        for k in kwargs:
-            setattr(self, k, kwargs[k])
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
 
 class Image(Attachment):
@@ -167,8 +167,8 @@ class Mentions(Attachment):
     """
     def __init__(self, user_ids, loci=None):
         super().__init__('mentions')
-        self.loci = loci
         self.user_ids = user_ids
+        self.loci = loci
 
     def __repr__(self):
         return "Mentions({!r})".format(self.user_ids)
