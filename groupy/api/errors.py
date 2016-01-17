@@ -10,9 +10,10 @@ GroupMe API.
 
 """
 
+
 class GroupMeError(Exception):
     """A general GroupMe error.
-    
+
     All exceptions raised by Groupy are descendents of this exception.
     """
     pass

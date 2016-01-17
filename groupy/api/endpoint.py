@@ -1,3 +1,14 @@
+"""
+.. module:: endpoint
+    :platform: Unix, Windows
+    :synopsis: A module containing the various API endpoints
+
+.. moduleauthor:: Robert Grant <rhgrant10@gmail.com>
+
+This module contains classes that represent the many endpoints in the GroupMe
+API.
+
+"""
 import time
 import json
 from io import BytesIO
@@ -380,9 +391,9 @@ class Likes(Endpoint):
 
         The ``conversation_id`` is poorly documented. For messages in a group,
         it corresponds to the ``group_id`` (or ``id`` since they seem to always
-        be identical). For direct messages, it corresponds to the ``user_id`` of
-        both conversation participants sorted lexicographically and concatenated
-        with a plus sign ("+").
+        be identical). For direct messages, it corresponds to the ``user_id``
+        of both conversation participants sorted lexicographically and
+        concatenated with a plus sign ("+").
 
     """
     url = '/'.join([Endpoint.url, 'messages'])

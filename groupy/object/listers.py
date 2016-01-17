@@ -1,6 +1,16 @@
-from ..api import errors
+"""
+.. module:: listers
+    :platform: Unix, Windows
+    :synopsis: A module containing classes used for lists of objects
 
+.. moduleauthor:: Robert Grant <rhgrant10@gmail.com>
+
+This module contains classes that provide filterable lists and message pagers.
+
+"""
 import operator
+
+from ..api import errors
 
 
 class FilterList(list):
