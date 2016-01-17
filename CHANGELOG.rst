@@ -2,6 +2,14 @@
 Change Log
 ==========
 
+v0.6.5 (January 17, 2016)
+=========================
+
+- Fixed typo the ``Bot`` class that caused the bots to have a "gorup_id" (kudos to JCDJulian)
+- All modules except ``object/listers.py`` and ``object/responses.py`` now have full test coverage
+- Updated AUTHORS.rst with all contributors to date (feel free to PR with an email address added to your username)
+- Fixed leftover markdown formatting in the CHANGELOG.rst file
+
 v0.6.4 (December 31, 2015)
 ==========================
 
@@ -17,49 +25,49 @@ v0.6.4 (December 31, 2015)
 v0.6.3 (December 23, 2015)
 ==========================
 
-- Added support for `tox` (envs py34,py35)
-- Added support for `bumpversion`
-- Added `make` file for handy development
-- Moved to `nosetests` and `coverage`
+- Added support for ``tox`` (envs py34,py35)
+- Added support for ``bumpversion``
+- Added ``make`` file for handy development
+- Moved to ``nosetests`` and ``coverage``
 - Split requirements into regular and testing
 - Updated some of the installation/troubleshooting docs
 - Merged in open pull-requests for various oversights (kudos to ScufyfNrdHrdr, rAntonioH, and JacobAMason)
 
 v0.6.2 (May 3, 2015)
-=========================
+====================
 
 - Fixed problem when posting messages as a bot
-- Added `refresh` option for automatically updating group information after addition/removal of members
+- Added ``refresh`` option for automatically updating group information after addition/removal of members
 - Updated documentation
 
 v0.6.1 (April 25, 2015)
-=========================
+=======================
 
-- Fixed code in `responses.py` that was still using the old exception class name
-- Changed the `Member.remove()` method to correctly use the `id` of the member rather than the `user_id`
+- Fixed code in ``responses.py`` that was still using the old exception class name
+- Changed the ``Member.remove()`` method to correctly use the ``id`` of the member rather than the ``user_id``
 - Slight beefing up of some documentation
 
 v0.5.8 (December 9, 2014)
 =========================
 
-- Fixed problems with `requirements.txt` and `setup.py` that caused problems installing from `pip`
+- Fixed problems with ``requirements.txt`` and ``setup.py`` that caused problems installing from ``pip``
 - Re-wrote many of the unittests (still in progress)
 - Added Travis-CI and PyPI badges to the readme
-- Bumped requirement for dropbox's `responses` to 0.3.0
-- Now uses `setup` from `setuptools` rather than `distutils.core`
+- Bumped requirement for dropbox's ``responses`` to 0.3.0
+- Now uses ``setup`` from ``setuptools`` rather than ``distutils.core``
 
 v0.5.3 (September 19, 2014)
 ===========================
 
-- Fix packaging bug that caused inner packages to not be installed via `pip3`
+- Fix packaging bug that caused inner packages to not be installed via ``pip3``
 
 v0.5.2 (September 14, 2014)
 ===========================
 
-- Now installable via `pip3`:
+- Now installable via ``pip3``:
 
     .. code-block:: console
-    
+
         $ pip3 install GroupyAPI
 
 
