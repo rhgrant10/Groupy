@@ -559,7 +559,7 @@ class Bot(ApiResponse):
     def __init__(self, **kwargs):
         super().__init__()
         self.bot_id = kwargs.get('bot_id')
-        self.gorup_id = kwargs.get('group_id')
+        self.group_id = kwargs.get('group_id')
         self.name = kwargs.get('name')
         self.avatar_url = kwargs.get('avatar_url')
         self.callback_url = kwargs.get('callback_url')
