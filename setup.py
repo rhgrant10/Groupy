@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os
 try:
     from setuptools import setup
 except ImportError:
