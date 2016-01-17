@@ -1,135 +1,180 @@
-import re
 import json
 import urllib
-import builtins
 import unittest
-import requests
-import responses
-
+from urllib.parse import urlsplit
 from unittest.mock import patch
 from unittest.mock import mock_open
+
+import requests
+import responses
 
 from groupy import config
 from groupy.api import errors
 from groupy.api import endpoint
 
 
-def fake_response(response=None, code=200, errors=None):
+def fake_response(code=200, errors=None, **kwargs):
     r = requests.Response()
     r.status_code = code
-    if response is None:
-        content_ = ' '
+    parcel = envelope(code=code, errors=errors, **kwargs)
+    if parcel:
+        data = json.dumps(parcel)
     else:
-        content_ = json.dumps(envelope(response, code, errors))
-    r._content = content_.encode('utf-8')
+        data = ' '
+    r._content = data.encode('utf-8')
     return r
 
 
-def envelope(response=None, code=200, errors=None):
+def envelope(code=200, errors=None, **kwargs):
     """Return a response envelope."""
-    env = {
-        'response': response,
-        'meta': {'code': code}
-    }
+    if not kwargs:
+        return None
+    env = {'meta': {'code': code}}
     if errors is not None:
         env['meta']['errors'] = errors
-    return env
+    return dict(env, **kwargs)
+
+
+def setUpModule():
+    endpoint.Endpoint.url = 'http://example.com'
+    config.API_KEY = 'TOKEN'
 
 
 class UrlBuildingTests(unittest.TestCase):
-    def test_valid_input(self):
-        def url(*args):
-            return '/'.join([config.API_URL] + list(args))
+    def test_token_included_as_param(self):
+        url = endpoint.Endpoint.build_url()
+        params = urlsplit(url).query
+        self.assertIn('token=TOKEN', params)
 
-        cases = {
-            (None, ()): url(),
-            (1, ()): url('1'),
-            ('somepath', ()): url('somepath'),
-            ('somepath/', ()): url('somepath/'),
-            ('/somepath', ()): url('/somepath'),
-            ('/somepath/', ()): url('/somepath/'),
-            ('somepath/{}', (1, )): url('somepath/1'),
-            ('{}/somepath', (1, )): url('1/somepath'),
-            ('/{}/somepath', (1, )): url('/1/somepath'),
-            ('/{}/{}/', (1, 2)): url('/1/2/'),
-            ('/{}/{}/{}', (1, 2, 3)): url('/1/2/3')
-        }
-        for (path, args), correct_url in cases.items():
-            with self.subTest(path=path, args=args):
-                url = endpoint.Endpoint.build_url(path, *args)
-                url_no_qs = url.split('?', 1)[0]
-                self.assertEqual(url_no_qs, correct_url)
+    def test_no_path_and_no_args(self):
+        url = endpoint.Endpoint.build_url()
+        path = urlsplit(url).path
+        self.assertEqual(path, '')
 
-    def test_invalid_input(self):
-        cases = {
-            ('{}', ()): IndexError,
-            ('{}{}', (1,)): IndexError,
-            ('{}{}{}', (1, 2)): IndexError,
-        }
-        for (path, args), err in cases.items():
-            with self.subTest(path=path, args=args):
-                with self.assertRaises(err):
-                    url = endpoint.Endpoint.build_url(path, *args)
+    def test_literal_path(self):
+        url = endpoint.Endpoint.build_url('path')
+        path = urlsplit(url).path
+        self.assertEqual(path, '/path')
+
+    def test_extra_args_arg_ignored(self):
+        url = endpoint.Endpoint.build_url('path', 1)
+        path = urlsplit(url).path
+        self.assertEqual(path, '/path')
+
+    def test_one_numeric_arg(self):
+        url = endpoint.Endpoint.build_url('{}', 1)
+        path = urlsplit(url).path
+        self.assertEqual(path, '/1')
+
+    def test_multiple_numeric_args(self):
+        url = endpoint.Endpoint.build_url('{}/{}', 1, 2)
+        path = urlsplit(url).path
+        self.assertEqual(path, '/1/2')
+
+    def test_one_string_arg(self):
+        url = endpoint.Endpoint.build_url('{}', 'arg1')
+        path = urlsplit(url).path
+        self.assertEqual(path, '/arg1')
+
+    def test_multiple_string_args(self):
+        url = endpoint.Endpoint.build_url('{}/{}', 'arg1', 'arg2')
+        path = urlsplit(url).path
+        self.assertEqual(path, '/arg1/arg2')
+
+    def test_multiple_string_args_used_in_order_given(self):
+        url = endpoint.Endpoint.build_url('{}/{}', 'arg2', 'arg1')
+        path = urlsplit(url).path
+        self.assertEqual(path, '/arg2/arg1')
+
+    def test_nonstring_path_converted_to_string(self):
+        url = endpoint.Endpoint.build_url(list())
+        path = urlsplit(url).path
+        self.assertEqual(path, '/[]')
+
+    def test_not_enough_args_raises_IndexError(self):
+        with self.assertRaises(IndexError):
+            endpoint.Endpoint.build_url('{}')
+
+    def test_nonstring_endpoint_url_raises_TypeError_with_no_args(self):
+        old = endpoint.Endpoint.url
+        endpoint.Endpoint.url = object()
+        with self.assertRaises(TypeError):
+            endpoint.Endpoint.build_url()
+        endpoint.Endpoint.url = old
+
+    def test_nonstring_endpoint_url_raises_TypeError_with_path(self):
+        old = endpoint.Endpoint.url
+        endpoint.Endpoint.url = object()
+        with self.assertRaises(TypeError):
+            endpoint.Endpoint.build_url('path')
+        endpoint.Endpoint.url = old
+
+    def test_nonstring_endpoint_url_raises_TypeError_with_path_and_args(self):
+        old = endpoint.Endpoint.url
+        endpoint.Endpoint.url = object()
+        with self.assertRaises(TypeError):
+            endpoint.Endpoint.build_url('path', 'arg')
+        endpoint.Endpoint.url = old
 
 
 class ResponseExtractionTests(unittest.TestCase):
-    def test_normal_response(self):
-        correct = {'key': 'value'}
-        for code in [200, 300, 400, 500]:
-            with self.subTest(code=code):
-                response = endpoint.Endpoint.response(
-                    fake_response(correct, code)
-                    )
-                self.assertEqual(response, correct)
+    def test_response_extracted_when_no_errors(self):
+        without_errors = fake_response(response='content')
+        response = endpoint.Endpoint.response(without_errors)
+        self.assertEqual(response, 'content')
 
-    def test_error_in_response(self):
-        for code in [200, 300, 400, 500]:
-            with self.subTest(code=code):
-                with self.assertRaises(errors.ApiError):
-                    extracted = endpoint.Endpoint.response(
-                        fake_response(
-                            {'key': 'value'},
-                            code,
-                            ['error']
-                        )
-                    )
+    def test_response_with_errors_raises_ApiError(self):
+        with_errors = fake_response(response='content', errors=['error1'])
+        with self.assertRaises(errors.ApiError):
+            endpoint.Endpoint.response(with_errors)
 
-    def test_empty_response(self):
-        for code in [300, 400, 500]:
-            with self.subTest(code=code):
-                with self.assertRaises(errors.ApiError):
-                    endpoint.Endpoint.response(fake_response(code=code))
+
+class EqualClampTests(unittest.TestCase):
+    def test_value_lower_and_upper_are_zero(self):
+        result = endpoint.Endpoint.clamp(0, lower=0, upper=0)
+        self.assertEqual(result, 0)
+
+    def test_value_lower_and_upper_are_positive(self):
+        result = endpoint.Endpoint.clamp(1, lower=1, upper=1)
+        self.assertEqual(result, 1)
+
+    def test_value_lower_and_upper_are_negative(self):
+        result = endpoint.Endpoint.clamp(-1, lower=-1, upper=-1)
+        self.assertEqual(result, -1)
 
 
 class ClampTests(unittest.TestCase):
-    def test_normal(self):
-        cases = {
-            ( 0, -1,  1):  0,
-            (-1, -1,  1): -1,
-            ( 1, -1,  1):  1,
-            (-2, -1,  1): -1,
-            ( 2, -1,  1):  1,
-            ( 0,  0,  0):  0,
-            ( 1,  1,  1):  1,
-            (-1, -1, -1): -1
-        }
-        for (value, lower, upper), answer in cases.items():
-            with self.subTest(value=value):
-                cvalue = endpoint.Endpoint.clamp(value, lower, upper)
-                self.assertEqual(cvalue, answer)
+    def test_value_between_lower_and_upper_produces_value(self):
+        lower, value, upper = 1, 2, 3
+        result = endpoint.Endpoint.clamp(value, lower=lower, upper=upper)
+        self.assertEqual(result, value)
 
-    def test_inverted_bounds(self):
-        cases = {
-            ( 0,  1, -1):  1,
-            (-1,  1, -1):  1,
-            ( 1,  1, -1):  1,
-            (-2,  1, -1):  1,
-            ( 2,  1, -1):  1,
-        }
-        for (value, lower, upper), answer in cases.items():
-            with self.subTest(value=value):
-                cvalue = endpoint.Endpoint.clamp(value, lower, upper)
-                self.assertEqual(cvalue, answer)
+    def test_value_is_less_than_lower_produces_lower(self):
+        lower, value, upper = 2, 1, 3
+        result = endpoint.Endpoint.clamp(value, lower=lower, upper=upper)
+        self.assertEqual(result, lower)
+
+    def test_value_is_more_than_upper_produces_upper(self):
+        lower, value, upper = 1, 3, 2
+        result = endpoint.Endpoint.clamp(value, lower=lower, upper=upper)
+        self.assertEqual(result, upper)
+
+
+class InvertedClampTests(unittest.TestCase):
+    def test_value_between_lower_and_upper_produces_given_lower(self):
+        lower, value, upper = 3, 2, 1
+        result = endpoint.Endpoint.clamp(value, lower=lower, upper=upper)
+        self.assertEqual(result, lower)
+
+    def test_value_is_greatest_produces_given_lower(self):
+        value, lower, upper = 3, 2, 1
+        result = endpoint.Endpoint.clamp(value, lower=lower, upper=upper)
+        self.assertEqual(result, lower)
+
+    def test_value_is_least_produces_given_lower(self):
+        lower, upper, value = 3, 2, 1
+        result = endpoint.Endpoint.clamp(value, lower=lower, upper=upper)
+        self.assertEqual(result, lower)
 
 
 class CorrectUrlTests(unittest.TestCase):
@@ -166,9 +211,7 @@ class CorrectUrlTests(unittest.TestCase):
         self.assert_url_correct(
             responses.GET,
             'https://api.groupme.com/v3/groups',
-            endpoint.Groups.index,
-                page=12, per_page=34
-        )
+            endpoint.Groups.index, page=12, per_page=34)
 
     @responses.activate
     def test_groups_show(self):
@@ -184,9 +227,9 @@ class CorrectUrlTests(unittest.TestCase):
             responses.POST,
             'https://api.groupme.com/v3/groups',
             endpoint.Groups.create,
-                name='name', description='one',
-                image_url='http://i.groupme.com/someimage.png',
-                share=True
+            name='name', description='one',
+            image_url='http://i.groupme.com/someimage.png',
+            share=True
         )
 
     @responses.activate
@@ -195,10 +238,10 @@ class CorrectUrlTests(unittest.TestCase):
             responses.POST,
             'https://api.groupme.com/v3/groups/1/update',
             endpoint.Groups.update, '1',
-                name='name',
-                description='one',
-                image_url='http://i.groupme.com/someimage.png',
-                share=True
+            name='name',
+            description='one',
+            image_url='http://i.groupme.com/someimage.png',
+            share=True
         )
 
     @responses.activate
@@ -211,7 +254,8 @@ class CorrectUrlTests(unittest.TestCase):
 
     @responses.activate
     def test_members_add(self):
-        self.assert_url_correct(responses.POST,
+        self.assert_url_correct(
+            responses.POST,
             'https://api.groupme.com/v3/groups/1/members/add',
             endpoint.Members.add, '1'
         )
@@ -238,7 +282,7 @@ class CorrectUrlTests(unittest.TestCase):
             responses.GET,
             'https://api.groupme.com/v3/groups/1/messages',
             endpoint.Messages.index, '1',
-                limit=100
+            limit=100
         )
 
     @responses.activate
@@ -255,10 +299,10 @@ class CorrectUrlTests(unittest.TestCase):
             responses.GET,
             'https://api.groupme.com/v3/direct_messages',
             endpoint.DirectMessages.index,
-                other_user_id='1',
-                before_id='2',
-                since_id='3',
-                after_id='4'
+            other_user_id='1',
+            before_id='2',
+            since_id='3',
+            after_id='4'
         )
 
     @responses.activate
@@ -299,10 +343,10 @@ class CorrectUrlTests(unittest.TestCase):
             responses.POST,
             'https://api.groupme.com/v3/bots',
             endpoint.Bots.create,
-                name='name',
-                group_id='group_id',
-                avatar_url='avatar_url',
-                callback_url='callback_url'
+            name='name',
+            group_id='group_id',
+            avatar_url='avatar_url',
+            callback_url='callback_url'
         )
 
     @responses.activate
@@ -311,9 +355,9 @@ class CorrectUrlTests(unittest.TestCase):
             responses.POST,
             'https://api.groupme.com/v3/bots/post',
             endpoint.Bots.post,
-                bot_id='bot_id',
-                text='Hello',
-                picture_url='picture_url'
+            bot_id='bot_id',
+            text='Hello',
+            picture_url='picture_url'
         )
 
     @responses.activate
@@ -322,7 +366,7 @@ class CorrectUrlTests(unittest.TestCase):
             responses.POST,
             'https://api.groupme.com/v3/bots/destroy',
             endpoint.Bots.destroy,
-                bot_id='bot_id'
+            bot_id='bot_id'
         )
 
     @responses.activate
@@ -339,8 +383,8 @@ class CorrectUrlTests(unittest.TestCase):
             responses.POST,
             'https://api.groupme.com/v3/users/sms_mode',
             endpoint.Sms.create,
-                duration=1,
-                registration_id='2'
+            duration=1,
+            registration_id='2'
         )
 
     @responses.activate
@@ -358,7 +402,7 @@ class CorrectUrlTests(unittest.TestCase):
                 responses.POST,
                 'https://image.groupme.com/pictures',
                 endpoint.Images.create,
-                    image=open('nosuchfile')
+                image=open('nosuchfile')
             )
 
     @responses.activate
@@ -367,8 +411,20 @@ class CorrectUrlTests(unittest.TestCase):
             responses.GET,
             'https://i.groupme.com/123456789.jpg',
             endpoint.Images.download,
-                url='https://i.groupme.com/123456789.jpg'
+            url='https://i.groupme.com/123456789.jpg'
         )
+
+
+class MessageListingArgTests(unittest.TestCase):
+    def test_multiple_message_ids_raises_ValueError(self):
+        with self.assertRaises(ValueError):
+            endpoint.Messages.index(1, before_id='10', after_id='5')
+
+
+class ImageResponseTests(unittest.TestCase):
+    def test_payload_returned_from_json(self):
+        payload = endpoint.Images.response(fake_response(payload='content'))
+        self.assertEqual(payload, 'content')
 
 
 if __name__ == '__main__':

@@ -10,4 +10,9 @@ Development Lead
 Contributors
 ------------
 
-None yet. Why not be the first?
+* fraben
+* JacobAMason
+* JCDJullian
+* rAntonioH
+* ScufyfNrdHrdr
+* t3zla

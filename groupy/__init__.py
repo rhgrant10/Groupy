@@ -7,13 +7,17 @@
 .. moduleauthor:: Robert Grant <rhgrant10@gmail.com>
 
 """
+import os
+import warnings
+
+from . import config
+from .object.responses import Group, User, Bot, Member
+from .object.listers import FilterList
+from .object import attachments
+
 __author__ = 'Robert Grant'
 __email__ = 'rhgrant10@gmail.com'
 __version__ = '0.6.4'
-
-import os
-import warnings
-from . import config
 
 
 def _attempt_to_load_apikey():
@@ -27,10 +31,6 @@ def _attempt_to_load_apikey():
             warnings.warn(
                 'key file {} exists but could not be opened: {}'.format(
                     config.KEY_LOCATION,
-                    str(e)))    
+                    str(e)))
 
 _attempt_to_load_apikey()
-
-from .object.responses import Group, User, Bot, Member
-from .object.listers import FilterList
-from .object import attachments

@@ -25,6 +25,7 @@ from .attachments import AttachmentFactory
 
 __all__ = ['Recipient', 'Group', 'Member', 'Message', 'Bot', 'User']
 
+
 class ApiResponse(object):
     """Base class for all API responses.
 
@@ -41,7 +42,7 @@ class ApiResponse(object):
 class Recipient(ApiResponse):
     """Base class for Group and Member.
 
-    Recipients can post and recieve messages.
+    Recipients can post and receive messages.
 
     :param endpoint: the API endpoint for messages
     :type endpoint: :class:`~groupy.api.endpoint.Endpoint`
@@ -122,7 +123,7 @@ class Recipient(ApiResponse):
         # Fetch the messages.
         try:
             r = self._endpoint.index(self._idkey, before_id=before,
-                                    since_id=since, after_id=after)
+                                     since_id=since, after_id=after)
         except errors.ApiError as e:
             # NOT_MODIFIED, in this case, means no more messages.
             if e.args[0]['code'] == status.NOT_MODIFIED:
@@ -204,7 +205,6 @@ class Group(Recipient):
                 next_groups = None
         return FilterList(Group(**g) for g in groups)
 
-
     @classmethod
     def create(cls, name, description=None, image_url=None, share=True):
         """Create a new group.
@@ -248,7 +248,7 @@ class Group(Recipient):
         :param bool share: whether to generate a share URL
         """
         endpoint.Groups.update(name=name, description=description,
-                          image_url=image_url, share=share)
+                               image_url=image_url, share=share)
         self.refresh()
 
     def members(self):
@@ -375,10 +375,10 @@ class Member(Recipient):
     def identification(self):
         """Return the identification of the member.
 
-        A member is identified by their ``nickname`` and ``user_id`` properties.
-        If the member does not yet have a GUID, a new one is created and
-        assigned to them (and is returned alongside the ``nickname`` and
-        ``user_id`` properties).
+        A member is identified by their ``nickname`` and ``user_id``
+        properties. If the member does not yet have a GUID, a new one is
+        created and assigned to them (and is returned alongside the
+        ``nickname`` and ``user_id`` properties).
 
         :returns: the ``nickname``, ``user_id``, and ``guid`` of the member
         :rtype: :class:`dict`
@@ -671,11 +671,12 @@ class User(ApiResponse):
 
         .. note::
 
-            If the ``registration_token`` is omitted, no push notifications will
-            be suppressed and the user will recieve *both* text messages *and*
-            push notifications.
+            If the ``registration_token`` is omitted, no push notifications
+            will be suppressed and the user will recieve *both* text messages
+            *and* push notifications.
 
-        :param int duration: the number of hours for which to send text messages
+        :param int duration: the number of hours for which to send text
+            messages
         :param str registration_token: the push notification token for which
             messages should be suppressed
         :returns: ``True`` if successful
@@ -708,4 +709,3 @@ class User(ApiResponse):
                 raise
             return e.args[0]['code']
         return True
-

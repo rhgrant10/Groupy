@@ -5,19 +5,6 @@
 
 Unit tests for the responses module.
 
-Recipient(mock_endpoint, 'mkey', 'idkey'):
- - post()
- - post(None)
- - post('')
-    * assert raises ValueError
- - post('some text')
-    * calls it's endpoint.create method
-        - once with arguments ('idkey', 'some text')
- - post('some text that ... is 500 chars in length')
-    * calls it's endpoint.create method twice
-        - once with arguments ('idkey', 'some text that ... ')
-        - once with arguments ('idkey', 'is 500 chars in length')
-
 """
 import unittest
 from unittest import mock
