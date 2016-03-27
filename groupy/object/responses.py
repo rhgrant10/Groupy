@@ -247,7 +247,8 @@ class Group(Recipient):
         :param str image_url: the URL for the new group image
         :param bool share: whether to generate a share URL
         """
-        endpoint.Groups.update(name=name, description=description,
+        endpoint.Groups.update(self.group_id,
+                               name=name, description=description,
                                image_url=image_url, share=share)
         self.refresh()
 
