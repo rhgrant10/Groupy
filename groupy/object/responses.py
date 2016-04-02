@@ -386,7 +386,7 @@ class Member(Recipient):
         return {
             'nickname': self.nickname,
             'user_id': self.user_id,
-            'guid': self._guid         # new guid set if nonexistant
+            'guid': self.guid         # new guid set if nonexistant
         }
 
     @classmethod
