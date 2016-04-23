@@ -2,13 +2,13 @@
 Credits
 =======
 
-Development Lead
-----------------
+Author
+======
 
 * Robert Grant <rhgrant@gmail.com>
 
 Contributors
-------------
+============
 
 * fraben
 * JacobAMason
@@ -16,3 +16,4 @@ Contributors
 * rAntonioH
 * ScufyfNrdHrdr
 * t3zla
+* mmirate
