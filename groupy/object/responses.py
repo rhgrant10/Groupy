@@ -573,7 +573,7 @@ class Bot(ApiResponse):
 
         :param str name: the name of the bot
         :param group: the group to which the bot will belong
-        :type group: :class:`~groupy.object.responses.Bot`
+        :type group: :class:`~groupy.object.responses.Group`
         :param str avatar_url: the URL for a GroupMe image to be used as the
             bot's avatar
         :param str callback_url: the URL to which each group message will be
