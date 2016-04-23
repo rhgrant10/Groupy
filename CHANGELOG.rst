@@ -2,6 +2,15 @@
 Change Log
 ==========
 
+v0.6.6 (April 23, 2016)
+=======================
+
+- Fixed a typo in the docs regarding the type of the ``group`` parameter of the ``Bot`` class (kudos to JCDJulian)
+- Fixed the ``Group.update`` method signature to include the ``group_id`` (kudos to mmirate)
+- Fixed ``Member.identification`` such that it uses ``Member.guid`` rather than ``Member._guid`` (kudos to mmirate)
+- Fixed the uncaught exception chain that occurred when a 304 was returned in ``Recipient.messages`` (thanks to dvmorris and sbonds for pointing it out)
+- Updated the list of contributors
+
 v0.6.5 (January 17, 2016)
 =========================
 
