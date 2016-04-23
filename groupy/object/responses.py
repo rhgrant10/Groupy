@@ -125,9 +125,16 @@ class Recipient(ApiResponse):
             r = self._endpoint.index(self._idkey, before_id=before,
                                      since_id=since, after_id=after)
         except errors.ApiError as e:
-            # NOT_MODIFIED, in this case, means no more messages.
-            if e.args[0]['code'] == status.NOT_MODIFIED:
-                return None
+            # NOT_MODIFIED, in this case, means no more messages. Some versions
+            # of the API return the 304 code inside the response envelope, but
+            # sometimes there is no JSON response and it returns the 304 in the
+            # response http code only.
+            try:
+                if e.args[0]['code'] == status.NOT_MODIFIED:
+                    return None
+            except TypeError:
+                if e.args[0].status_code == status.NOT_MODIFIED:
+                    return None
             raise e
         # Update the message count and grab the messages.
         self.message_count = r['count']
