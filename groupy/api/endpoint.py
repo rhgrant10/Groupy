@@ -469,12 +469,13 @@ class Bots(Endpoint):
         return cls.response(r)
 
     @classmethod
-    def post(cls, bot_id, text, picture_url=None):
+    def post(cls, bot_id, text, *attachments, picture_url=None):
         """Post a message to a group as a bot.
 
         :param str bot_id: the ID of the bot
         :param str text: the message text
         :param str picture_url: the GroupMe image URL for a picture
+        :param list attachments: a list of attachments to include
         :returns: the created message
         :rtype: :class:`dict`
         """
@@ -483,7 +484,8 @@ class Bots(Endpoint):
             data=json.dumps({
                 'bot_id': bot_id,
                 'text': text,
-                'picture_url': picture_url
+                'picture_url': picture_url,
+                'attachments': attachments
             }),
             headers={'content-type': 'application/json'}
         )

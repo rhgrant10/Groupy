@@ -602,17 +602,18 @@ class Bot(ApiResponse):
         """
         return FilterList(Bot(**b) for b in endpoint.Bots.index())
 
-    def post(self, text, picture_url=None):
+    def post(self, text, *attachments, picture_url=None):
         """Post a message to the group of the bot.
 
         :param str text: the message text
         :param str picture_url: the GroupMe image URL for an image
+        :param list attachments: the attachments to include
         :returns: ``True`` if successful
         :rtype: bool
         :raises groupy.api.errors.ApiError: if unsuccessful
         """
         try:
-            endpoint.Bots.post(self.bot_id, text, picture_url)
+            endpoint.Bots.post(self.bot_id, text, *attachments, picture_url=picture_url)
         except errors.ApiError as e:
             if e.args[0].status_code >= status.BAD_REQUEST:
                 raise
