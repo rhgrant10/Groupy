@@ -538,6 +538,8 @@ class Message(ApiResponse):
 
         :rtype: bool
         """
+        if self._user is None:
+            self._user = User.get()
         return self.user_id == self._user.user_id
 
     def is_liked_by_me(self):
@@ -545,6 +547,8 @@ class Message(ApiResponse):
 
         :rtype: bool
         """
+        if self._user is None:
+            self._user = User.get()
         return self._user.user_id in self.favorited_by
 
     def metions_me(self):
@@ -552,6 +556,8 @@ class Message(ApiResponse):
 
         :rtype: bool
         """
+        if self._user is None:
+            self._user = User.get()
         for a in self.attachments:
             if a.type == 'mentions' and self._user.user_id in a.user_ids:
                 return True
