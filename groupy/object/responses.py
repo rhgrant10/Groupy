@@ -547,7 +547,7 @@ class Message(ApiResponse):
         """
         return self._user.user_id in self.favorited_by
 
-    def metions_me(self):
+    def mentions_me(self):
         """Return ``True`` if the message "@" mentions you.
 
         :rtype: bool
