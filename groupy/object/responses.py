@@ -187,6 +187,15 @@ class Group(Recipient):
             self.max_members, self.message_count)
 
     @classmethod
+    def get(cls, group_id):
+        """Get a group by its id
+        :param str group_id: the ID of the group to get.
+        :returns: group object of the group with the given id
+        :rtype: :class: `~groupy.object.responses.Group`
+        """
+        return cls(**endpoint.Groups.show(group_id))
+
+    @classmethod
     def list(cls, former=False):
         """List all of your current or former groups.
 
