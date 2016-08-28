@@ -12,6 +12,7 @@ API.
 import time
 import json
 from io import BytesIO
+from datetime import datetime
 
 import requests
 from PIL import Image as PImage
@@ -607,3 +608,68 @@ class Images(Endpoint):
             return PImage.open(image)
         except OSError:
             return None
+
+
+class Gallery(Endpoint):
+    """Endpoint for the unofficial gallery API.
+
+    Messages from the gallery can be listed.
+    """
+    
+    url = '/'.join([Endpoint.url, 'conversations'])
+
+    @classmethod
+    def index(cls, group_id,
+            before=None, since=None, after=None, limit=100):
+        """List the messages in the gallery from a group.
+
+        Listing gallery messages gives the most recent 100 by default. Additional
+        messages can be obtained by specifying a reference message, thereby
+        facilitating paging through messages.
+
+        Use ``before`` and ``after`` to "page" through messages.
+        ``since`` is odd in that it returns the *most recent* messages
+        since the reference message, which means there may be messages missing
+        between the reference message and the oldest message in the returned
+        list of messages.
+
+        .. note::
+
+            Only one of ``before_id``, ``after_id``, or ``since_id`` can be
+            specified in a single call.
+
+        :param str group_id: the ID of the group from which to list messages
+        :param before: a datetime object, specifying this will list messages prior to this
+        :type before: :class:`datetime.datetime`
+        :param since: a datetime object, specify this to list
+            the *most recent* messages after it
+            (**not** the messages right after the reference message)
+        :type since: :class:`datetime.datetime`
+        :param after: a datetime object, specifying this will
+            return the messages just after the reference message
+        :type after: :class:`datetime.datetime`
+        :param int limit: a limit on the number of messages returned (between
+            1 and 100 inclusive)
+        :returns: a :class:`dict` containing ``messages``
+        :rtype: :class:`dict`
+        :raises ValueError: if more than one of ``before``, ``after`` or
+            ``since`` are specified
+        """            
+        if sum(x is not None for x in (before, since, after)) > 1:
+            raise ValueError("Only one of 'after', 'since', and "
+                "'before' can be specified in a single call")
+
+        converter = lambda t: datetime.strftime(t, "%Y-%m-%dT%H:%M:%S.%f")[:-2] + "Z" if t else None
+        before, since, after = converter(before), converter(since), converter(after)
+
+        r = requests.get(
+            cls.build_url("{}/gallery", group_id), 
+            params = {
+                'acceptFiles': '1',
+                'before': before,
+                'since': since,
+                'after': after,
+                'limit': limit
+            }
+        )
+        return cls.response(r)
