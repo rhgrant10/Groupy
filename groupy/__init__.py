@@ -17,7 +17,7 @@ from .object import attachments
 
 __author__ = 'Robert Grant'
 __email__ = 'rhgrant10@gmail.com'
-__version__ = '0.6.6'
+__version__ = '0.7.0'
 
 
 def _attempt_to_load_apikey():
