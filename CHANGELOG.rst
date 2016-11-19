@@ -2,6 +2,14 @@
 Change Log
 ==========
 
+v0.7.0 (November 19, 2016)
+==========================
+
+- Fixed an issue with attachments not being serializable. Now an attempt to call their ``as_dict`` method is made (thank you to awctomlinson for pointing it out)
+- Fixed problem with ``is_liked_by_me``, ``is_from_me`` and ``metions_me`` when used on ``DirectMessages`` (thank you to mmigrate)
+- Added attachment support to ``Bot``'s ``post`` method (thank you again to mmigrate)
+- Fixed a mispelling in the ``mentions_me`` method name (thank you adelq)
+
 v0.6.6 (April 23, 2016)
 =======================
 
