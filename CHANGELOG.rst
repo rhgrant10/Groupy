@@ -2,6 +2,12 @@
 Change Log
 ==========
 
+v0.7.1 (March 29, 2017)
+=======================
+
+- Fixed an issue serializing attachments posted by the user (not a bot) (thanks to a-vilmin for reporting the issue)
+
+
 v0.7.0 (November 19, 2016)
 ==========================
 
