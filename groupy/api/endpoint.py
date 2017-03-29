@@ -479,20 +479,13 @@ class Bots(Endpoint):
         :returns: the created message
         :rtype: :class:`dict`
         """
-        def serializable(attachments):
-            for attachment in attachments:
-                try:
-                    yield attachment.as_dict()
-                except AttributeError:
-                    yield attachment
-
         r = requests.post(
             cls.build_url('post'),
             data=json.dumps({
                 'bot_id': bot_id,
                 'text': text,
                 'picture_url': picture_url,
-                'attachments': list(serializable(attachments)),
+                'attachments': attachments,
             }),
             headers={'content-type': 'application/json'}
         )

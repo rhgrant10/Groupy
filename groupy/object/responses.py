@@ -85,6 +85,11 @@ class Recipient(ApiResponse):
         """
         if not text and not attachments:
             raise ValueError('must be one attachment or text')
+
+        # Serialize any attachments
+        attachments = [vars(a) for a in attachments]
+
+        # Split long messages into chunks and send the attachments in the last
         *chunks, last = self._chunkify(text)
         sent = []
         for chunk in chunks:
