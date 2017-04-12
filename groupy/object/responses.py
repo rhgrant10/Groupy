@@ -321,6 +321,7 @@ class Group(Recipient):
                 raise
         if refresh:
             self.refresh()
+
         return True
 
 
