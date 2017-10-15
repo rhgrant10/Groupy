@@ -1,12 +1,13 @@
 language: python
-env:
-- TOXENV=py34
-- TOXENV=py35
-install: pip install -U tox
+python:
+  - "3.4"
+  - "3.5"
+  - "3.6"
+install: pip install tox-travis
 script: tox
 deploy:
   provider: pypi
-  distributions: sdist
+  distributions: sdist wheel
   user: rhgrant10
   password:
     secure: JhxeEKGlDqtxzJrHoRqa9YFuEWbQOhH3/maVjdqLH/LXpfKEcYq7K1hZRYOATaIVJ+Y0dZJ0IKJrRfAP1IgMXphySDe8GwbNyt7ifngUru+tyvZ5gGs7mGbI4Z6Jev58zf0h+laiNMj7EmqBcEJZ6e4fy2jardCspUJ3/EGC87E=
