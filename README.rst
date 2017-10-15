@@ -20,5 +20,5 @@ The simple yet powerful GroupMe API wrapper for Python.
 
 .. _Full Documentation: http://groupy.readthedocs.org/en/latest/
 .. _Installation: http://groupy.readthedocs.org/en/latest/pages/installation.html
-.. _Basic Usage: http://http://groupy.readthedocs.org/en/latest/pages/quickstart.html
+.. _Basic Usage: http://groupy.readthedocs.org/en/latest/pages/quickstart.html
 .. _Contributing: http://groupy.readthedocs.org/en/latest/pages/contributing.html
