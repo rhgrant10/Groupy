@@ -521,6 +521,29 @@ class Users(Endpoint):
         )
         return cls.response(r)
 
+    @classmethod
+    def update(cls, avatar_url=None, name=None, email=None, zip_code=None):
+        """Update the information for the user.
+
+        :param str avatar_url: the image URL for the user's avatar
+        :param str name: the new name of the user
+        :param str email: the new email of the user
+        :param str zip_code: the new Zip code of the user
+        :returns: the modified user
+        :rtype: :class:`dict`
+        """
+        r = requests.post(
+            cls.build_url('update'),
+            params={
+                'avatar_url': avatar_url,
+                'name': name,
+                'email': email,
+                'zip_code': zip_code
+            }
+        )
+        return cls.response(r)
+
+
 
 class Sms(Endpoint):
     """Endpoint for the SMS API.

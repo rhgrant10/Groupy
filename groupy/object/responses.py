@@ -681,6 +681,19 @@ class User(ApiResponse):
         return cls(**endpoint.Users.me())
 
     @classmethod
+    def update(self, avatar_url=None, name=None, email=None, zip_code=None):
+        """Change user information.
+
+        :param str avatar_url: the image URL for the user's avatar
+        :param str name: the new name of the user
+        :param str email: the new email of the user
+        :param str zip_code: the new zip code of the user
+        """
+        endpoint.Users.update(avatar_url=avatar_url, name=name,
+                              email=email, zip_code=zip_code)
+
+
+    @classmethod
     def enable_sms(cls, duration=4, registration_token=None):
         """Enable SMS mode.
 
