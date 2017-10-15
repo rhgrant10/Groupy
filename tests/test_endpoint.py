@@ -2,8 +2,7 @@ import json
 import urllib
 import unittest
 from urllib.parse import urlsplit
-from unittest.mock import patch
-from unittest.mock import mock_open
+from unittest import mock
 
 import requests
 import responses
@@ -397,13 +396,15 @@ class CorrectUrlTests(unittest.TestCase):
 
     @responses.activate
     def test_images_create(self):
-        with patch('builtins.open', mock_open()):
-            self.assert_url_correct(
-                responses.POST,
-                'https://image.groupme.com/pictures',
-                endpoint.Images.create,
-                image=open('nosuchfile')
-            )
+        mock_image_file = mock.MagicMock(name='some-image.png')
+        mock_image_file.name = 'some-image'
+        mock_image_file.read.return_value = b'abc123'
+        self.assert_url_correct(
+            responses.POST,
+            'https://image.groupme.com/pictures',
+            endpoint.Images.create,
+            image=mock_image_file
+        )
 
     @responses.activate
     def test_images_download(self):
