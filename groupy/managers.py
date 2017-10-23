@@ -1,4 +1,5 @@
 import time
+import uuid
 
 from .resources import Group
 from .resources import Bot
@@ -6,6 +7,8 @@ from .resources import Message
 from .resources import Chat
 from .resources import DirectMessage
 from .resources import Block
+from .resources import MembershipRequest
+from . import exceptions
 from . import pagers
 from . import utils
 
@@ -322,4 +325,38 @@ class Likes(Manager):
     def unlike(self):
         url = utils.urljoin(self.url, 'unlike')
         response = self.session.post(url)
+        return response.ok
+
+
+class Memberships(Manager):
+
+    def __init__(self, session, group_id):
+        path = 'groups/{}/members'.format(group_id)
+        super().__init__(session, path=path)
+
+    def add(self, *members):
+        guid = uuid.uuid4()
+        for i, member in enumerate(members):
+            member['guid'] = '{}-{}'.format(guid, i)
+
+        payload = {'members': members}
+        url = utils.urljoin(self.url, 'add')
+        response = self.session.post(url, json=payload)
+        return MembershipRequest(self, *members, **response.data)
+
+    def check(self, results_id):
+        path = 'results/{}'.format(results_id)
+        url = utils.urljoin(self.url, path)
+        response = self.session.get(url)
+        if response.status_code == 503:
+            raise exceptions.ResultsNotReady(response)
+        if response.status_code == 404:
+            raise exceptions.ResultsExpired(response)
+        return response.data['members']
+
+    def remove(self, membership_id):
+        path = '{}/remove'.format(membership_id)
+        url = utils.urljoin(self.url, path)
+        payload = {'membership_id': membership_id}
+        response = self.session.post(url, json=payload)
         return response.ok

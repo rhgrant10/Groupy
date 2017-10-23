@@ -1,5 +1,8 @@
+import time
 from datetime import datetime
+from collections import namedtuple
 
+from . import exceptions
 from . import managers
 
 
@@ -30,10 +33,12 @@ class Group(Resource):
         super().__init__(manager, **data)
         self.messages = managers.Messages(self.manager.session, self.id)
         self.leaderboard = managers.Leaderboard(self.manager.session, self.id)
+        self.memberships = managers.Memberships(self.manager.session, self.id)
+
+        members = self.data.get('members') or []
+        self.members = [Member(self.manager, self.id, **m) for m in members]
         self.created_at = datetime.fromtimestamp(self.created_at)
         self.updated_at = datetime.fromtimestamp(self.updated_at)
-        members = self.data.get('members') or []
-        self.members = [Member(self.manager, **m) for m in members]
 
     def __repr__(self):
         klass = self.__class__.__name__
@@ -143,11 +148,13 @@ class Block(Resource):
 
 
 class Member(Resource):
-    def __init__(self, manager, **data):
+    def __init__(self, manager, group_id, **data):
         super().__init__(manager, **data)
-        self.messages = managers.DirectMessages(self.manager,
+        self.messages = managers.DirectMessages(self.manager.session,
                                                 other_user_id=self.user_id)
         self._user = managers.User(self.manager.session)
+        self._memberships = managers.Memberships(self.manager.session,
+                                                 group_id=group_id)
 
     def __repr__(self):
         klass = self.__class__.__name__
@@ -155,13 +162,16 @@ class Member(Resource):
                                                           self.nickname)
 
     def is_blocked(self):
-        return self.user.blocks.between(other_user_id=self.user_id)
+        return self._user.blocks.between(other_user_id=self.user_id)
 
     def block(self):
-        return self.user.blocks.block(other_user_id=self.user_id)
+        return self._user.blocks.block(other_user_id=self.user_id)
 
     def unblock(self):
-        return self.user.blocks.unblock(other_user_id=self.user_id)
+        return self._user.blocks.unblock(other_user_id=self.user_id)
+
+    def remove(self):
+        return self._memberships.remove(membership_id=self.id)
 
 
 class AttachmentMeta(type):
@@ -206,3 +216,62 @@ class Emoji(Attachment):
 
 class Mentions(Attachment):
     pass
+
+
+class MembershipRequest(Resource):
+
+    Results = namedtuple('Results', 'members failures')
+
+    def __init__(self, manager, *requests, **data):
+        super().__init__(manager, **data)
+        self._requests = requests
+        self._expired_exception = None
+        self._not_ready_exception = None
+        self._is_ready = False
+        self.results = None
+
+    def _check_if_ready(self):
+        try:
+            results = self.manager.check(self.results_id)
+            self._is_ready = True
+            self._not_ready_exception = None
+            self._process_new_members(results)
+        except exceptions.ResultsNotReady as e:
+            self._is_ready = False
+            self._not_ready_exception = e
+        except exceptions.ResultsExpired as e:
+            self._is_ready = True
+            self._expired_exception = e
+
+    def _process_new_members(self, results):
+        members = []
+        failures = []
+        data = {member['guid']: member for member in results}
+        for request in self._requests:
+            try:
+                member_data = data[request['guid']]
+            except KeyError:
+                failures.append(request)
+            else:
+                member_data.pop('guid')
+                member = Member(self.manager, **member_data)
+                members.append(member)
+        self.results = self.Results(members, failures)
+
+    def is_ready(self):
+        if not self._is_ready:
+            self._check_if_ready()
+        return self._is_ready
+
+    def poll(self, timeout=30, interval=2):
+        start = time.time()
+        while time.time() - start < timeout and not self.is_ready():
+            time.sleep(interval)
+        return self.get()
+
+    def get(self):
+        if self._expired_exception:
+            raise self._expired_exception
+        if self._not_ready_exception:
+            raise self._not_ready_exception
+        return self.results

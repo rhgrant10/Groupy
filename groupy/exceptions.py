@@ -18,17 +18,26 @@ class BadResponse(ApiError):
         self.response = response
 
 
-class CorruptResponse(BadResponse):
+class ResultsError(ApiError):
+    def __init__(self, response):
+        self.response = response
+
+
+class InvalidJsonError(BadResponse):
     pass
 
 
-class InvalidJsonError(CorruptResponse):
+class MissingResponseError(BadResponse):
     pass
 
 
-class MissingResponseError(CorruptResponse):
+class MissingMetaError(BadResponse):
     pass
 
 
-class MissingMetaError(CorruptResponse):
+class ResultsNotReady(ResultsError):
+    pass
+
+
+class ResultsExpired(ResultsError):
     pass
