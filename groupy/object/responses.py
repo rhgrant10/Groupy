@@ -19,7 +19,7 @@ from .. import config
 from ..api import status
 from ..api import errors
 from ..api import endpoint
-from .listers import FilterList, MessagePager
+from .listers import FilterList, MessagePager, GalleryPager
 from .attachments import AttachmentFactory
 
 
@@ -146,6 +146,52 @@ class Recipient(ApiResponse):
         messages = (Message(self, **m) for m in r[self._mkey])
         return MessagePager(self, messages, backward=backward)
 
+    def gallery(self, before=None, since=None, after=None, limit=None):
+        """Return a page of messages from the gallery of the recipient.
+
+        .. note::
+
+            Only one of ``before``, ``after``, or ``since`` can be specified in
+            a single call.
+
+        :param before: a datetime object, specifying this will list messages prior to this
+        :type before: :class:`datetime.datetime`
+        :param since: a datetime object, specify this to list
+            the *most recent* messages after it
+            (**not** the messages right after the reference message)
+        :type since: :class:`datetime.datetime`
+        :param after: a datetime object, specifying this will
+            return the messages just after the reference message
+        :type after: :class:`datetime.datetime`
+        :param int limit: a limit on the number of messages returned (between
+            1 and 100 inclusive)
+        :rtype: :class:`~groupy.object.listers.MessagePager`
+        :raises ValueError: if more than one of ``before``, ``after`` or
+            ``since`` are specified
+        """
+        # Messages obtained with the 'after' parameter are in reversed order.
+        backward = after is not None
+
+        # Fetch the messages.
+        try:
+            r = endpoint.Gallery.index(self._idkey, before=before, 
+                                        since=since, after=after, limit=limit)
+        except errors.ApiError as e:
+            # NOT_MODIFIED, in this case, means no more messages. Some versions
+            # of the API return the 304 code inside the response envelope, but
+            # sometimes there is no JSON response and it returns the 304 in the
+            # response http code only.
+            try:
+                if e.args[0]['code'] == status.NOT_MODIFIED:
+                    return None
+            except TypeError:
+                if e.args[0].status_code == status.NOT_MODIFIED:
+                    return None
+            raise e
+
+        gallery_messages = (Message(self, **m) for m in r[self._mkey])
+        return GalleryPager(self, gallery_messages)
+
 
 class Group(Recipient):
     """A GroupMe group.
@@ -190,6 +236,15 @@ class Group(Recipient):
         return "{}, {}/{} members, {} messages".format(
             self.name, len(self.members()),
             self.max_members, self.message_count)
+
+    @classmethod
+    def get(cls, group_id):
+        """Get a group by its id
+        :param str group_id: the ID of the group to get.
+        :returns: group object of the group with the given id
+        :rtype: :class: `~groupy.object.responses.Group`
+        """
+        return cls(**endpoint.Groups.show(group_id))
 
     @classmethod
     def list(cls, former=False):

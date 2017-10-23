@@ -9,6 +9,7 @@ This module contains classes that provide filterable lists and message pagers.
 
 """
 import operator
+from datetime import datetime
 
 from ..api import errors
 
@@ -173,3 +174,30 @@ class MessagePager(FilterList):
         else:
             self.extend(self.older())
         return True
+
+class GalleryPager(MessagePager):
+    """A filterable, extendable page of messages in the Gallery.
+
+    :param group: the group from which to page through messages
+    :type group: :class:`~groupy.object.responses.Group`
+    :param list messages: the initial page of messages
+    :param bool backward: whether the oldest message is at index 0
+    """
+    def __init__(self, group, messages, backward=False):
+        super().__init__(group, messages, backward)
+
+    def newer(self):
+        """Return the next (newer) page of messages.
+
+        :returns: a newer page of messages
+        :rtype: :class:`~groupy.object.listers.MessagePager`
+        """
+        return self.group.gallery(after=datetime.utcfromtimestamp(int(self.oldest.created_at.timestamp())))
+
+    def older(self):
+        """Return the previous (older) page of messages.
+
+        :returns: an older page of messages
+        :rtype: :class:`~groupy.object.listers.MessagePager`
+        """
+        return self.group.gallery(before=datetime.utcfromtimestamp(int(self.oldest.created_at.timestamp())))
