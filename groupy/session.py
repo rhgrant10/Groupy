@@ -57,4 +57,4 @@ class Response:
         except ValueError as e:
             raise exceptions.InvalidJsonError(self._resp) from e
         except KeyError as e:
-            raise exceptions.MissingMetarror(self._resp) from e
+            raise exceptions.MissingMetaError(self._resp) from e
