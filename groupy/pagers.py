@@ -48,6 +48,8 @@ class MessageList(Pager):
         for mode in ('before_id', 'after_id', 'since_id'):
             if mode in params:
                 modes.append(mode)
+        if len(modes) > 1:
+            raise ValueError('ambiguous mode')
         return modes[0] if modes else 'before_id'
 
     def set_next_page_params(self):
