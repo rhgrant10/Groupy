@@ -224,3 +224,28 @@ class Likes(base.Manager):
         url = utils.urljoin(self.url, 'unlike')
         response = self.session.post(url)
         return response.ok
+
+
+class Gallery(base.Manager):
+    def __init__(self, session, group_id):
+        path = 'conversations/{}/gallery'.format(group_id)
+        super().__init__(session, path=path)
+
+    def _raw_list(self, **params):
+        response = self.session.get(self.url, params=params)
+        if response.status_code == 304:
+            return []
+        messages = response.data['messages']
+        return [Message(self, **message) for message in messages]
+
+    def list(self, **params):
+        return pagers.MessageList(self, **params)
+
+    def list_before(self, message_id, **params):
+        return self.list(before_id=message_id, **params)
+
+    def list_since(self, message_id, **params):
+        return self.list(since_id=message_id, **params)
+
+    def list_after(self, message_id, **params):
+        return self.list(after_id=message_id, **params)

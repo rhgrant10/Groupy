@@ -64,8 +64,9 @@ class Group(base.Resource):
     def __init__(self, manager, **data):
         super().__init__(manager, **data)
         self.messages = messages.Messages(self.manager.session, self.id)
+        self.gallery = messages.Gallery(self.manager.session, self.group_id)
         self.leaderboard = messages.Leaderboard(self.manager.session, self.id)
-        self.memberships = messages.Memberships(self.manager.session, self.id)
+        self.memberships = memberships.Memberships(self.manager.session, self.id)
 
         members = self.data.get('members') or []
         Member = partial(memberships.Member, self.manager, self.id)
