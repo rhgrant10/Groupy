@@ -55,6 +55,8 @@ class DirectMessages(base.Manager):
     def _raw_list(self, **params):
         params['other_user_id'] = self.other_user_id
         response = self.session.get(self.url, params=params)
+        if response.status_code == 304:
+            return []
         messages = response.data['direct_messages']
         return [DirectMessage(self, **message) for message in messages]
 
