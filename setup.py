@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup
+from setuptools import find_packages
 
 
 with open('README.rst') as readme_file:
@@ -27,11 +25,8 @@ setup(
     author='Robert Grant',
     author_email='rhgrant10@gmail.com',
     url='https://github.com/rhgrant10/Groupy',
-    packages=[
-        'groupy', 'groupy.object', 'groupy.api'
-    ],
-    package_dir={'groupy':
-                 'groupy'},
+    packages=find_packages(),
+    package_dir={'groupy': 'groupy'},
     include_package_data=True,
     install_requires=requirements,
     license="Apache Software License, Version 2.0",
