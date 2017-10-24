@@ -1,5 +1,5 @@
 from . import base
-from . import utils
+from groupy import utils
 
 
 class Images(base.Manager):

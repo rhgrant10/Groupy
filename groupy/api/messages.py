@@ -2,7 +2,7 @@ import time
 from datetime import datetime
 
 from . import base
-from . import utils
+from groupy import utils
 from groupy import pagers
 
 

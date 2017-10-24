@@ -1,4 +1,4 @@
-from . import utils
+from groupy import utils
 
 
 class Manager:

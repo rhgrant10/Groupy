@@ -5,7 +5,7 @@ import uuid
 from . import base
 from . import messages
 from . import user
-from . import utils
+from groupy import utils
 from groupy import exceptions
 
 
