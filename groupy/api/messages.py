@@ -79,7 +79,7 @@ class DirectMessages(base.Manager):
             message['text'] = text
 
         if attachments is not None:
-            message['attachments'] = attachments
+            message['attachments'] = [a.to_json() for a in attachments]
 
         payload = {'direct_message': message}
         response = self.session.post(self.url, json=payload)
