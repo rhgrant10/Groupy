@@ -20,7 +20,7 @@ class Groups(base.Manager):
     def list(self, **params):
         return pagers.GroupList(self, **params)
 
-    def former(self, **params):
+    def list_former(self, **params):
         url = utils.urljoin(self.url, 'former')
         response = self.session.get(url, params=params)
         return [Group(self, **group) for group in response.data]
@@ -83,11 +83,7 @@ class Group(base.Resource):
         return self.manager.update(id=self.id, **details)
 
     def destroy(self):
-        return self.manager.delete(id=self.id)
-
-    def join(self, share_token):
-        return self.manager.join(group_id=self.group_id,
-                                 share_token=share_token)
+        return self.manager.destroy(id=self.id)
 
     def rejoin(self):
         return self.manager.rejoin(group_id=self.group_id)
@@ -102,3 +98,5 @@ class Group(base.Resource):
             return value != self.data[field]
         except AttributeError:
             return field in self.data
+        except KeyError:
+            return True
