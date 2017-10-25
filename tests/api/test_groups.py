@@ -145,7 +145,7 @@ class GroupTests(unittest.TestCase):
         self.group = groups.Group(mock.Mock(), **get_fake_group_data())
 
 
-class GroupReprTests(unittest.TestCase):
+class GroupReprTests(GroupTests):
     def test_repr(self):
         representation = repr(self.group)
         self.assertEqual(representation, "<Group(name='foobar')>")
