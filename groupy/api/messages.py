@@ -92,12 +92,13 @@ class GenericMessage(base.Resource):
 
     def __init__(self, manager, conversation_id, **data):
         super().__init__(manager, **data)
-        self._likes = Likes(self.manager.session, conversation_id,
-                            message_id=self.id)
+        self.conversation_id = conversation_id
         self.created_at = datetime.fromtimestamp(self.created_at)
-
         attachments = self.data.get('attachments') or []
         self.attachments = Attachment.from_bulk_data(self.manager, attachments)
+
+        self._likes = Likes(self.manager.session, self.conversation_id,
+                            message_id=self.id)
 
     def __repr__(self):
         klass = self.__class__.__name__
@@ -123,17 +124,16 @@ class Message(GenericMessage):
 class DirectMessage(GenericMessage):
     # manager could be from a chat or from a group... is that a problem?
     def __init__(self, manager, **data):
-        DirectMessage.ensure_conversation_id(data)
-        super().__init__(manager, **data)
+        conversation_id = self.__class__.get_conversation_id(data)
+        super().__init__(manager, conversation_id, **data)
 
     @staticmethod
-    def ensure_conversation_id(data):
-        # tricky tricky! the API response for *creating* a direct message
-        # doesn't contain the conversation id (facepalm) so we create it
-        # if it's not in the data
-        if 'conversation_id' not in data:
+    def get_conversation_id(data):
+        conversation_id = data.get('conversation_id')
+        if not conversation_id:
             participant_ids = data['recipient_id'], data['sender_id']
-            data['conversation_id'] = '+'.join(sorted(participant_ids))
+            conversation_id = '+'.join(sorted(participant_ids))
+        return conversation_id
 
 
 class AttachmentMeta(type):
