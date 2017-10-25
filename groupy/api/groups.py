@@ -1,5 +1,4 @@
 from datetime import datetime
-from functools import partial
 
 from . import base
 from . import messages
@@ -69,8 +68,7 @@ class Group(base.Resource):
         self.memberships = memberships.Memberships(self.manager.session, self.id)
 
         members = self.data.get('members') or []
-        Member = partial(memberships.Member, self.manager, self.id)
-        self.members = [Member(**member) for member in members]
+        self.members = [memberships.Member(self.manager, self.id, **m) for m in members]
         self.created_at = datetime.fromtimestamp(self.created_at)
         self.updated_at = datetime.fromtimestamp(self.updated_at)
 
@@ -94,9 +92,9 @@ class Group(base.Resource):
     def rejoin(self):
         return self.manager.rejoin(group_id=self.group_id)
 
-    def refresh(self):
+    def refresh_from_server(self):
         group = self.manager.get(id=self.id)
-        self.__init__(self.manager, **group.data)
+        self.data = group.data
 
     def has_omission(self, field):
         try:
