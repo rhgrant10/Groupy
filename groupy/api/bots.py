@@ -17,18 +17,16 @@ class Bots(base.Manager):
 
     def post(self, bot_id, text, attachments=None):
         url = utils.urljoin(self.url, 'post')
-        payload = {
-            'bot_id': bot_id,
-            'text': text,
-        }
+        payload = dict(bot_id=bot_id, text=text)
+
         if attachments:
             payload['attachments'] = [a.to_json() for a in attachments]
 
         response = self.session.post(url, json=payload)
         return response.ok
 
-    def destroy(self, id):
-        path = '{}/destroy'.format(id)
+    def destroy(self, bot_id):
+        path = '{}/destroy'.format(bot_id)
         url = utils.urljoin(self.url, path)
         response = self.session.post(url)
         return response.ok

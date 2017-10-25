@@ -92,8 +92,6 @@ class BlocksUnblockTests(BlocksTests):
         self.assertEqual(params.get('otherUser'), self.other_user_id)
 
 
-
-
 class BlockTests(unittest.TestCase):
     def setUp(self):
         self.m_manager = mock.Mock()
@@ -108,6 +106,6 @@ class BlockTests(unittest.TestCase):
         self.block.exists()
         self.assertTrue(self.m_manager.between.called)
 
-    def test_unblock_users_unblock(self):
+    def test_unblock_uses_unblock(self):
         self.block.unblock()
         self.assertTrue(self.m_manager.unblock.called)
