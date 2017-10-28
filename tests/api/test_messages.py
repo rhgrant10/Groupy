@@ -4,6 +4,14 @@ from unittest import mock
 from groupy.api import messages
 
 
+class TestCase(unittest.TestCase):
+    def assert_kwargs(self, mock, **kwargs):
+        __, m_kwargs = mock.call_args
+        for k, v in kwargs.items():
+            with self.subTest(key=k, value=v):
+                self.assertEqual(m_kwargs.get(k), v)
+
+
 def get_fake_generic_message_data(**kwargs):
     data = {
         'id': 'foo',
@@ -35,7 +43,7 @@ def get_fake_response(code=200, data=None):
     return response
 
 
-class MessagesTests(unittest.TestCase):
+class MessagesTests(TestCase):
     def setUp(self):
         self.m_session = mock.Mock()
         self.messages = messages.Messages(self.m_session, group_id='bar')
@@ -129,7 +137,7 @@ class CreateAttachmentMessagesTests(MessagesTests):
         self.assertNotIn('text', message)
 
 
-class DirectMessagesTests(unittest.TestCase):
+class DirectMessagesTests(TestCase):
     def setUp(self):
         self.m_session = mock.Mock()
         self.messages = messages.DirectMessages(self.m_session,
@@ -220,7 +228,7 @@ class CreateAttachmentDirectMessagesTests(DirectMessagesTests):
         self.assertNotIn('text', message)
 
 
-class GenericMessageTests(unittest.TestCase):
+class GenericMessageTests(TestCase):
     def setUp(self):
         self.m_manager = mock.Mock()
         data = get_fake_generic_message_data(name='Alice', text='corge')
@@ -248,7 +256,7 @@ class GenericMessageReprTests(GenericMessageTests):
                                          "text='corge', attachments=0)>")
 
 
-class MessageTests(unittest.TestCase):
+class MessageTests(TestCase):
     def setUp(self):
         self.m_manager = mock.Mock()
         data = get_fake_message_data()
@@ -258,7 +266,7 @@ class MessageTests(unittest.TestCase):
         self.assertEqual(self.message.conversation_id, self.message.group_id)
 
 
-class DirectMessageTests(unittest.TestCase):
+class DirectMessageTests(TestCase):
     def setUp(self):
         self.m_manager = mock.Mock()
         data = get_fake_direct_message_data()
@@ -268,7 +276,7 @@ class DirectMessageTests(unittest.TestCase):
         self.assertEqual(self.message.conversation_id, 'bar+baz')
 
 
-class AttachmentTests(unittest.TestCase):
+class AttachmentTests(TestCase):
     def setUp(self):
         self.m_manager = mock.Mock()
 
@@ -296,16 +304,123 @@ class AttachmentsFromBulkDataTests(AttachmentTests):
         self.assertIsInstance(self.attachments[1], messages.Location)
 
 
-class LeaderboardTests(unittest.TestCase):
+class LeaderboardTests(TestCase):
     def setUp(self):
         self.m_session = mock.Mock()
         self.leaderboard = messages.Leaderboard(self.m_session, 'foo')
 
 
-class GetMessagesLeaderboardTests(LeaderboardTests):
+class LeaderboardGetMessagesTests(LeaderboardTests):
     def test_results_are_messages(self):
         message = get_fake_message_data()
         data = {'messages': [message]}
         self.m_session.get.return_value = get_fake_response(data=data)
         results = self.leaderboard._get_messages()
         self.assertTrue(all(isinstance(m, messages.Message) for m in results))
+
+
+class LeaderboardListMethodTests(LeaderboardTests):
+    def setUp(self):
+        super().setUp()
+        self.leaderboard._get_messages = mock.Mock()
+
+    def test_period_is_day(self):
+        self.leaderboard.list_day()
+        self.assert_kwargs(self.leaderboard._get_messages, period='day')
+
+    def test_period_is_week(self):
+        self.leaderboard.list_week()
+        self.assert_kwargs(self.leaderboard._get_messages, period='week')
+
+    def test_period_is_month(self):
+        self.leaderboard.list_month()
+        self.assert_kwargs(self.leaderboard._get_messages, period='month')
+
+    def test_path_is_mine(self):
+        self.leaderboard.list_mine()
+        self.assert_kwargs(self.leaderboard._get_messages, path='mine')
+
+    def test_path_is_for_me(self):
+        self.leaderboard.list_for_me()
+        self.assert_kwargs(self.leaderboard._get_messages, path='for_me')
+
+
+class LikesTests(TestCase):
+    def setUp(self):
+        self.m_session = mock.Mock()
+        self.likes = messages.Likes(self.m_session, conversation_id='foo',
+                                    message_id='bar')
+
+
+class LikeTests(LikesTests):
+    def setUp(self):
+        super().setUp()
+        self.result = self.likes.like()
+
+    def test_url_ends_with_like(self):
+        (url,), __ = self.m_session.post.call_args
+        self.assertTrue(url.endswith('/like'))
+
+    def test_result_is_True(self):
+        self.assertTrue(self.result)
+
+
+class UnlikeTests(LikesTests):
+    def setUp(self):
+        super().setUp()
+        self.result = self.likes.unlike()
+
+    def test_url_ends_with_unlike(self):
+        (url,), __ = self.m_session.post.call_args
+        self.assertTrue(url.endswith('/unlike'))
+
+    def test_result_is_True(self):
+        self.assertTrue(self.result)
+
+
+class GalleryTests(TestCase):
+    def setUp(self):
+        self.m_session = mock.Mock()
+        self.gallery = messages.Gallery(self.m_session, group_id='foo')
+
+
+class RawListGalleryTests(GalleryTests):
+    def setUp(self):
+        super().setUp()
+        message = get_fake_message_data()
+        response = get_fake_response(data={'messages': [message]},
+                                     code=self.code)
+        self.m_session.get.return_value = response
+        self.results = self.gallery._raw_list()
+
+
+class NonemptyRawListGalleryTests(RawListGalleryTests):
+    code = 200
+
+    def test_results_are_messages(self):
+        self.assertTrue(all(isinstance(m, messages.GenericMessage) for m in self.results))
+
+
+class EmptyRawListGalleryTests(RawListGalleryTests):
+    code = 304
+
+    def test_results_are_empty(self):
+        self.assertEqual(self.results, [])
+
+
+class ListMethodGalleryTests(GalleryTests):
+    def setUp(self):
+        super().setUp()
+        self.gallery._raw_list = mock.Mock()
+
+    def test_before(self):
+        self.gallery.list_before('baz')
+        self.assert_kwargs(self.gallery._raw_list, before_id='baz')
+
+    def test_since(self):
+        self.gallery.list_since('baz')
+        self.assert_kwargs(self.gallery._raw_list, since_id='baz')
+
+    def test_after(self):
+        self.gallery.list_after('baz')
+        self.assert_kwargs(self.gallery._raw_list, after_id='baz')
