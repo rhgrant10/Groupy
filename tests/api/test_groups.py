@@ -2,6 +2,7 @@ import unittest
 from unittest import mock
 
 from groupy.api import groups
+from .base import get_fake_response
 
 
 def get_fake_group_data(**kwargs):
@@ -14,13 +15,6 @@ def get_fake_group_data(**kwargs):
     }
     group_data.update(kwargs)
     return group_data
-
-
-def get_fake_response(code=200, data=None):
-    response = mock.Mock()
-    response.status_code = code
-    response.data = data
-    return response
 
 
 class GroupsTests(unittest.TestCase):

@@ -1,15 +1,8 @@
-import unittest
 from unittest import mock
 
 from groupy.api import messages
-
-
-class TestCase(unittest.TestCase):
-    def assert_kwargs(self, mock, **kwargs):
-        __, m_kwargs = mock.call_args
-        for k, v in kwargs.items():
-            with self.subTest(key=k, value=v):
-                self.assertEqual(m_kwargs.get(k), v)
+from .base import get_fake_response
+from .base import TestCase
 
 
 def get_fake_generic_message_data(**kwargs):
@@ -34,13 +27,6 @@ def get_fake_direct_message_data(**kwargs):
     data['sender_id'] = 'baz'
     data.update(kwargs)
     return data
-
-
-def get_fake_response(code=200, data=None):
-    response = mock.Mock()
-    response.status_code = code
-    response.data = data
-    return response
 
 
 class MessagesTests(TestCase):
