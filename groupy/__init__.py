@@ -7,3 +7,5 @@
 .. moduleauthor:: Robert Grant <rhgrant10@gmail.com>
 
 """
+
+__version__ = '0.7.1-dev'
