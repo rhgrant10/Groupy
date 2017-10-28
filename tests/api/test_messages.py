@@ -294,3 +294,18 @@ class AttachmentsFromBulkDataTests(AttachmentTests):
 
     def test_attachment_two_is_location(self):
         self.assertIsInstance(self.attachments[1], messages.Location)
+
+
+class LeaderboardTests(unittest.TestCase):
+    def setUp(self):
+        self.m_session = mock.Mock()
+        self.leaderboard = messages.Leaderboard(self.m_session, 'foo')
+
+
+class GetMessagesLeaderboardTests(LeaderboardTests):
+    def test_results_are_messages(self):
+        message = get_fake_message_data()
+        data = {'messages': [message]}
+        self.m_session.get.return_value = get_fake_response(data=data)
+        results = self.leaderboard._get_messages()
+        self.assertTrue(all(isinstance(m, messages.Message) for m in results))
