@@ -58,6 +58,40 @@ class Groups(base.Manager):
         response = self.session.post(url, json=payload)
         return Group(self, **response.data)
 
+    def change_owners(self, group_id, owner_id):
+        url = utils.urljoin(self.url, 'change_owners')
+        requests = [{'group_id': group_id, 'owner_id': owner_id}]
+        payload = {'requests': requests}
+        response = self.session.post(url, json=payload)
+        result, = response.data['results']  # should be exactly one
+        return ChangeOwnersResult(**result)
+
+
+class ChangeOwnersResult:
+    success_code = '200'
+    status_texts = {
+        '200': 'everything checked out',
+        '400': 'the group is already owned by that user',
+        '403': 'you must own a group to change its owner',
+        '404': 'either the new owner is not a member of the group, or the '
+               'new owner or the group were not found',
+        '405': 'request object is missing required field or any of the '
+               'required fields is not an ID',
+    }
+
+    def __init__(self, group_id, owner_id, status):
+        self.group_id = group_id
+        self.owner_id = owner_id
+        self.status = status
+        self.reason = self.status_texts.get(status, 'unknown')
+
+    @property
+    def is_success(self):
+        return self.status == self.success_code
+
+    def __bool__(self):
+        return self.is_success
+
 
 class Group(base.Resource):
     def __init__(self, manager, **data):

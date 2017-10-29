@@ -1,8 +1,8 @@
-import unittest
 from unittest import mock
 
 from groupy.api import groups
 from .base import get_fake_response
+from .base import TestCase
 
 
 def get_fake_group_data(**kwargs):
@@ -17,7 +17,7 @@ def get_fake_group_data(**kwargs):
     return group_data
 
 
-class GroupsTests(unittest.TestCase):
+class GroupsTests(TestCase):
     def setUp(self):
         self.m_session = mock.Mock()
         self.groups = groups.Groups(self.m_session)
@@ -134,7 +134,21 @@ class RejoinGroupTests(GroupsTests):
         self.assertTrue(isinstance(self.result, groups.Group))
 
 
-class GroupTests(unittest.TestCase):
+class ChangeOwnersGroupTests(GroupsTests):
+    def setUp(self):
+        super().setUp()
+        group_id = 'foo'
+        owner_id = 'bar'
+        result = {'group_id': group_id, 'owner_id': owner_id, 'status': '200'}
+        response = get_fake_response(data={'results': [result]})
+        self.m_session.post.return_value = response
+        self.result = self.groups.change_owners(group_id='foo', owner_id='bar')
+
+    def test_result_is_change_owners_result(self):
+        self.assertTrue(isinstance(self.result, groups.ChangeOwnersResult))
+
+
+class GroupTests(TestCase):
     def setUp(self):
         self.group = groups.Group(mock.Mock(), **get_fake_group_data())
 
@@ -205,3 +219,53 @@ class GroupHasOmissionTests(GroupTests):
 
     def test_no_omission(self):
         self.assertFalse(self.group.has_omission('corge'))
+
+
+class SuccessfulChangeOwnersResultTests(TestCase):
+    def setUp(self):
+        self.result = groups.ChangeOwnersResult('foo', 'bar', '200')
+
+    def test_is_success(self):
+        self.assertTrue(self.result.is_success)
+
+    def test_is_truthy(self):
+        self.assertTrue(self.result)
+
+    def test_reason_is_not_unknown(self):
+        self.assertNotEqual(self.result.reason, 'unknown')
+
+
+class UnsuccessfulChangeOwnersResultTests(TestCase):
+    known_codes = '400', '403', '404', '405'
+
+    def test_is_not_success(self):
+        for code in self.known_codes:
+            with self.subTest(code=code):
+                result = groups.ChangeOwnersResult('foo', 'bar', code)
+                self.assertFalse(result.is_success)
+
+    def test_is_falsey(self):
+        for code in self.known_codes:
+            with self.subTest(code=code):
+                result = groups.ChangeOwnersResult('foo', 'bar', code)
+                self.assertFalse(result)
+
+    def test_reason_is_not_unknown(self):
+        for code in self.known_codes:
+            with self.subTest(code=code):
+                result = groups.ChangeOwnersResult('foo', 'bar', code)
+                self.assertNotEqual(result.reason, 'unknown')
+
+
+class UnknownChangeOwnerResults(TestCase):
+    def setUp(self):
+        self.result = groups.ChangeOwnersResult('foo', 'bar', '419')
+
+    def test_is_not_success(self):
+        self.assertFalse(self.result.is_success)
+
+    def test_is_falsey(self):
+        self.assertFalse(self.result)
+
+    def test_reason_is_unknown(self):
+        self.assertEqual(self.result.reason, 'unknown')
