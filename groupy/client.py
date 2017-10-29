@@ -10,8 +10,8 @@ class Client:
     def __init__(self, session):
         self.session = session
         self.groups = groups.Groups(self.session)
-        self.bots = bots.Bots(self.session)
         self.chats = chats.Chats(self.session)
+        self.bots = bots.Bots(self.session)
         self.user = user.User(self.session)
         self.images = images.Images(self.session)
 
