@@ -27,69 +27,47 @@ About **Groupy**
 ================
 
 **Groupy** lets you forget about the GroupMe API and focus on what you need
-to get done! 
-
-It is composed of two main parts:
-
-.. hlist::
-
-    * API wrapper (:mod:`groupy.api`)
-    * Object abstraction (:mod:`groupy.object`)
-
-
-Current Features
-----------------
+to get done! It supports the entire API plus one or two undocumented features.
 
 Groups
-^^^^^^
-
-- Create, update, and destroy your own groups
-- List and filter your current and former groups
-- Add and remove members from your current groups
-- List and filter group members
-- List and filter group messages
+------
+- list directly from the client
+- create new groups
+- destroy groups you own
+- update group details
+- join new groups
+- rejoin former groups
+- change group ownership
 
 Members
-^^^^^^^
+-------
+- list from a group
+- add/remove from a group
 
-- List and filter all known members
-- List and filter direct messages
-- Post direct messages to members
+Chats
+-----
+- list directly from the client
 
 Messages
-^^^^^^^^
+--------
+- list from groups and chats
+- post new messages to groups and chats
+- like/unlike messages
+- list gallery messages from a group
+- list leaderboard messages from a group
 
-- Collect all messages from a group or member
-- Like and unlike messages (even direct messages!)
-- List and filter members who liked a message
-- Inspect and create attachments
+User
+----
+- get/update your own information
+- set/unset SMS mode
 
-Bots
-^^^^
+Blocks
+------
+- list from user
+- block/unblock other users
+- check if a block between you and another user exists
 
-- List and filter your bots
-- Use your bots to post messages
-- Create, update, and destroy bots
 
-Users
-^^^^^
-
-- Get your user information
-- Enable and disable SMS mode
-
-Planned Development
--------------------
-
-(in no particular order)
-
-- Unit tests
-- Installation via pip
-- More direct way to add and remove yourself from groups
-- Remove multiple members in one method call
-- Porcelain for checking results of adding members
-- Automatic updating of object attributes without the need to re-fetch objects
-- Member objects that are aware of membership in all groups
-- Additional ways to access objects
-- More convenience methods instead of accessing API attributes directly
-- Documentation about the API wrapper package
-- Python 2.7 support
+2 basic types
+- Resource
+- Manager

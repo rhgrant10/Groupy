@@ -1,490 +1,178 @@
-===========
-Basic Usage
-===========
+==========
+Quickstart
+==========
 
-This page gives an overview of all but the most advanced features of **Groupy**.
+First, make sure you have:
 
-First, you'll want to make sure that 
+- **Groupy** installed
+- your API key
 
-- **Groupy** is *installed*
-- **Groupy** can *find your API key*
-
-See the :doc:`installation` page for instructions. Now that that's out of the
-way, let's get started!
+See the :doc:`installation` page for help if needed.
 
 
+The Client
+==========
 
-Listing Things
-==============
+Creating a client
+-----------------
 
-The most basic operation is listing things.
-:class:`~groupy.object.responses.Group`\ s,
-:class:`~groupy.object.responses.Member`\ s, and
-:class:`~groupy.object.responses.Bot`\ s can be listed directly.
+Assuming your API token is stored in ``token``:
 
 .. code-block:: python
 
-    >>> import groupy
-    >>> groups = groupy.Group.list()
-    >>> members = groupy.Member.list()
-    >>> bots = groupy.Bot.list()
+    >>> from groupy.client import Client
+    >>> client = Client.from_token(token)
 
-The object lists are returned as a 
-:class:`~groupy.object.listers.FilterList`\ . These behave just like the
-built-in :class:`list` does with some convenient additions. 
-
-You can read more about the types of lists used by **Groupy** in the
-:doc:`advanced` section, but for the remainder of this page, the following truth
-should suffice.
+Listing groups
+--------------
 
 .. code-block:: python
 
-    >>> groups.first == groups[0]
-    True
-    >>> groups.last == groups[-1]
-    True
+    >>> page_one = client.groups.list()
+    >>> page_two = client.groups.list(page=2)
+    >>> probably_all_groups = client.groups.list(per_page=100)
+    >>> all_groups = list(client.groups.list().autopage())
+
+
+Listing chats
+-------------
+
+.. code-block:: python
+
+    >>> chats = client.chats.list()
+
+
+Listing bots
+------------
+
+.. code-block:: python
+
+    >>> bots = client.bots.list()
+
+
+Getting your own user information
+---------------------------------
+
+.. code-block:: python
+
+    >>> cached_user_data = client.user.me
+    >>> fresh_user_data = client.user.get_me()
 
 
 Groups
 ======
 
-From a :class:`~groupy.object.responses.Group`, you can list its 
-:class:`~groupy.object.responses.Member`\ s and
-:class:`~groupy.object.responses.Message`\ s.
+Creating new groups
+-------------------
 
 .. code-block:: python
 
-    >>> from groupy import Group
-    >>> groups = Group.list()
-    >>> group = groups.first
-    >>> messages = group.messages()
-    >>> members = group.members()
+    >>> new_group = client.groups.create(name='Yay, I have my own group')
 
-A group returns all of its members in a single list. So determining the number
-of members in a group should be a familiar task.
+Listing messages from a group
+-----------------------------
 
 .. code-block:: python
 
-    >>> len(members)
-    5
+    >>> messages = group.messages.list()
 
-:class:`~groupy.object.responses.Message`\ s, however, are a different matter.
-Since there may be thousands of messages in a group, messages are returned in
-pages. The default (and maximum) number of messages per page is 100. To
-determine the total number of messages in a group, simply access the
-``message_count`` attribute. Additional pages of messages can be obtained using
-:func:`~groupy.object.listers.MessagePager.older` and
-:func:`~groupy.object.listers.MessagePager.newer`.
+.. note:: See "Listing messages" for details.
+
+
+Accessing members of a group
+----------------------------
 
 .. code-block:: python
 
-    >>> len(messages)
-    100
-    >>> group.message_count
-    3014
-    >>> older = messages.older()
-    >>> newer = messages.newer()
+    >>> members = group.members
 
-There are also methods for collecting a newer or older page of messages into
-one list: :func:`~groupy.object.listers.MessagePager.iolder` and
-:func:`~groupy.object.listers.MessagePager.inewer`. An example of using the
-former to retrieve all messages in a group:
+
+Viewing the leaderboard
+-----------------------
 
 .. code-block:: python
 
-    >>> from groupy import Group
-    >>> group = Group.list().first
-    >>> messages = group.messages()
-    >>> while messages.iolder():
-    ...       pass
-    ... 
-    >>> len(messages) == group.message_count
-    True
+    >>> daily_best = group.leaderboard.list_day()
+    >>> weekly_best = group.leaderboard.list_week()
+    >>> my_best = group.leaderboard.list_for_me()
 
-Often you'll want to post a new message to a group. New messages can be posted
-to a group using its :func:`~groupy.object.responses.Recipient.post` method.
+
+Viewing the gallery
+-------------------
 
 .. code-block:: python
 
-    >>> from groupy import Group
-    >>> group = Group.list().first
-    >>> group.post('Hello to you')
-    >>> group.messages().newest.text
-    'Hello to you'
+    >>> messages = group.gallery.list()
 
-.. note::
-
-    Posting a message does not affect ``message_count``. However, retrieving
-    any page of messages *does* update it.
-
-:class:`~groupy.object.responses.Group`\ s have many attributes, some of which
-can be changed.
+Destroying a group
+------------------
 
 .. code-block:: python
 
-    >>> group.name
-    'My Family'
-    >>> group.image_url
-    'http://i.groupme.com/123456789'
-    >>> group.description
-    'Group of my family members - so we can keep up with each other.'
-    >>> group.update(name="My Group of Family Members")
-    >>> group.name
-    'My Group of Family Members'
-    >>> group.update(name="[old] Family Group", description="The old family group")
-    >>> group.name
-    '[old] Family Group'
-    >>> group.description
-    'The old family group'
-
-Some :class:`~groupy.object.responses.Group`\ s also have a ``share_url`` that
-others can visit to join the group.
-
-.. code-block:: python
-
-    >>> group.share_url
-    'https://groupme.com/join_group/1234567890/SHARE_TOKEN'
-
-Beware that not every group is created with a share link, in which case the
-value of ``share_url`` would be ``None``. However, this can be changed in the
-same way as other group information.
-
-.. code-block:: python
-
-    >>> print(group.share_url)
-    None
-    >>> group.update(share=True)
-    >>> group.share_url
-    'https://groupme.com/join_group/1234567890/SHARE_TOKEN'
-
-.. note::
-
-    The ``SHARE_TOKEN`` is specific to each group's share link.
-
-The remainder of a :class:`~groupy.object.responses.Group`\ s attributes cannot
-be changed. Some of the more important attributes are shown below.
-
-.. code-block:: python
-
-    >>> group.group_id
-    '1234567890'
-    >>> group.creator_user_id
-    '0123456789'
-    >>> print(group.created_at)
-    2013-12-25 9:53:33
-    >>> print(group.updated_at)
-    2013-12-26 4:21:08
+    >>> if group.destroy():
+    ...     print('Bye bye!')
+    ... else:
+    ...     print('Something went wrong...')
 
 
 Messages
 ========
 
-Unlike :class:`~groupy.object.responses.Group`\ s,
-:class:`~groupy.object.responses.Member`\ s, and
-:class:`~groupy.object.responses.Bot`\ s,
-:class:`~groupy.object.responses.Message`\ s *cannot* be listed directly.
-Instead, :class:`~groupy.object.responses.Message`\ s are listed either from
-:class:`~groupy.object.responses.Group` or
-:class:`~groupy.object.responses.Member` instances.
-
-To list the messages from a group, use a group's 
-:func:`~groupy.object.responses.Recipient.messages` method.
+Creating a message (in a group)
+-------------------------------
 
 .. code-block:: python
 
-    >>> from groupy import Group
-    >>> group = Group.list().first
-    >>> messages = group.messages()
+    >>> message = group_or_chat.post(text='hi')
 
-To list the messages from a member, use a member's 
-:func:`~groupy.object.responses.Recipient.messages` method.
-
-.. code-block:: python
-
-    >>> from groupy import Member
-    >>> member = Member.list().first
-    >>> messages = member.messages()
-
-Messages have several properties. Let's look at a few of them. Messages have a
-timestamp indicating when the message was created as a
-:class:`datetime.datetime` instance, as well as information about the member
-who posted it. Of course, messages can have text and attachments. 
-
-.. code-block:: python
-
-    >>> message = messages.newest
-    >>> print(message.created_at)
-    2014-4-29 12:19:05
-    >>> message.user_id
-    '0123456789'
-    >>> message.name
-    'Kevin'
-    >>> message.avatar_url
-    'http://i.groupme.com/123456789'
-    >>> message.text
-    'Hello'
-    >>> message.attachments
-    [Image(url='http://i.groupme.com/123456789')]
-
-.. note::
-
-    Not every message will have text and not every message will have
-    attachments but every message must have one or the other.
-
-.. note::
-
-    Although the majority of messages will have just one attachment, there is
-    no limit on the number of attachments. In fact, despite that most clients
-    are incapable of displaying more than one of each type of attachment, the
-    API doesn't limit the types of attachments in any way. For example, a
-    single message might have two images, three locations, and one emoji, but
-    it's not likely that any client would show them all or handle the message
-    without error.
-
-There are multiple types of messages. System messages are messages that are not
-sent by a member, but generated by member actions. Many things generate system
-messages, including membership changes (entering/leaving, adding/removing),
-group updates (name, avatar, etc.), and member updates (nickname, avatar,
-etc.), and changing the topic.
-
-Additionally there are group messages and direct messages. Group messages are
-messages in a group, whereas direct messages are messages between two members.
-
-Each message has a few properties that can be used to differentiate among the
-types.
-
-    >>> message.group_id
-    '1234567890'
-    >>> message.recipient_id
-    None
-    >>> message.system
-    False
-
-In the above example, we can see that ``message.system`` is ``False``, which
-indicates that the message was sent by a member, not the system. We can also
-see that although the message has a ``message.group_id``, it does *not* have a
-``message.recipient_id``, which means it is a group message. Had it been a
-system message, ``message.system`` would have been ``True``. Had it been a
-direct message, ``message.group_id`` would have been ``None`` and
-``message.recipient_id`` would contain a valid user ID.
-
-Lastly, each message contains a list of user IDs to indicate which members have
-"liked" it.
-
-    >>> message.favorited_by
-    ['2345678901', '3456789012']
-
-Because often more information about the member is desired, a list of actual
-:class:`~groupy.object.responses.Member` instances can be retrieved using the
-:func:`~groupy.object.responses.Message.likes` method.
-
-.. code-block:: python
-
-    >>> message.likes()
-    [Rob, Jennifer, Vlad]
-
-Messages can also be liked and unliked.
+Liking/Unliking a message
+-------------------------
 
 .. code-block:: python
 
     >>> message.like()
-    True
     >>> message.unlike()
-    True
 
-.. note::
+Listing messages
+----------------
 
-    Currently, the message instance itself does **not** update its own
-    attributes. You must re-fetch the message.
+.. code-block:: python
+
+    >>> messages = chat_or_group.messages.list()
+    >>> oldest_message_in_page = messages[-1]
+    >>> page_two = chat_or_group.messages.list_before(oldest_message_in_page.id)
+    >>> all_messages = list(chat_or_group.messages.list().autopage())
 
 
 Members
 =======
 
-:class:`~groupy.object.responses.Member` instances represent other GroupMe
-users. Finding members can be accomplished in one of three ways.
-
-Firstly, members may be listed from a group. This lists just the members of a
-particular group.
+Blocking/Unblocking a member
+----------------------------
 
 .. code-block:: python
 
-    >>> from groupy import Group
-    >>> group = Group.list().first
-    >>> members = group.members()
+    >>> block = member.block()
+    >>> member.unblock()
 
-Secondly, members may be listed from a message. This lists just the members who
-have "liked" a particular message.
+Removing members from groups
+----------------------------
 
-.. code-block:: python
-
-    >>> messages = group.messages()
-    >>> message = message.newest
-    >>> members = message.likes()
-
-Lastly, *all* the members you've seen thus far can be listed directly.
+.. note:: Remember, members are specific to the group from which they were obtained.
 
 .. code-block:: python
 
-    >>> from groupy import Member
-    >>> members = Member.list()
+    >>> member.remove()
 
-.. note::
 
-    Although many attributes of a member are specific to a particular group,
-    members listed in this fashion are taken from a single group with one
-    exception: the nickname of each member listed from
-    :func:`~groupy.object.responses.Member.list` is the most frequent of the
-    names that the member uses among the groups of which you are both members.
+Chats
+=====
 
-Each member has a user ID, a nickname, and a URL indicating their avatar image
-that are specific to the group from which the member was listed.
+Listing messages
+----------------
 
 .. code-block:: python
 
-    >>> member = members.first
-    >>> member.user_id
-    '0123456789'
-    >>> member.nickname
-    'Bill'
-    >>> member.avatar_url
-    'http://i.groupme.com/123456789'
+    >>> messages = chat.messages.list()
 
-Members have one more property of interest: ``muted``. This indicates whether
-the member has that group muted.
-
-.. code-block:: python
-
-    >>> member1, member2 = members[:2]
-    >>> member1.muted
-    False
-    >>> member2.muted
-    True
-
-Messaging a member and retrieving the messages between you and the member is
-done in the same way as when messaging a group.
-
-.. code-block:: python
-
-    >>> member.post("Hello")
-    >>> member.messages().newest.text
-    'Hello'
-
-
-Groups and Members
-==================
-
-Members can be added and removed from groups. Adding one or multiple members to
-a group is quite intuitive. The following examples assume that no one from
-``group1`` is a member of ``group2`` (although the API doesn't care if you add
-a member who is already a member).
-
-.. code-block:: python
-    
-    >>> from groupy import Group
-    >>> group1, group2 = Group.list()[:2]
-    >>> member = group1.members().first
-    >>> group2.add(member)
-
-Multiple members can be added simultaneously as well. Suppose you wanted to add
-everyone from ``group1`` to ``group2``.
-
-.. code-block:: python
-
-    >>> group2.add(*group1.members())
-
-Removing members, however, must be done one at a time:
- 
-.. code-block:: python
-
-    >>> for m in group2.members():
-    ...   group2.remove(m)
-    ... 
-
-GroupMe and You
-===============
-
-One of the most basic pieces of information you'll want to obtain is your own!
-**Groupy** makes this very simple:
-
-.. code-block:: python
-
-    >>> from groupy import User
-    >>> your_info = User.get()
-
-It contains your GroupMe profile/account information and settings: 
-
-.. code-block:: python
-
-    >>> print(your_info.user_id)
-    12345678
-    >>> print(your_info.name)
-    Billy Bob <-- the MAN!
-    >>> print(your_info.image_url)
-    http://i.groupme.com/123456789
-    >>> print(your_info.sms)
-    False
-    >>> print(your_info.phone_number)
-    +1 5055555555
-    >>> print(your_info.email)
-    bb@example.com
-
-It also contains some meta information: 
-
-.. code-block:: python
-
-    >>> print(your_info.created_at)
-    2011-3-14 14:11:12
-    >>> print(your_info.updated_at)
-    2013-4-20 6:58:26
-
-``created_at`` and ``updated_at`` are returned as :class:`~datetime.datetime`
-objects.
-
-
-Bots
-====
-
-Bots can be a useful tool because each has a callback URL to which every
-message in the group is POSTed. This allows your bot the chance to do... well,
-something (whatever that may be) in response to every message!
-
-.. note::
-
-    Keep in mind that bots can only post messages to groups, so if anything
-    else is going to get done, it'll be done by you, not your bot. That means
-    adding and removing users, liking messages, direct messaging a member, and
-    creating or modifying group will be done under your name.
-
-Bot creation is simple. You'll need to give the bot a name and associate it
-with a specific group. 
-
-.. code-block:: python
-
-    >>> from groupy import Bot, Group
-    >>> group = Group.list().first
-    >>> bot = Bot.create('R2D2', group)
-
-``bot`` is now the newly created bot and is ready to be used. If you want, you
-can also specify a callback URL *(recommended)*, as well as an image URL to be
-used for the bot's avatar.
-
-Just about the only thing a bot can do is post a message to a group. **Groupy**
-makes it easy:
-
-.. code-block:: python
-
-    >>> from group import Bot
-    >>> bot = Bot.list().first
-    >>> bot.post("I'm a bot!")
-
-Note that the bot always posts its messages to the group in which it belongs.
-You can create multiple bots. Listing all of your bots is straightforward.
-
-.. code-block:: python
-
-    >>> from groupy import Bot
-    >>> bots = Bot.list()
-
-Now ``bots`` contains a list of all of your bots.
-
+.. note:: See "Listing messages" for details.

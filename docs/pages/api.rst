@@ -5,57 +5,30 @@ Developer Docs
 This section of the documentation is for other developers, and contains the
 complete information about each package, module, class, and method.
 
+
+The ``client`` Package
+======================
+
+.. automodule:: groupy.client
+    :members:
+
+
 The ``api`` Package
 ===================
 
 .. automodule:: groupy.api
 	:members:
 
-The ``api.endpoint`` Module
----------------------------
 
-.. automodule:: groupy.api.endpoint
-	:members:
+The ``session`` Package
+=======================
 
-The ``api.errors`` Module
--------------------------
-
-.. automodule:: groupy.api.errors
-	:members:
-
-The ``api.status`` Module
--------------------------
-
-.. automodule:: groupy.api.status
-	:members:
+.. automodule:: groupy.session
+    :members:
 
 
-The ``object`` Package
+The ``pagers`` Package
 ======================
 
-.. automodule:: groupy.object
-
-The ``object.responses`` Module
--------------------------------
-
-.. automodule:: groupy.object.responses
-	:members:
-
-The ``object.attachments`` Module
----------------------------------
-
-.. automodule:: groupy.object.attachments
-	:members:
-
-The ``object.listers`` Module
------------------------------
-
-.. automodule:: groupy.object.listers
-	:members:
-
-The ``config`` Module
-=====================
-
-.. automodule:: groupy.config
-	:members:
-
+.. automodule:: groupy.pagers
+    :members:
