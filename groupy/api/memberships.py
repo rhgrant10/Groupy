@@ -76,30 +76,31 @@ class MembershipRequest(base.Resource):
 
     def __init__(self, manager, *requests, **data):
         super().__init__(manager, **data)
-        self._requests = requests
+        self.requests = requests
         self._expired_exception = None
         self._not_ready_exception = None
         self._is_ready = False
         self.results = None
 
-    def _check_if_ready(self):
+    def check_if_ready(self):
         try:
             results = self.manager.check(self.results_id)
-            self._is_ready = True
-            self._not_ready_exception = None
-            self._process_new_members(results)
         except exceptions.ResultsNotReady as e:
             self._is_ready = False
             self._not_ready_exception = e
         except exceptions.ResultsExpired as e:
             self._is_ready = True
             self._expired_exception = e
+        else:
+            self.results = self.match_members_to_requests(results)
+            self._is_ready = True
+            self._not_ready_exception = None
 
-    def _process_new_members(self, results):
+    def match_members_to_requests(self, results):
         members = []
         failures = []
         data = {member['guid']: member for member in results}
-        for request in self._requests:
+        for request in self.requests:
             try:
                 member_data = data[request['guid']]
             except KeyError:
@@ -108,11 +109,11 @@ class MembershipRequest(base.Resource):
                 member_data.pop('guid')
                 member = Member(self.manager, **member_data)
                 members.append(member)
-        self.results = self.Results(members, failures)
+        return self.Results(members, failures)
 
-    def is_ready(self):
-        if not self._is_ready:
-            self._check_if_ready()
+    def is_ready(self, check=True):
+        if not self._is_ready and check:
+            self.check_if_ready()
         return self._is_ready
 
     def poll(self, timeout=30, interval=2):

@@ -115,3 +115,94 @@ class RemoveMemberTests(MemberTests):
     def test_uses_user_id(self):
         self.assert_kwargs(self.member._memberships.remove,
                            membership_id=self.data['id'])
+
+
+class MembershipRequestTests(TestCase):
+    def setUp(self):
+        self.m_manager = mock.Mock()
+        self.requests = [get_fake_member_data(guid='foo-%s' % n) for n in range(2)]
+        self.request = memberships.MembershipRequest(self.m_manager,
+                                                     *self.requests,
+                                                     results_id='bar')
+
+
+class ReadyResultsTests(MembershipRequestTests):
+    def setUp(self):
+        super().setUp()
+        self.m_manager.check.return_value = self.requests
+        self.is_ready = self.request.is_ready()
+        self.results = self.request.get()
+
+    def test_result_is_ready(self):
+        self.assertTrue(self.is_ready)
+
+    def test_results_are_members(self):
+        for member in self.results.members:
+            with self.subTest(member=member):
+                self.assertIsInstance(member, memberships.Member)
+
+    def test_there_are_no_failures(self):
+        self.assertEqual(self.results.failures, [])
+
+    def test_resulting_members_have_no_guids(self):
+        for member in self.results.members:
+            with self.subTest(member=member):
+                with self.assertRaises(AttributeError):
+                    member.guid
+
+
+class NotReadyResultsTests(MembershipRequestTests):
+    def setUp(self):
+        super().setUp()
+        self.m_manager.check.side_effect = ResultsNotReady(response=None)
+        self.is_ready = self.request.is_ready()
+
+    def test_result_is_not_ready(self):
+        self.assertFalse(self.is_ready)
+
+    def test_getting_result_raises_not_ready_exception(self):
+        with self.assertRaises(ResultsNotReady):
+            self.request.get()
+
+
+class ExpiredResultsTests(MembershipRequestTests):
+    def setUp(self):
+        super().setUp()
+        self.m_manager.check.side_effect = ResultsExpired(response=None)
+        self.is_ready = self.request.is_ready()
+
+    def test_result_is_ready(self):
+        self.assertTrue(self.is_ready)
+
+    def test_getting_result_raises_expired_exception(self):
+        with self.assertRaises(ResultsExpired):
+            self.request.get()
+
+
+class FailureResultsTests(MembershipRequestTests):
+    def setUp(self):
+        super().setUp()
+        self.m_manager.check.return_value = self.requests[1:]
+        self.is_ready = self.request.is_ready()
+        self.results = self.request.get()
+
+    def test_not_all_requests_have_results(self):
+        self.assertNotEqual(len(self.results.members), len(self.requests))
+
+    def test_there_are_failures(self):
+        self.assertTrue(self.results.failures)
+
+    def test_the_failure_is_the_correct_request(self):
+        self.assertEqual(self.results.failures, self.requests[:1])
+
+
+class PollResultsTests(MembershipRequestTests):
+    def setUp(self):
+        super().setUp()
+        self.request.get = mock.Mock()
+        self.request.is_ready = mock.Mock()
+        self.request.is_ready.side_effect = [False, True]
+        self.result = self.request.poll(interval=0)
+
+    def test_result_is_get(self):
+        self.assertEqual(self.result, self.request.get.return_value)
