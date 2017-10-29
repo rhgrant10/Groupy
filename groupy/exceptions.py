@@ -1,7 +1,8 @@
 
 
 class GroupyError(Exception):
-    pass
+    def __init__(self, message):
+        super().__init__(message)
 
 
 class ApiError(GroupyError):
@@ -9,17 +10,14 @@ class ApiError(GroupyError):
 
 
 class NoResponse(ApiError):
-    def __init__(self, request):
+    def __init__(self, request, message='Could not get a response'):
+        super().__init__(message)
         self.request = request
 
 
 class BadResponse(ApiError):
-    def __init__(self, response):
-        self.response = response
-
-
-class ResultsError(ApiError):
-    def __init__(self, response):
+    def __init__(self, response, message='Got a bad response'):
+        super().__init__(message)
         self.response = response
 
 
@@ -35,9 +33,17 @@ class MissingMetaError(BadResponse):
     pass
 
 
+class ResultsError(ApiError):
+    def __init__(self, response, message):
+        super().__init__(message)
+        self.response = response
+
+
 class ResultsNotReady(ResultsError):
-    pass
+    def __init__(self, response, message='The results are not ready yet'):
+        super().__init__(response, message)
 
 
 class ResultsExpired(ResultsError):
-    pass
+    def __init__(self, response, message='The results have expired'):
+        super().__init__(response, message)
