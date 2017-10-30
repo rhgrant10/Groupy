@@ -8,6 +8,8 @@ from groupy import pagers
 
 
 class Groups(base.Manager):
+    """A group manager."""
+
     def __init__(self, session):
         super().__init__(session, path='groups')
 
@@ -17,48 +19,112 @@ class Groups(base.Manager):
             return []
         return [Group(self, **group) for group in response.data]
 
-    def list(self, **params):
-        return pagers.GroupList(self, **params)
+    def list(self, page=None, per_page=None, omit=None):
+        """List groups by page.
 
-    def list_former(self, **params):
+        The API allows certain fields to be excluded from the results so that
+        very large groups can be fetched without exceeding the maximum
+        response size. At the time of this writing, only 'memberships' is
+        supported.
+
+        :param int page: page number
+        :param int per_page: number of groups per page
+        :param int omit: a comma-separated list of fields to exclude
+        :return: a list of groups
+        :rtype: :class:`~groupy.pagers.GroupList`
+        """
+        return pagers.GroupList(self, page=page, per_page=per_page, omit=omit)
+
+    def list_former(self):
+        """List all former groups.
+
+        :return: a list of groups
+        :rtype: list
+        """
         url = utils.urljoin(self.url, 'former')
-        response = self.session.get(url, params=params)
+        response = self.session.get(url)
         return [Group(self, **group) for group in response.data]
 
     def get(self, id):
+        """Get a single group by ID.
+
+        :param str id: a group ID
+        :return: a group
+        :rtype: :class:`~groupy.api.groups.Group`
+        """
         url = utils.urljoin(self.url, id)
         response = self.session.get(url)
         return Group(self, **response.data)
 
     def create(self, name, **details):
+        """Create a new group.response
+
+        :param str name: the name of the group
+        :param kwargs details: additional group fields
+        :return: a new group
+        :rtype: :class:`~groupy.api.groups.Group`
+        """
         payload = dict(details, name=name)
         response = self.session.post(self.url, json=payload)
         return Group(self, **response.data)
 
     def update(self, id, **details):
+        """Update the details of a group.
+
+        :param str id: a group ID
+        :param kwargs details: values to update
+        """
         url = utils.urljoin(self.url, id)
         response = self.session.post(url, json=details)
         return Group(self, **response.data)
 
     def destroy(self, id):
+        """Destroy a group.
+
+        :param str id: a group ID
+        :return: ``True`` if successful
+        :rtype: bool
+        """
         path = '{}/destroy'.format(id)
         url = utils.urljoin(self.url, path)
         response = self.session.post(url)
         return response.ok
 
     def join(self, group_id, share_token):
+        """Join a group using a share token.
+
+        :param str group_id: the group_id of a group
+        :param str share_token: the share token
+        :return: the group
+        :rtype: :class:`~groupy.api.groups.Group`
+        """
         path = '{}/join/{}'.format(group_id, share_token)
         url = utils.urljoin(self.url, path)
         response = self.session.post(url)
         return Group(self, **response.data)
 
     def rejoin(self, group_id):
+        """Rejoin a former group.
+
+        :param str group_id: the group_id of a group
+        :return: the group
+        :rtype: :class:`~groupy.api.groups.Group`
+        """
         url = utils.urljoin(self.url, group_id)
         payload = {'group_id': group_id}
         response = self.session.post(url, json=payload)
         return Group(self, **response.data)
 
     def change_owners(self, group_id, owner_id):
+        """Change the owner of a group.
+
+        .. note:: you must be the owner to change owners
+
+        :param str group_id: the group_id of a group
+        :param str owner_id: the ID of the new owner
+        :return: the group
+        :rtype: :class:`~groupy.api.groups.Group`
+        """
         url = utils.urljoin(self.url, 'change_owners')
         requests = [{'group_id': group_id, 'owner_id': owner_id}]
         payload = {'requests': requests}
@@ -111,7 +177,7 @@ class Group(base.Resource):
         return '<{}(name={!r})>'.format(klass, self.name)
 
     def post(self, text=None, attachments=None):
-        return self.messages.create(text, attachments)
+        return self.messages.create(text=text, attachments=attachments)
 
     def update(self, **details):
         return self.manager.update(id=self.id, **details)

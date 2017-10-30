@@ -7,6 +7,15 @@ from .session import Session
 
 
 class Client:
+    """The API client.
+
+    The client is the main point of interaction. It can directly list groups,
+    chats, and bots, as well as provide your user information.
+
+    :param session: the request session
+    :type session: :class:`~groupy.session.Session`
+    """
+
     def __init__(self, session):
         self.session = session
         self.groups = groups.Groups(self.session)
@@ -17,5 +26,11 @@ class Client:
 
     @classmethod
     def from_token(cls, token):
+        """Create a client directly from an API token.
+
+        :param str token: an API token
+        :return: a client
+        :rtype: :class:`~groupy.client.Client`
+        """
         session = Session(token=token)
         return cls(session)

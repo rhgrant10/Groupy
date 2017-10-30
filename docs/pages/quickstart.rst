@@ -59,18 +59,36 @@ Getting your own user information
     >>> fresh_user_data = client.user.get_me()
 
 
+Working with resources
+======================
+
+In general, if a field is present in an API response, you can access it as an attribute of the resource. For example:
+
+.. code-block:: python
+
+    >>> group.name
+    'My cool group'
+    >>> member.id
+    '123456789'
+
+Some fields are converted to more useful objects for you:
+
+    >>> message.created_at
+    datetime.datetime(2015, 2, 8, 2, 8, 40)
+
+
 Groups
-======
+------
 
 Creating new groups
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
     >>> new_group = client.groups.create(name='Yay, I have my own group')
 
 Listing messages from a group
------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
@@ -80,7 +98,7 @@ Listing messages from a group
 
 
 Accessing members of a group
-----------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
@@ -88,7 +106,7 @@ Accessing members of a group
 
 
 Viewing the leaderboard
------------------------
+^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
@@ -98,14 +116,14 @@ Viewing the leaderboard
 
 
 Viewing the gallery
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
     >>> messages = group.gallery.list()
 
 Destroying a group
-------------------
+^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
@@ -113,6 +131,19 @@ Destroying a group
     ...     print('Bye bye!')
     ... else:
     ...     print('Something went wrong...')
+
+
+Chats
+=====
+
+Listing messages
+----------------
+
+.. code-block:: python
+
+    >>> messages = chat.messages.list()
+
+.. note:: See "Listing messages" for details.
 
 
 Messages
@@ -163,16 +194,3 @@ Removing members from groups
 .. code-block:: python
 
     >>> member.remove()
-
-
-Chats
-=====
-
-Listing messages
-----------------
-
-.. code-block:: python
-
-    >>> messages = chat.messages.list()
-
-.. note:: See "Listing messages" for details.

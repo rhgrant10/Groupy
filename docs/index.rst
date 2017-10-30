@@ -1,6 +1,6 @@
-==================
-Welcome to Groupy!
-==================
+======
+Groupy
+======
 
 .. image:: https://img.shields.io/pypi/v/GroupyAPI.svg
     :target: https://pypi.python.org/pypi/GroupyAPI
@@ -11,7 +11,7 @@ Welcome to Groupy!
 .. image:: https://readthedocs.org/projects/groupy/badge/?version=latest
     :target: https://groupy.readthedocs.org/en/latest
 
-The simple yet powerful wrapper for the GroupMe API.
+The simple yet powerful API client for the GroupMe messaging service.
 
 
 .. code-block:: console

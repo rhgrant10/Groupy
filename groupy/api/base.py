@@ -2,6 +2,14 @@ from groupy import utils
 
 
 class Manager:
+    """Class for interacting with the endpoint for a resource.
+
+    :param session: the requests session
+    :type session: :class:`~groupy.session.Session`
+    :param str path: path relative to the base URL
+    """
+
+    #: the base URL
     base_url = 'https://api.groupme.com/v3/'
 
     def __init__(self, session, path=None):
@@ -10,7 +18,15 @@ class Manager:
 
 
 class Resource:
+    """Class to represent an API object."""
+
     def __init__(self, manager, **data):
+        """Create an instance of the resource.
+
+        :param manager: the resource's manager
+        :type manager: :class:`~groupy.api.base.Manager`
+        :param kwargs data: the resource data
+        """
         self.manager = manager
         self.data = data
 
