@@ -124,8 +124,8 @@ class Message(GenericMessage):
 class DirectMessage(GenericMessage):
     # manager could be from a chat or from a group... is that a problem?
     def __init__(self, manager, **data):
-        conversation_id = self.__class__.get_conversation_id(data)
-        super().__init__(manager, conversation_id, **data)
+        data['conversation_id'] = self.__class__.get_conversation_id(data)
+        super().__init__(manager, **data)
 
     @staticmethod
     def get_conversation_id(data):
