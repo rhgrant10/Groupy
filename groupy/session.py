@@ -26,10 +26,10 @@ class Session(requests.Session):
             response.raise_for_status()
             return Response(response)
         except requests.HTTPError as e:
-            logger.exception('recieved a bad response')
+            logger.exception('received a bad response')
             raise exceptions.BadResponse(response) from e
         except requests.RequestException as e:
-            logger.exception('could not recieve a response')
+            logger.exception('could not receive a response')
             raise exceptions.NoResponse(e.request) from e
 
 
