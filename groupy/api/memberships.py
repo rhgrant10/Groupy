@@ -123,17 +123,40 @@ class MembershipRequest(base.Resource):
             member['guid'] = guid
 
     def is_ready(self, check=True):
+        """Return ``True`` if the results are ready.
+
+        If you pass ``check=False``, no attempt is made to check again for
+        results.
+
+        :param bool check: whether to query for the results
+        :return: ``True`` if the results are ready
+        :rtype: bool
+        """
         if not self._is_ready and check:
             self.check_if_ready()
         return self._is_ready
 
     def poll(self, timeout=30, interval=2):
+        """Return the results when they become ready.
+
+        :param int timeout: the maximum time to wait for the results
+        :param float interval: the number of seconds between checks
+        :return: the membership request result
+        :rtype: :class:`~groupy.api.memberships.MembershipResult.Results`
+        """
         start = time.time()
         while time.time() - start < timeout and not self.is_ready():
             time.sleep(interval)
         return self.get()
 
     def get(self):
+        """Return the results now.
+
+        :return: the membership request results
+        :rtype: :class:`~groupy.api.memberships.MembershipResult.Results`
+        :raises groupy.exceptions.ResultsNotReady: if the results are not ready
+        :raises groupy.exceptions.ResultsExpired: if the results have expired
+        """
         if self._expired_exception:
             raise self._expired_exception
         if self._not_ready_exception:
