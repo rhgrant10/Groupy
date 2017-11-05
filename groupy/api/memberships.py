@@ -92,24 +92,35 @@ class MembershipRequest(base.Resource):
             self._is_ready = True
             self._expired_exception = e
         else:
-            self.results = self.match_members_to_requests(results)
+            failures = self.get_failed_requests(results)
+            members = self.get_new_members(results)
+            self.results = self.__class__.Results(list(members), list(failures))
             self._is_ready = True
             self._not_ready_exception = None
 
-    def match_members_to_requests(self, results):
-        members = []
-        failures = []
+    def get_failed_requests(self, results):
+        """Return the requests that failed.
+
+        :param list results: the results of a membership request check
+        :return: the failed requests
+        :rtype: generator
+        """
         data = {member['guid']: member for member in results}
         for request in self.requests:
-            try:
-                member_data = data[request['guid']]
-            except KeyError:
-                failures.append(request)
-            else:
-                member_data.pop('guid')
-                member = Member(self.manager, **member_data)
-                members.append(member)
-        return self.Results(members, failures)
+            if request['guid'] not in data:
+                yield request
+
+    def get_new_members(self, results):
+        """Return the newly added members.
+
+        :param list results: the results of a membership request check
+        :return: the successful requests, as :class:`~groupy.api.memberships.Members`
+        :rtype: generator
+        """
+        for member in results:
+            guid = member.pop('guid')
+            yield Member(self.manager, **member)
+            member['guid'] = guid
 
     def is_ready(self, check=True):
         if not self._is_ready and check:
