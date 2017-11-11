@@ -13,8 +13,9 @@ class Pager:
     #: the base set of params
     default_params = {}
 
-    def __init__(self, manager, **params):
+    def __init__(self, manager, endpoint, **params):
         self.manager = manager
+        self.endpoint = endpoint
         params = {k: v for k, v in params.items() if v is not None}
         self.params = dict(self.default_params, **params)
         self.items = self.fetch()
@@ -35,7 +36,7 @@ class Pager:
         :return: the current page of results
         :rtype: list
         """
-        return self.manager._raw_list(**self.params)
+        return self.endpoint(**self.params)
 
     def fetch_next(self):
         """Fetch the next page of results.
@@ -66,8 +67,8 @@ class GroupList(Pager):
 class MessageList(Pager):
     """Pager for messages."""
 
-    def __init__(self, manager, **params):
-        super().__init__(manager, **params)
+    def __init__(self, manager, endpoint, **params):
+        super().__init__(manager, endpoint, **params)
         self.mode = MessageList.detect_mode(**params)
 
     @staticmethod

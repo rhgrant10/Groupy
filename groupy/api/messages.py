@@ -19,7 +19,7 @@ class Messages(base.Manager):
         return [Message(self, **message) for message in messages]
 
     def list(self, **params):
-        return pagers.MessageList(self, **params)
+        return pagers.MessageList(self, self._raw_list, **params)
 
     def list_before(self, message_id, **params):
         return self.list(before_id=message_id, **params)
@@ -239,7 +239,7 @@ class Gallery(base.Manager):
         return [Message(self, **message) for message in messages]
 
     def list(self, **params):
-        return pagers.MessageList(self, **params)
+        return pagers.MessageList(self, self._raw_list, **params)
 
     def list_before(self, message_id, **params):
         return self.list(before_id=message_id, **params)

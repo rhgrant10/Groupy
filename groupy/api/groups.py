@@ -33,7 +33,8 @@ class Groups(base.Manager):
         :return: a list of groups
         :rtype: :class:`~groupy.pagers.GroupList`
         """
-        return pagers.GroupList(self, page=page, per_page=per_page, omit=omit)
+        return pagers.GroupList(self, self._raw_list, page=page,
+                                per_page=per_page, omit=omit)
 
     def list_former(self):
         """List all former groups.

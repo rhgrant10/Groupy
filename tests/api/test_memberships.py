@@ -32,8 +32,8 @@ class AddMembershipTests(MembershipsTests):
         self.m_session.post.return_value = get_fake_response(data={'qux': 'quux'})
         self.result = self.memberships.add(*self.members)
 
-    def test_result_is_MembershipResult(self):
-        self.assertIsInstance(self.result, memberships.MembershipResult)
+    def test_result_is_MembershipRequest(self):
+        self.assertIsInstance(self.result, memberships.MembershipRequest)
 
     def test_payload_contained_guids(self):
         __, kwargs = self.m_session.post.call_args
@@ -117,16 +117,16 @@ class RemoveMemberTests(MemberTests):
                            membership_id=self.data['id'])
 
 
-class MembershipResultTests(TestCase):
+class MembershipRequestTests(TestCase):
     def setUp(self):
         self.m_manager = mock.Mock()
         self.requests = [get_fake_member_data(guid='foo-%s' % n) for n in range(2)]
-        self.request = memberships.MembershipResult(self.m_manager,
-                                                    *self.requests,
-                                                    results_id='bar')
+        self.request = memberships.MembershipRequest(self.m_manager,
+                                                     *self.requests,
+                                                     results_id='bar')
 
 
-class ReadyResultsTests(MembershipResultTests):
+class ReadyResultsTests(MembershipRequestTests):
     def setUp(self):
         super().setUp()
         self.m_manager.check.return_value = self.requests
@@ -151,7 +151,7 @@ class ReadyResultsTests(MembershipResultTests):
                     member.guid
 
 
-class NotReadyResultsTests(MembershipResultTests):
+class NotReadyResultsTests(MembershipRequestTests):
     def setUp(self):
         super().setUp()
         self.m_manager.check.side_effect = ResultsNotReady(response=None)
@@ -165,7 +165,7 @@ class NotReadyResultsTests(MembershipResultTests):
             self.request.get()
 
 
-class ExpiredResultsTests(MembershipResultTests):
+class ExpiredResultsTests(MembershipRequestTests):
     def setUp(self):
         super().setUp()
         self.m_manager.check.side_effect = ResultsExpired(response=None)
@@ -179,7 +179,7 @@ class ExpiredResultsTests(MembershipResultTests):
             self.request.get()
 
 
-class FailureResultsTests(MembershipResultTests):
+class FailureResultsTests(MembershipRequestTests):
     def setUp(self):
         super().setUp()
         self.m_manager.check.return_value = self.requests[1:]
@@ -196,7 +196,7 @@ class FailureResultsTests(MembershipResultTests):
         self.assertEqual(self.results.failures, self.requests[:1])
 
 
-class PollResultsTests(MembershipResultTests):
+class PollResultsTests(MembershipRequestTests):
     def setUp(self):
         super().setUp()
         self.request.get = mock.Mock()
