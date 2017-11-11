@@ -64,7 +64,7 @@ class Bots(base.Manager):
         return response.ok
 
 
-class Bot(base.Resource):
+class Bot(base.ManagedResource):
     """A bot."""
 
     def __repr__(self):

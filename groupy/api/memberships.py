@@ -43,7 +43,7 @@ class Memberships(base.Manager):
         return response.ok
 
 
-class Member(base.Resource):
+class Member(base.ManagedResource):
     def __init__(self, manager, group_id, **data):
         super().__init__(manager, **data)
         self.messages = messages.DirectMessages(self.manager.session,
@@ -70,7 +70,7 @@ class Member(base.Resource):
         return self._memberships.remove(membership_id=self.id)
 
 
-class MembershipRequest(base.Resource):
+class MembershipRequest(base.ManagedResource):
 
     Results = namedtuple('Results', 'members failures')
 

@@ -58,7 +58,7 @@ class Blocks(base.Manager):
         return response.ok
 
 
-class Block(base.Resource):
+class Block(base.ManagedResource):
     """A block between you and another user."""
 
     def __repr__(self):

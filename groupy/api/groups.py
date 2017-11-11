@@ -160,7 +160,7 @@ class ChangeOwnersResult:
         return self.is_success
 
 
-class Group(base.Resource):
+class Group(base.ManagedResource):
     def __init__(self, manager, **data):
         super().__init__(manager, **data)
         self.messages = messages.Messages(self.manager.session, self.id)

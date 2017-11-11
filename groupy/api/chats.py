@@ -19,7 +19,7 @@ class Chats(base.Manager):
         return [Chat(self, **chat) for chat in response.data]
 
 
-class Chat(base.Resource):
+class Chat(base.ManagedResource):
     """A chat with another user."""
 
     def __init__(self, manager, **data):

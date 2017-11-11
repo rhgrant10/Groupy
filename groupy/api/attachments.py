@@ -9,7 +9,7 @@ class AttachmentMeta(type):
         cls._types[name.lower()] = cls
 
 
-class Attachment(metaclass=AttachmentMeta):
+class Attachment(base.Resource, metaclass=AttachmentMeta):
     def __init__(self, type, **data):
         data['type'] = type
         self.data = data
@@ -45,10 +45,8 @@ class Emoji(Attachment):
 
 
 class Mentions(Attachment):
-    # FIXME: find actual fields for mentions attachments
-    def __init__(self, **kwargs):
-        kwargs['type'] = 'mentions'
-        super().__init__(**kwargs)
+    def __init__(self, loci, user_ids):
+        super().__init__(type='mentions', loci=loci, user_ids=user_ids)
 
 
 class Image(Attachment):

@@ -14,9 +14,8 @@ class MangerTests(unittest.TestCase):
 
 class ResourceTests(unittest.TestCase):
     def setUp(self):
-        self.m_manager = mock.Mock()
         self.data = {'foo': 'bar'}
-        self.resource = base.Resource(self.m_manager, **self.data)
+        self.resource = base.Resource(**self.data)
 
     def test_data(self):
         self.assertEqual(self.data, self.resource.data)

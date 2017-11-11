@@ -88,7 +88,7 @@ class DirectMessages(base.Manager):
         return DirectMessage(self, **message)
 
 
-class GenericMessage(base.Resource):
+class GenericMessage(base.ManagedResource):
     preview_length = 42
 
     def __init__(self, manager, conversation_id, **data):
