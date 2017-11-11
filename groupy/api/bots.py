@@ -12,7 +12,7 @@ class Bots(base.Manager):
         """Return a list of bots.
 
         :return: all of your bots
-        :rtype: list
+        :rtype: :class:`list`
         """
         response = self.session.get(self.url)
         return [Bot(self, **bot) for bot in response.data]
@@ -37,7 +37,8 @@ class Bots(base.Manager):
 
         :param str bot_id: the ID of the bot
         :param str text: the text of the message
-        :param list attachments: a list of attachments
+        :param attachments: a list of attachments
+        :type attachments: :class:`list`
         :return: ``True`` if successful
         :rtype: bool
         """
@@ -74,7 +75,8 @@ class Bot(base.Resource):
         """Post a message as the bot.
 
         :param str text: the text of the message
-        :param list attachments: a list of attachments
+        :param attachments: a list of attachments
+        :type attachments: :class:`list`
         :return: ``True`` if successful
         :rtype: bool
         """

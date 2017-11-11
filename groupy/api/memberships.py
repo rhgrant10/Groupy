@@ -101,7 +101,8 @@ class MembershipRequest(base.Resource):
     def get_failed_requests(self, results):
         """Return the requests that failed.
 
-        :param list results: the results of a membership request check
+        :param results: the results of a membership request check
+        :type results: :class:`list`
         :return: the failed requests
         :rtype: generator
         """
@@ -113,7 +114,8 @@ class MembershipRequest(base.Resource):
     def get_new_members(self, results):
         """Return the newly added members.
 
-        :param list results: the results of a membership request check
+        :param results: the results of a membership request check
+        :type results: :class:`list`
         :return: the successful requests, as :class:`~groupy.api.memberships.Members`
         :rtype: generator
         """

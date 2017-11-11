@@ -13,7 +13,7 @@ class Chats(base.Manager):
 
         :param kwargs params: any list params
         :return: all chats you have with other users
-        :rtype: list
+        :rtype: :class:`list`
         """
         response = self.session.get(self.url, params=params)
         return [Chat(self, **chat) for chat in response.data]
@@ -35,7 +35,8 @@ class Chat(base.Resource):
         """Post a message to the chat.
 
         :param str text: the text of the message
-        :param list attachments: a list of attachments
+        :param attachments: a list of attachments
+        :type attachments: :class:`list`
         :return: ``True`` if successful
         :rtype: bool
         """

@@ -34,7 +34,7 @@ class Pager:
         """Fetch the current page of results.
 
         :return: the current page of results
-        :rtype: list
+        :rtype: :class:`list`
         """
         return self.endpoint(**self.params)
 
@@ -42,7 +42,7 @@ class Pager:
         """Fetch the next page of results.
 
         :return: the next page of results
-        :rtype: list
+        :rtype: :class:`list`
         """
         self.set_next_page_params()
         return self.fetch()

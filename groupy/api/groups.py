@@ -40,7 +40,7 @@ class Groups(base.Manager):
         """List all former groups.
 
         :return: a list of groups
-        :rtype: list
+        :rtype: :class:`list`
         """
         url = utils.urljoin(self.url, 'former')
         response = self.session.get(url)
