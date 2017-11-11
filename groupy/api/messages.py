@@ -2,6 +2,7 @@ import time
 from datetime import datetime
 
 from . import base
+from .attachments import Attachment
 from groupy import utils
 from groupy import pagers
 
@@ -95,7 +96,12 @@ class GenericMessage(base.Resource):
         self.conversation_id = conversation_id
         self.created_at = datetime.fromtimestamp(self.created_at)
         attachments = self.data.get('attachments') or []
-        self.attachments = Attachment.from_bulk_data(self.manager, attachments)
+        try:
+            self.attachments = Attachment.from_bulk_data(attachments)
+        except Exception:
+            print(attachments)
+            import sys
+            sys.exit(1)
 
         self._likes = Likes(self.manager.session, self.conversation_id,
                             message_id=self.id)
@@ -134,50 +140,6 @@ class DirectMessage(GenericMessage):
             participant_ids = data['recipient_id'], data['sender_id']
             conversation_id = '+'.join(sorted(participant_ids))
         return conversation_id
-
-
-class AttachmentMeta(type):
-    _types = {}
-
-    def __init__(cls, name, bases, attrs):
-        cls._types[name.lower()] = cls
-
-
-class Attachment(base.Resource, metaclass=AttachmentMeta):
-    def __init__(self, manager, type, **data):
-        super().__init__(manager, type=type, **data)
-
-    def to_json(self):
-        return self.data
-
-    @classmethod
-    def from_data(cls, manager, **data):
-        return cls._types.get(data['type'], cls)(manager, **data)
-
-    @classmethod
-    def from_bulk_data(cls, manager, attachments):
-        return [cls.from_data(manager, **a) for a in attachments]
-
-
-class Image(Attachment):
-    def download(self):
-        return self.manager.session.get(self.url)
-
-
-class Location(Attachment):
-    pass
-
-
-class Split(Attachment):
-    pass
-
-
-class Emoji(Attachment):
-    pass
-
-
-class Mentions(Attachment):
-    pass
 
 
 class Leaderboard(base.Manager):

@@ -3,10 +3,12 @@
 class Pager:
     """Class for iterating over multiple pages of results.
 
-    To use, provide a definition for ``set_next_page_params`` in a subclass.
+    This is a generic, base class. To create a specific type of pager, provide
+    a definition for ``set_next_page_params`` in a subclass.
 
     :param manager: the manager from which to get results
     :type manager: :class:`~groupy.api.base.Manager`
+    :param func endpoint: a callable from which results can be fetched
     :param kwargs params: initial params to pass to the manager
     """
 

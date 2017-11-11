@@ -1,5 +1,6 @@
 from unittest import mock
 
+from groupy.api import attachments
 from groupy.api import messages
 from .base import get_fake_response
 from .base import TestCase
@@ -269,7 +270,7 @@ class AttachmentTests(TestCase):
 
 class AttachmentToJsonTests(AttachmentTests):
     def test_json_is_correct(self):
-        a = messages.Attachment(self.m_manager, type='foo', text='bar')
+        a = messages.Attachment(type='foo', text='bar')
         self.assertEqual(a.to_json(), {'type': 'foo', 'text': 'bar'})
 
 
@@ -277,17 +278,16 @@ class AttachmentsFromBulkDataTests(AttachmentTests):
     def setUp(self):
         super().setUp()
         self.data = [
-            {'type': 'attachment', 'foo': 'bar'},
-            {'type': 'location', 'baz': 'qux'},
+            {'type': 'unknown', 'foo': 'bar'},
+            {'type': 'location', 'lat': 4, 'lng': 2, 'name': 'baz'},
         ]
-        self.attachments = messages.Attachment.from_bulk_data(self.m_manager,
-                                                              self.data)
+        self.attachments = attachments.Attachment.from_bulk_data(self.data)
 
     def test_attachment_one_is_attachment(self):
-        self.assertEqual(type(self.attachments[0]), messages.Attachment)
+        self.assertEqual(type(self.attachments[0]), attachments.Attachment)
 
     def test_attachment_two_is_location(self):
-        self.assertIsInstance(self.attachments[1], messages.Location)
+        self.assertIsInstance(self.attachments[1], attachments.Location)
 
 
 class LeaderboardTests(TestCase):

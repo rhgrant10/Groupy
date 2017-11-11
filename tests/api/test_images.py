@@ -1,13 +1,13 @@
 import unittest
 from unittest import mock
 
-from groupy.api import images
+from groupy.api import attachments
 
 
 class ImagesTests(unittest.TestCase):
     def setUp(self):
         self.m_session = mock.Mock()
-        self.images = images.Images(self.m_session)
+        self.images = attachments.Images(self.m_session)
 
 
 class UploadImageTests(ImagesTests):
@@ -24,7 +24,8 @@ class DownloadImageTests(ImagesTests):
     def setUp(self):
         super().setUp()
         self.m_session.get.return_value = mock.Mock(content='bar')
-        self.result = self.images.download('foo')
+        m_image_attachment = mock.Mock(url='foo')
+        self.result = self.images.download(m_image_attachment)
 
     def test_result_is_content(self):
         self.assertEqual(self.result, 'bar')
