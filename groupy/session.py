@@ -9,6 +9,11 @@ logger = logging.getLogger(__name__)
 
 
 class Session(requests.Session):
+    """An HTTP session for making API requests.
+
+    This session sets the content type to JSON and injects the API token.
+    """
+
     def __init__(self, token):
         super().__init__()
         self.token = token

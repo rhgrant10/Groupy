@@ -135,7 +135,17 @@ class Groups(base.Manager):
 
 
 class ChangeOwnersResult:
+    """The result of requesting a group owner change.
+
+    :param str group_id: group_id of the group
+    :param str owner_id: the ID of the new owner
+    :param str status: the status of the request
+    """
+
+    #: the status that represents success
     success_code = '200'
+
+    #: a map of statuses to meanings
     status_texts = {
         '200': 'everything checked out',
         '400': 'the group is already owned by that user',
@@ -154,6 +164,7 @@ class ChangeOwnersResult:
 
     @property
     def is_success(self):
+        """Return ``True`` if the request was successful."""
         return self.status == self.success_code
 
     def __bool__(self):
@@ -161,6 +172,8 @@ class ChangeOwnersResult:
 
 
 class Group(base.ManagedResource):
+    """A group."""
+
     def __init__(self, manager, **data):
         super().__init__(manager, **data)
         self.messages = messages.Messages(self.manager.session, self.id)
@@ -178,22 +191,58 @@ class Group(base.ManagedResource):
         return '<{}(name={!r})>'.format(klass, self.name)
 
     def post(self, text=None, attachments=None):
+        """Post a new message to the group.
+
+        :param str text: the text of the message
+        :param attachments: a list of attachments
+        :type attachments: :class:`list`
+        :return: the message
+        :rtype: :class:`~groupy.api.messages.Message`
+        """
         return self.messages.create(text=text, attachments=attachments)
 
     def update(self, **details):
+        """Update the details of a group.
+
+        :param kwargs details: updated values
+        :return: an updated group
+        :rtype: :class:`~groupy.api.groups.Group`
+        """
         return self.manager.update(id=self.id, **details)
 
     def destroy(self):
+        """Destroy the group.
+
+        Note that you must be the owner.
+
+        :return: ``True`` if successful
+        :rtype: bool
+        """
         return self.manager.destroy(id=self.id)
 
     def rejoin(self):
+        """Rejoin the group.
+
+        Note that this must be a former group.
+        :return: a current (not former) group
+        :rtype: :class:`~groupy.api.groups.Group`
+        """
         return self.manager.rejoin(group_id=self.group_id)
 
     def refresh_from_server(self):
+        """Refresh the group from the server in place."""
         group = self.manager.get(id=self.id)
         self.data = group.data
 
     def has_omission(self, field):
+        """Detect whether this group is missing data from the API.
+
+        Since the API allows omission of fields when listing groups, this
+        method enables easy detection of them.
+
+        :return: ``True`` if the field data is missing
+        :rtype: bool
+        """
         try:
             value = getattr(self, field)
             return value != self.data[field]

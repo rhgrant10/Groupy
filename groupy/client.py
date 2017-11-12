@@ -10,7 +10,8 @@ class Client:
     """The API client.
 
     The client is the main point of interaction. It can directly list groups,
-    chats, and bots, as well as provide your user information.
+    chats, bots, and provide your user information. It can also download
+    the image of a message attachment.
 
     :param session: the request session
     :type session: :class:`~groupy.session.Session`
