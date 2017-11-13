@@ -16,11 +16,17 @@ complete information about each package, module, class, and method.
 ``groupy.api``
 ==============
 
+``groupy.api.attachments``
+--------------------------
+
+.. automodule:: groupy.api.attachments
+    :members:
+
 ``groupy.api.base``
 -------------------
 
 .. automodule:: groupy.api.base
-	:members:
+    :members:
 
 ``groupy.api.blocks``
 ---------------------
@@ -44,12 +50,6 @@ complete information about each package, module, class, and method.
 ---------------------
 
 .. automodule:: groupy.api.groups
-    :members:
-
-``groupy.api.images``
----------------------
-
-.. automodule:: groupy.api.images
     :members:
 
 ``groupy.api.memberships``

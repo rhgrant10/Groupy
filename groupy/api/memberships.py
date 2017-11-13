@@ -10,12 +10,24 @@ from groupy import exceptions
 
 
 class Memberships(base.Manager):
+    """A membership manager for a particular group.
+
+    :param session: the request session
+    :type session: :class:`~groupy.session.Session`
+    :param str group_id: the group_id of a group
+    """
 
     def __init__(self, session, group_id):
         path = 'groups/{}/members'.format(group_id)
         super().__init__(session, path=path)
 
     def add(self, *members):
+        """Add members to the group.
+
+        :param args members: the members to add
+        :return: a membership request
+        :rtype: :class:`MembershipRequest`
+        """
         guid = uuid.uuid4()
         for i, member in enumerate(members):
             member['guid'] = '{}-{}'.format(guid, i)
@@ -26,6 +38,14 @@ class Memberships(base.Manager):
         return MembershipRequest(self, *members, **response.data)
 
     def check(self, results_id):
+        """Check for results of a membership request.
+
+        :param str results_id: the ID of a membership request
+        :return: successfully created memberships
+        :rtype: :class:`list`
+        :raises groupy.exceptions.ResultsNotReady: if the results are not ready
+        :raises groupy.exceptions.ResultsExpired: if the results have expired
+        """
         path = 'results/{}'.format(results_id)
         url = utils.urljoin(self.url, path)
         response = self.session.get(url)
@@ -36,6 +56,12 @@ class Memberships(base.Manager):
         return response.data['members']
 
     def remove(self, membership_id):
+        """Remove a member from the group.
+
+        :param str membership_id: the ID of a member in this group
+        :return: ``True`` if the member was successfully removed
+        :rtype: bool
+        """
         path = '{}/remove'.format(membership_id)
         url = utils.urljoin(self.url, path)
         payload = {'membership_id': membership_id}
@@ -44,6 +70,17 @@ class Memberships(base.Manager):
 
 
 class Member(base.ManagedResource):
+    """A user's membership in a particular group.
+
+    Members have both an ID and a membership ID. The membership ID is unique
+    to the combination of user and group.
+
+    :param manager: a manager for the group of the membership
+    :type manager: :class:`~groupy.api.base.Manager`
+    :param str group_id: the group_id of the membership
+    :param kwargs data: additional membership data
+    """
+
     def __init__(self, manager, group_id, **data):
         super().__init__(manager, **data)
         self.messages = messages.DirectMessages(self.manager.session,
@@ -58,23 +95,51 @@ class Member(base.ManagedResource):
                                                           self.nickname)
 
     def is_blocked(self):
+        """Check whether you have the user of the membership blocked.
+
+        :return: ``True`` if the user is blocked
+        :rtype: bool
+        """
         return self._user.blocks.between(other_user_id=self.user_id)
 
     def block(self):
+        """Block the user of the membership.
+
+        :return: the block created
+        :rtype: :class:`~groupy.api.blocks.Block`
+        """
         return self._user.blocks.block(other_user_id=self.user_id)
 
     def unblock(self):
+        """Unblock the user of the membership.
+
+        :return: ``True`` if successfully unblocked
+        :rtype: bool
+        """
         return self._user.blocks.unblock(other_user_id=self.user_id)
 
     def remove(self):
+        """Remove the member from the group (destroy the membership).
+
+        :return: ``True`` if successfully removed
+        :rtype: bool
+        """
         return self._memberships.remove(membership_id=self.id)
 
 
 class MembershipRequest(base.ManagedResource):
+    """A membership request.
+
+    :param manager: a manager for the group of the membership
+    :type manager: :class:`~groupy.api.base.Manager`
+    :param args requests: the members requested to be added
+    :param kwargs data: the membership request response data
+    """
 
     Results = namedtuple('Results', 'members failures')
 
     def __init__(self, manager, *requests, **data):
+        # data contains the results_id
         super().__init__(manager, **data)
         self.requests = requests
         self._expired_exception = None
@@ -83,6 +148,7 @@ class MembershipRequest(base.ManagedResource):
         self.results = None
 
     def check_if_ready(self):
+        """Check for and fetch the results if ready."""
         try:
             results = self.manager.check(self.results_id)
         except exceptions.ResultsNotReady as e:
