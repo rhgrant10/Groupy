@@ -66,8 +66,3 @@ Blocks
 - list from user
 - block/unblock other users
 - check if a block between you and another user exists
-
-
-2 basic types
-- Resource
-- Manager

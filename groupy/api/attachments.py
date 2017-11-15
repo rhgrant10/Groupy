@@ -61,10 +61,12 @@ class Location(Attachment):
     :param float lat: latitude
     :param float lng: longitude
     :param str name: the name
+    :param str foursqure_venue_id: an optional Foursquare venue ID
     """
 
-    def __init__(self, lat, lng, name):
-        super().__init__(type='location', lat=lat, lng=lng, name=name)
+    def __init__(self, lat, lng, name, foursqure_venue_id=None):
+        super().__init__(type='location', lat=lat, lng=lng, name=name,
+                         foursqure_venue_id=foursqure_venue_id)
 
 
 class Split(Attachment):

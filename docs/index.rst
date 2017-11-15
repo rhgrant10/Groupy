@@ -49,7 +49,6 @@ Table of Contents
     pages/introduction
     pages/installation
     pages/quickstart
-    pages/advanced
-    pages/contributing
     pages/api
+    pages/contributing
     pages/changelog
