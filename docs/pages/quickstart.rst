@@ -62,7 +62,8 @@ Getting your own user information
 Resources
 =========
 
-In general, if a field is present in an API response, you can access it as an attribute of the resource. For example:
+In general, if a field is present in an API response, you can access it as an
+attribute of the resource. For example:
 
 .. code-block:: python
 
@@ -160,7 +161,8 @@ Blocking/Unblocking a member
 Removing members from groups
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. note:: Remember, members are specific to the group from which they were obtained.
+.. note:: Remember, members are specific to the group from which they are 
+obtained.
 
 .. code-block:: python
 
@@ -248,10 +250,10 @@ To fetch the actual image bytes an image attachment, use the ``client``:
 Mentions
 ^^^^^^^^
 
-:class:`~groupy.api.attachments.Mentions` are a new type of attachment and
-have yet to be documented. However, they are simple to understand. Mentions
-capture the details necessary to highlight "@" mentions of members in groups.
-They contain a list of ``loci`` and an equal-sized list of ``user_ids``.
+:class:`~groupy.api.attachments.Mentions` are an undocumented type of
+attachment.  However, they are simple to understand. Mentions capture the
+details necessary to highlight "@" mentions of members in groups. They
+contain a list of ``loci`` and an equal-sized list of ``user_ids``.
 
 Assuming Bob's user ID is 1234, the mention of Bob in "Hi @Bob!" would be:
 
@@ -265,9 +267,9 @@ The strings in ``user_ids`` correspond *by index* to the elements in ``loci``.
 You can use the ``loci`` to extract the mentioning portion of the text, as
 well as obtain the mentioned member via ``user_ids``.
 
-An example with mutiple mentions probably illustrates this better. If Bill (user
-ID 2345) and Zoe Childs (user ID 6789) are mentioned in "@Bill hey I saw you with
-@Zoe Childs at the park!'"
+An example with mutiple mentions probably illustrates this better. If Bill
+(user ID 2345) and Zoe Childs (user ID 6789) are mentioned in "@Bill hey I
+saw you with @Zoe Childs at the park!'"
 
 .. code-block:: python
 
@@ -279,13 +281,12 @@ ID 2345) and Zoe Childs (user ID 6789) are mentioned in "@Bill hey I saw you wit
 Emojis
 ^^^^^^
 
-:class:`~groupy.api.attachments.Emojis` are relatively undocumented yet
-frequently appear in messages. More documentation will come as more is learned.
-
-Emoji attachments have a ``placeholder`` and a ``charmap``. The ``placeholder``
-is a high-point or unicode character designed to mark the location of the emoji
-in the text of the message. The ``charmap`` serves as some sort of translation
-or lookup tool for obtaining the actual emoji.
+:class:`~groupy.api.attachments.Emojis` are also an undocumented type of
+attachment, yet frequently appear in messages. Emoji attachments have a ``
+placeholder`` and a ``charmap``. The ``placeholder`` is a high-point or
+unicode character designed to mark the location of the emoji in the text of
+the message. The ``charmap`` serves as some sort of translation or lookup
+tool for obtaining the actual emoji.
 
 Splits
 ^^^^^^
