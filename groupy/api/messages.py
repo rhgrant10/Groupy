@@ -113,7 +113,7 @@ class DirectMessages(base.Manager):
         return [DirectMessage(self, **message) for message in messages]
 
     def list(self, **params):
-        return pagers.MessageList(self, **params)
+        return pagers.MessageList(self, self._raw_list, **params)
 
     def list_before(self, message_id, **kwargs):
         return self.list(before_id=message_id, **kwargs)
