@@ -70,6 +70,10 @@ class GroupList(Pager):
         self.params['page'] += 1
 
 
+class ChatList(GroupList):
+    pass
+
+
 class MessageList(Pager):
     """Pager for messages."""
 

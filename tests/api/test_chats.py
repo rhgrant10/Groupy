@@ -1,6 +1,7 @@
 import unittest
 from unittest import mock
 
+from groupy import pagers
 from groupy.api import chats
 
 
@@ -17,8 +18,11 @@ class ListChatsTests(ChatsTests):
         self.m_session.get.return_value = mock.Mock(data=[m_chat])
         self.results = self.chats.list()
 
-    def test_results_is_chats(self):
+    def test_results_contains_chats(self):
         self.assertTrue(all(isinstance(c, chats.Chat) for c in self.results))
+
+    def test_results_is_a_ChatList(self):
+        self.assertTrue(isinstance(self.results, pagers.ChatList))
 
 
 class ChatTests(unittest.TestCase):

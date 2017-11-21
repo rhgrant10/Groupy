@@ -1,8 +1,9 @@
 from unittest import mock
 
-from groupy.api import groups
 from .base import get_fake_response
 from .base import TestCase
+from groupy import pagers
+from groupy.api import groups
 
 
 def get_fake_group_data(**kwargs):
@@ -62,6 +63,21 @@ class ListFormerGroupsTests(GroupsTests):
 
     def test_results_are_groups(self):
         self.assertTrue(all(isinstance(g, groups.Group) for g in self.results))
+
+    def test_results_is_a_list(self):
+        self.assertTrue(isinstance(self.results, list))
+
+
+class ListCurrentGroupsTests(GroupsTests):
+    def setUp(self):
+        super().setUp()
+        group = get_fake_group_data()
+        response = get_fake_response(data=[group])
+        self.m_session.get.return_value = response
+        self.results = self.groups.list()
+
+    def test_results_is_a_GroupList(self):
+        self.assertTrue(isinstance(self.results, pagers.GroupList))
 
 
 class GetGroupTests(GroupsTests):

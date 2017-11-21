@@ -1,5 +1,6 @@
 from . import base
 from . import messages
+from groupy import pagers
 
 
 class Chats(base.Manager):
@@ -8,15 +9,26 @@ class Chats(base.Manager):
     def __init__(self, session):
         super().__init__(session, 'chats')
 
-    def list(self, **params):
+    def _raw_list(self, **params):
         """List all chats.
 
-        :param kwargs params: any list params
-        :return: all chats you have with other users
-        :rtype: :class:`list`
+        :param args params: listing paramters
+        :return: chats with other users
+        :rtype: :class:`~groupy.pagers.ChatList`
         """
         response = self.session.get(self.url, params=params)
         return [Chat(self, **chat) for chat in response.data]
+
+    def list(self, page=1, per_page=10):
+        """List all chats.
+
+        :param int page: which page
+        :param int per_page: how many chats per page
+        :return: chats with other users
+        :rtype: :class:`~groupy.pagers.ChatList`
+        """
+        return pagers.ChatList(self, self._raw_list, per_page=per_page,
+                               page=page)
 
 
 class Chat(base.ManagedResource):
