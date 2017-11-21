@@ -23,19 +23,64 @@ Assuming your API token is stored in ``token``:
     >>> from groupy.client import Client
     >>> client = Client.from_token(token)
 
+Clients are capable of listing groups, chats, and bots. It can also provide your user information.
+
 Listing groups
 --------------
 
+Groups are listed in pages. You can specify which page and how many groups per page using the ``page`` and ``per_page`` paramters. ``per_page`` defaults to 10.
+
 .. code-block:: python
 
-    >>> page_one = client.groups.list()
-    >>> page_two = client.groups.list(page=2)
-    >>> probably_all_groups = client.groups.list(per_page=100)
-    >>> all_groups = list(client.groups.list().autopage())
+    >>> client.groups.list()
+    <groupy.pagers.GroupList at 0x7fcd9f7174e0>
+    >>> client.groups.list(page=2, per_page=30)
+    <groupy.pagers.GroupList at 0x7fa02c23db70>
+
+The :class:`~groupy.pagers.GroupList` returned can be iterated to obtain the groups in that page.
+
+... code-block:: python
+
+    >>> for group in client.groups.list():
+    ...     print(group.name)
+
+Since paging can be a pain, the :class:`~groupy.pagers.GroupList` also possesses an :func:`~groupy.pagers.Pager.autopage` method that can be used to obtain all groups by automatically handling paging:
+
+    >>> groups = client.groups.list()
+    >>> for group in groups.autopage():
+    ...     print(group.name)
+
+.. note::
+
+    The ordering of groups is determined by most recent activity, so the group with the youngest message will be listed first. For this reason, autopaging is highly recommended when the goal is to list all groups.
+
+
+Omitting fields
+^^^^^^^^^^^^^^^
+
+Sometimes, particularly when a group contains hundreds of members, the response is "too large" and contains an incomplete response. In that case, an :class:`~groupy.exceptions.InvalidJsonError` is raised.
+
+To avoid this, use the ``omit`` parameter to specify fields to omit.
+
+.. code-block:: python
+
+    >>> groups = client.groups.list(omit="memberships")
+
+.. note::
+    
+    Multiple fields must be formatted in a CSV (e.g. "memberships,description"). At the time of this writing, however, the API only supports omission of "memberships."
+
+To refresh a group with fresh data from the server, thus replenishing any missing fields, use :func:`refresh_from_server`:
+
+.. code-block:: python
+
+    >>> group.refresh_from_server()
 
 
 Listing chats
 -------------
+
+
 
 .. code-block:: python
 
