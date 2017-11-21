@@ -19,7 +19,7 @@ class Groups(base.Manager):
             return []
         return [Group(self, **group) for group in response.data]
 
-    def list(self, page=None, per_page=None, omit=None):
+    def list(self, page=1, per_page=10, omit=None):
         """List groups by page.
 
         The API allows certain fields to be excluded from the results so that
@@ -233,20 +233,3 @@ class Group(base.ManagedResource):
         """Refresh the group from the server in place."""
         group = self.manager.get(id=self.id)
         self.data = group.data
-
-    def has_omission(self, field):
-        """Detect whether this group is missing data from the API.
-
-        Since the API allows omission of fields when listing groups, this
-        method enables easy detection of them.
-
-        :return: ``True`` if the field data is missing
-        :rtype: bool
-        """
-        try:
-            value = getattr(self, field)
-            return value != self.data[field]
-        except AttributeError:
-            return field in self.data
-        except KeyError:
-            return True

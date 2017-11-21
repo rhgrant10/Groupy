@@ -226,31 +226,6 @@ class GroupRefreshFromServerTests(GroupTests):
         self.assertEqual(self.group.name, 'qux')
 
 
-class GroupHasOmissionTests(GroupTests):
-    def test_present(self):
-        self.assertFalse(self.group.has_omission('group_id'))
-
-    def test_omitted(self):
-        self.assertTrue(self.group.has_omission('members'))
-
-    def test_no_omission(self):
-        self.assertFalse(self.group.has_omission('corge'))
-
-
-class SuccessfulChangeOwnersResultTests(TestCase):
-    def setUp(self):
-        self.result = groups.ChangeOwnersResult('foo', 'bar', '200')
-
-    def test_is_success(self):
-        self.assertTrue(self.result.is_success)
-
-    def test_is_truthy(self):
-        self.assertTrue(self.result)
-
-    def test_reason_is_not_unknown(self):
-        self.assertNotEqual(self.result.reason, 'unknown')
-
-
 class UnsuccessfulChangeOwnersResultTests(TestCase):
     known_codes = '400', '403', '404', '405'
 
