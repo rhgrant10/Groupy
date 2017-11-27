@@ -23,12 +23,14 @@ Assuming your API token is stored in ``token``:
     >>> from groupy.client import Client
     >>> client = Client.from_token(token)
 
-Clients are capable of listing groups, chats, and bots. It can also provide your user information.
+Clients are capable of listing groups, chats, and bots. It can also provide your user
+information.
 
 Listing groups
 --------------
 
-Groups are listed in pages. You can specify which page and how many groups per page using the ``page`` and ``per_page`` paramters. ``per_page`` defaults to 10.
+Groups are listed in pages. You can specify which page and how many groups per page
+using the ``page`` and ``per_page`` parameters. ``per_page`` defaults to 10.
 
 .. code-block:: python
 
@@ -37,14 +39,17 @@ Groups are listed in pages. You can specify which page and how many groups per p
     >>> client.groups.list(page=2, per_page=30)
     <groupy.pagers.GroupList at 0x7fa02c23db70>
 
-The :class:`~groupy.pagers.GroupList` returned can be iterated to obtain the groups in that page.
+The :class:`~groupy.pagers.GroupList` returned can be iterated to obtain the groups
+in that page.
 
-... code-block:: python
+.. code-block:: python
 
     >>> for group in client.groups.list():
     ...     print(group.name)
 
-Since paging can be a pain, the :class:`~groupy.pagers.GroupList` also possesses an :func:`~groupy.pagers.Pager.autopage` method that can be used to obtain all groups by automatically handling paging:
+Since paging can be a pain, the :class:`~groupy.pagers.GroupList` also possesses an
+:func:`~groupy.pagers.Pager.autopage` method that can be used to obtain all groups
+by automatically handling paging:
 
     >>> groups = client.groups.list()
     >>> for group in groups.autopage():
@@ -52,13 +57,17 @@ Since paging can be a pain, the :class:`~groupy.pagers.GroupList` also possesses
 
 .. note::
 
-    The ordering of groups is determined by most recent activity, so the group with the youngest message will be listed first. For this reason, autopaging is highly recommended when the goal is to list all groups.
+    The ordering of groups is determined by most recent activity, so the group with
+    the youngest message will be listed first. For this reason, autopaging is highly
+    recommended when the goal is to list all groups.
 
 
 Omitting fields
 ^^^^^^^^^^^^^^^
 
-Sometimes, particularly when a group contains hundreds of members, the response is "too large" and contains an incomplete response. In that case, an :class:`~groupy.exceptions.InvalidJsonError` is raised.
+Sometimes, particularly when a group contains hundreds of members, the response is
+"too large" and contains an incomplete response. In that case, an
+:class:`~groupy.exceptions.InvalidJsonError` is raised.
 
 To avoid this, use the ``omit`` parameter to specify fields to omit.
 
@@ -68,9 +77,12 @@ To avoid this, use the ``omit`` parameter to specify fields to omit.
 
 .. note::
     
-    Multiple fields must be formatted in a CSV (e.g. "memberships,description"). At the time of this writing, however, the API only supports omission of "memberships."
+    Multiple fields must be formatted in a CSV (e.g. "memberships,description").
+    At the time of this writing, however, the API only supports omission of
+    "memberships."
 
-To refresh a group with fresh data from the server, thus replenishing any missing fields, use :func:`refresh_from_server`:
+To refresh a group with fresh data from the server, thus replenishing any missing
+fields, use :func:`refresh_from_server`:
 
 .. code-block:: python
 
@@ -80,35 +92,55 @@ To refresh a group with fresh data from the server, thus replenishing any missin
 Listing chats
 -------------
 
-
+Listing chats is exactly list listing groups, except that you cannot choose to
+omit fields.
 
 .. code-block:: python
 
     >>> chats = client.chats.list()
+    >>> for chat in chats:
+    ...     print(chat.other_user['name'])
+
+    >>> for chat in chats.autopage():
+    ...     print(chat.created_at)
 
 
 Listing bots
 ------------
 
+Bots are listed all in one go. That is, the list of bots you own is not paginated.
+
 .. code-block:: python
 
-    >>> bots = client.bots.list()
+    >>> for bot in client.bots.list():
+    ...     print(bot.name)
 
 
-Getting your own user information
----------------------------------
+Your own user information
+-------------------------
+
+At any time, you can easily access information about your GroupMe user account:
+
+.. code-block:: python
+
+    >>> fresh_user_data = client.user.get_me()
+
+The information is returned as a simple dictionary.
+
+However, since user information does not typically change during the lifetime
+of a single client instance, the user information is cached the first time it
+is fetched. You can access the cached user information as a read-only property:
 
 .. code-block:: python
 
     >>> cached_user_data = client.user.me
-    >>> fresh_user_data = client.user.get_me()
 
 
 Resources
 =========
 
-In general, if a field is present in an API response, you can access it as an
-attribute of the resource. For example:
+In general, if a field is present in an API response, you can access it
+as an attribute of the resource. For example:
 
 .. code-block:: python
 
@@ -182,6 +214,8 @@ Destroying a group
 Chats
 -----
 
+A chat represents a conversation between you and another user.
+
 Listing messages
 ^^^^^^^^^^^^^^^^
 
@@ -206,8 +240,10 @@ Blocking/Unblocking a member
 Removing members from groups
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. note:: Remember, members are specific to the group from which they are 
-obtained.
+.. note::
+
+    Remember, members are specific to the group from which they are 
+    obtained.
 
 .. code-block:: python
 
@@ -285,7 +321,7 @@ you can obtain the actual image. To create a new image from a local file object,
     >>> with open('some-image', 'rb') as f:
     >>>     image = attachments.Image.from_file(f)    
 
-To fetch the actual image bytes an image attachment, use the ``client``:
+To fetch the actual image bytes of an image attachment, use the ``client``:
 
 .. code-block:: python
 
@@ -304,7 +340,8 @@ Assuming Bob's user ID is 1234, the mention of Bob in "Hi @Bob!" would be:
 
 .. code-block:: python
 
-    >>> mention = attachments.Mentions(loci=[(3, 4)], user_ids=['1234'])
+    >>> mention = attachments.Mentions(loci=[(3, 4)],
+    ...                                user_ids=['1234'])
 
 Each element in ``loci`` has two integers, the first of which indicates the
 starting index of the mentioning text, while second indicates its length.
@@ -319,7 +356,7 @@ saw you with @Zoe Childs at the park!'"
 .. code-block:: python
 
     >>> mentions = attachments.Mentions(loci=[[0, 5], [25, 11]],
-                                        user_ids=['2345', '6789'])
+    ...                                 user_ids=['2345', '6789'])
     
 
 
@@ -327,8 +364,8 @@ Emojis
 ^^^^^^
 
 :class:`~groupy.api.attachments.Emojis` are also an undocumented type of
-attachment, yet frequently appear in messages. Emoji attachments have a ``
-placeholder`` and a ``charmap``. The ``placeholder`` is a high-point or
+attachment, yet frequently appear in messages. Emoji attachments have a
+``placeholder`` and a ``charmap``. The ``placeholder`` is a high-point or
 unicode character designed to mark the location of the emoji in the text of
 the message. The ``charmap`` serves as some sort of translation or lookup
 tool for obtaining the actual emoji.
@@ -342,5 +379,3 @@ Splits
     splitting feature that seems to no longer be implemented in their clients.
     **Groupy**, however, still supports them due to their presence in older
     messages.
-
-
