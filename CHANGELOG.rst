@@ -2,10 +2,11 @@
 Change Log
 ==========
 
-v0.8.0 (November ??, 2017)
+v0.8.0 (November 26, 2017)
 ==========================
 
-This version represents a complete refactoring with much improved test coverage.
+This version represents a significant, backwards-incompatible change! The old
+API was brittle, poorly designed, and very difficult to test.
 
 - added additional endpoints: gallery, leaderboard, blocks
 - added missing group functionality: joining with a share token, rejoining a former group, and changing group ownership
@@ -14,7 +15,6 @@ This version represents a complete refactoring with much improved test coverage.
 - removal of Pillow depenedency for images; simply upload/download image bytes and do with them as you please
 - filter options on listings are gone; use standard python filter constructs instead
 - no more global api key; create clients using a specific api key instead
-
 - now uses the Apache license instead of GPLv3
 
 
