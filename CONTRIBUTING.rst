@@ -71,11 +71,11 @@ Ready to contribute? Here's how to set up `Groupy` for local development.
     $ cd Groupy/
     $ pyvenv env
     $ source env/bin/activate
-    $ pip install -r requirements.txt && pip install testing_requirements.txt
+    $ pip install -r requirements.txt -r testing_requirements.txt -e .
 
 4. Create a branch *from the dev branch* for local development::
 
-    $ git checkout -b name-of-your-bugfix-or-feature dev
+    $ git checkout -b new-hotness dev
 
    Now you can make your changes locally.
 
@@ -91,7 +91,7 @@ Note that if you update ``requirements.txt`` or ``testing_requirements.txt`` you
 
     $ git add .
     $ git commit
-    $ git push origin name-of-your-bugfix-or-feature
+    $ git push origin new-hotness
 
 Please make sure to:
 
@@ -108,8 +108,8 @@ Before you submit a pull request, check that it meets these guidelines:
 1. The pull request should include **tests**.
 2. If the pull request adds functionality, the **docs** should be updated. Put
    your new functionality into a function with a **docstring**, and add the
-   feature to the list in README.rst.
-3. The pull request should work for Python 3.4 and 3.5. Check
+   feature to the list in the documentation.
+3. The pull request should work for Python 3.4, 3.5, and 3.6. Check
    https://travis-ci.org/rhgrant10/Groupy/pull_requests
    and make sure that the tests pass for all supported Python versions.
 

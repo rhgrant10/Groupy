@@ -5,57 +5,81 @@ Developer Docs
 This section of the documentation is for other developers, and contains the
 complete information about each package, module, class, and method.
 
-The ``api`` Package
-===================
 
-.. automodule:: groupy.api
-	:members:
+``groupy.client``
+=================
 
-The ``api.endpoint`` Module
----------------------------
-
-.. automodule:: groupy.api.endpoint
-	:members:
-
-The ``api.errors`` Module
--------------------------
-
-.. automodule:: groupy.api.errors
-	:members:
-
-The ``api.status`` Module
--------------------------
-
-.. automodule:: groupy.api.status
-	:members:
+.. automodule:: groupy.client
+    :members:
 
 
-The ``object`` Package
-======================
+``groupy.api``
+==============
 
-.. automodule:: groupy.object
+``groupy.api.attachments``
+--------------------------
 
-The ``object.responses`` Module
--------------------------------
+.. automodule:: groupy.api.attachments
+    :members:
 
-.. automodule:: groupy.object.responses
-	:members:
+``groupy.api.base``
+-------------------
 
-The ``object.attachments`` Module
----------------------------------
+.. automodule:: groupy.api.base
+    :members:
 
-.. automodule:: groupy.object.attachments
-	:members:
+``groupy.api.blocks``
+---------------------
 
-The ``object.listers`` Module
------------------------------
+.. automodule:: groupy.api.blocks
+    :members:
 
-.. automodule:: groupy.object.listers
-	:members:
+``groupy.api.bots``
+-------------------
 
-The ``config`` Module
+.. automodule:: groupy.api.bots
+    :members:
+
+``groupy.api.chats``
+--------------------
+
+.. automodule:: groupy.api.chats
+    :members:
+
+``groupy.api.groups``
+---------------------
+
+.. automodule:: groupy.api.groups
+    :members:
+
+``groupy.api.memberships``
+--------------------------
+
+.. automodule:: groupy.api.memberships
+    :members:
+
+``groupy.api.messages``
+-----------------------
+
+.. automodule:: groupy.api.messages
+    :members:
+
+``groupy.api.user``
+-------------------
+
+.. automodule:: groupy.api.user
+    :members:
+
+
+``groupy.pagers``
+=================
+
+.. automodule:: groupy.pagers
+    :members:
+
+
+``groupy.exceptions``
 =====================
 
-.. automodule:: groupy.config
-	:members:
-
+.. automodule:: groupy.exceptions
+    :members:

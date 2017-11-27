@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup
+from setuptools import find_packages
 
 
 with open('README.rst') as readme_file:
@@ -21,17 +19,14 @@ with open('testing_requirements.txt') as test_requirements_file:
 
 setup(
     name='GroupyAPI',
-    version='0.7.1',
+    version='0.7.1-dev',
     description='The simple yet powerful wrapper for the GroupMe API',
     long_description=readme + '\n\n' + changelog,
     author='Robert Grant',
     author_email='rhgrant10@gmail.com',
     url='https://github.com/rhgrant10/Groupy',
-    packages=[
-        'groupy', 'groupy.object', 'groupy.api'
-    ],
-    package_dir={'groupy':
-                 'groupy'},
+    packages=find_packages(),
+    package_dir={'groupy': 'groupy'},
     include_package_data=True,
     install_requires=requirements,
     license="Apache Software License, Version 2.0",
@@ -53,6 +48,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ],
     test_suite='tests',
     tests_require=test_requirements
