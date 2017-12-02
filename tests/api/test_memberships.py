@@ -10,7 +10,6 @@ from .base import TestCase
 def get_fake_member_data(**kwargs):
     data = {
         'id': 'foo',
-        'group_id': 'bar',
         'user_id': 'baz',
         'nicknack': 'nick',
     }
@@ -71,7 +70,7 @@ class MemberTests(TestCase):
     @mock.patch('groupy.api.memberships.user')
     def setUp(self, *__):
         self.m_manager = mock.Mock()
-        self.data = get_fake_member_data()
+        self.data = get_fake_member_data(group_id='foo_group_id')
         self.member = memberships.Member(self.m_manager, **self.data)
         self._blocks = self.member._user.blocks
         self._memberships = self.member._memberships
@@ -123,6 +122,7 @@ class MembershipRequestTests(TestCase):
         self.requests = [get_fake_member_data(guid='foo-%s' % n) for n in range(2)]
         self.request = memberships.MembershipRequest(self.m_manager,
                                                      *self.requests,
+                                                     group_id='baz',
                                                      results_id='bar')
 
 

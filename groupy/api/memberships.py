@@ -20,6 +20,7 @@ class Memberships(base.Manager):
     def __init__(self, session, group_id):
         path = 'groups/{}/members'.format(group_id)
         super().__init__(session, path=path)
+        self.group_id = group_id
 
     def add(self, *members):
         """Add members to the group.
@@ -35,7 +36,8 @@ class Memberships(base.Manager):
         payload = {'members': members}
         url = utils.urljoin(self.url, 'add')
         response = self.session.post(url, json=payload)
-        return MembershipRequest(self, *members, **response.data)
+        return MembershipRequest(self, *members, group_id=self.group_id,
+                                 **response.data)
 
     def check(self, results_id):
         """Check for results of a membership request.
@@ -187,7 +189,7 @@ class MembershipRequest(base.ManagedResource):
         """
         for member in results:
             guid = member.pop('guid')
-            yield Member(self.manager, **member)
+            yield Member(self.manager, self.group_id, **member)
             member['guid'] = guid
 
     def is_ready(self, check=True):
