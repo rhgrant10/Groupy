@@ -102,7 +102,8 @@ class Groups(base.Manager):
         path = '{}/join/{}'.format(group_id, share_token)
         url = utils.urljoin(self.url, path)
         response = self.session.post(url)
-        return Group(self, **response.data)
+        group = response.data['group']
+        return Group(self, **group)
 
     def rejoin(self, group_id):
         """Rejoin a former group.

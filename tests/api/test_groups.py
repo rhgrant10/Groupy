@@ -130,7 +130,7 @@ class JoinGroupTests(GroupsTests):
     def setUp(self):
         super().setUp()
         group = get_fake_group_data()
-        response = get_fake_response(data=group)
+        response = get_fake_response(data={'group': group})
         self.m_session.post.return_value = response
         self.result = self.groups.join(group_id='foo', share_token='bar')
 
