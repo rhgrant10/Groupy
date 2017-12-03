@@ -2,35 +2,10 @@ from unittest import mock
 
 from groupy.api import attachments
 from groupy.api import messages
-from .base import get_fake_response
-from .base import TestCase
+from . import base
 
 
-def get_fake_generic_message_data(**kwargs):
-    data = {
-        'id': 'foo',
-        'created_at': 1302623328,
-    }
-    data.update(kwargs)
-    return data
-
-
-def get_fake_message_data(**kwargs):
-    data = get_fake_generic_message_data()
-    data['group_id'] = 'bar'
-    data.update(kwargs)
-    return data
-
-
-def get_fake_direct_message_data(**kwargs):
-    data = get_fake_generic_message_data()
-    data['recipient_id'] = 'bar'
-    data['sender_id'] = 'baz'
-    data.update(kwargs)
-    return data
-
-
-class MessagesTests(TestCase):
+class MessagesTests(base.TestCase):
     def setUp(self):
         self.m_session = mock.Mock()
         self.messages = messages.Messages(self.m_session, group_id='bar')
@@ -39,8 +14,8 @@ class MessagesTests(TestCase):
 class RawListMessagesTests(MessagesTests):
     def setUp(self):
         super().setUp()
-        message = get_fake_message_data()
-        response = get_fake_response(data={'messages': [message]})
+        message = base.get_fake_message_data()
+        response = base.get_fake_response(data={'messages': [message]})
         self.m_session.get.return_value = response
         self.results = self.messages._raw_list()
 
@@ -51,8 +26,8 @@ class RawListMessagesTests(MessagesTests):
 class EmptyRawListMessagesTests(MessagesTests):
     def setUp(self):
         super().setUp()
-        message = get_fake_message_data()
-        response = get_fake_response(code=304, data={'messages': [message]})
+        message = base.get_fake_message_data()
+        response = base.get_fake_response(code=304, data={'messages': [message]})
         self.m_session.get.return_value = response
         self.results = self.messages._raw_list()
 
@@ -81,8 +56,8 @@ class ListModesMessagesTests(MessagesTests):
 class CreateTextMessagesTests(MessagesTests):
     def setUp(self):
         super().setUp()
-        message = get_fake_message_data()
-        response = get_fake_response(data={'message': message})
+        message = base.get_fake_message_data()
+        response = base.get_fake_response(data={'message': message})
         self.m_session.post.return_value = response
         self.result = self.messages.create(text='qux')
 
@@ -103,8 +78,8 @@ class CreateTextMessagesTests(MessagesTests):
 class CreateAttachmentMessagesTests(MessagesTests):
     def setUp(self):
         super().setUp()
-        message = get_fake_message_data()
-        response = get_fake_response(data={'message': message})
+        message = base.get_fake_message_data()
+        response = base.get_fake_response(data={'message': message})
         self.m_session.post.return_value = response
         m_attachment = mock.Mock()
         m_attachment.to_json.return_value = {'qux': 'quux'}
@@ -124,7 +99,7 @@ class CreateAttachmentMessagesTests(MessagesTests):
         self.assertNotIn('text', message)
 
 
-class DirectMessagesTests(TestCase):
+class DirectMessagesTests(base.TestCase):
     def setUp(self):
         self.m_session = mock.Mock()
         self.messages = messages.DirectMessages(self.m_session,
@@ -134,8 +109,8 @@ class DirectMessagesTests(TestCase):
 class RawListDirectMessagesTests(DirectMessagesTests):
     def setUp(self):
         super().setUp()
-        message = get_fake_direct_message_data()
-        response = get_fake_response(data={'direct_messages': [message]})
+        message = base.get_fake_direct_message_data()
+        response = base.get_fake_response(data={'direct_messages': [message]})
         self.m_session.get.return_value = response
         self.results = self.messages._raw_list()
 
@@ -146,8 +121,8 @@ class RawListDirectMessagesTests(DirectMessagesTests):
 class EmptyRawListDirectMessagesTests(DirectMessagesTests):
     def setUp(self):
         super().setUp()
-        message = get_fake_direct_message_data()
-        response = get_fake_response(code=304, data={'direct_messages': [message]})
+        message = base.get_fake_direct_message_data()
+        response = base.get_fake_response(code=304, data={'direct_messages': [message]})
         self.m_session.get.return_value = response
         self.results = self.messages._raw_list()
 
@@ -172,8 +147,8 @@ class ListModesDirectMessagesTests(DirectMessagesTests):
 class CreateTextDirectMessagesTests(DirectMessagesTests):
     def setUp(self):
         super().setUp()
-        message = get_fake_direct_message_data()
-        response = get_fake_response(data={'direct_message': message})
+        message = base.get_fake_direct_message_data()
+        response = base.get_fake_response(data={'direct_message': message})
         self.m_session.post.return_value = response
         self.result = self.messages.create(text='qux')
 
@@ -194,8 +169,8 @@ class CreateTextDirectMessagesTests(DirectMessagesTests):
 class CreateAttachmentDirectMessagesTests(DirectMessagesTests):
     def setUp(self):
         super().setUp()
-        message = get_fake_direct_message_data()
-        response = get_fake_response(data={'direct_message': message})
+        message = base.get_fake_direct_message_data()
+        response = base.get_fake_response(data={'direct_message': message})
         self.m_session.post.return_value = response
         m_attachment = mock.Mock()
         m_attachment.to_json.return_value = {'qux': 'quux'}
@@ -215,10 +190,10 @@ class CreateAttachmentDirectMessagesTests(DirectMessagesTests):
         self.assertNotIn('text', message)
 
 
-class GenericMessageTests(TestCase):
+class GenericMessageTests(base.TestCase):
     def setUp(self):
         self.m_manager = mock.Mock()
-        data = get_fake_generic_message_data(name='Alice', text='corge')
+        data = base.get_fake_generic_message_data(name='Alice', text='corge')
         self.message = messages.GenericMessage(self.m_manager, 'qux', **data)
 
 
@@ -243,27 +218,27 @@ class GenericMessageReprTests(GenericMessageTests):
                                          "text='corge', attachments=0)>")
 
 
-class MessageTests(TestCase):
+class MessageTests(base.TestCase):
     def setUp(self):
         self.m_manager = mock.Mock()
-        data = get_fake_message_data()
+        data = base.get_fake_message_data()
         self.message = messages.Message(self.m_manager, **data)
 
     def test_conversation_id_is_group_id(self):
         self.assertEqual(self.message.conversation_id, self.message.group_id)
 
 
-class DirectMessageTests(TestCase):
+class DirectMessageTests(base.TestCase):
     def setUp(self):
         self.m_manager = mock.Mock()
-        data = get_fake_direct_message_data()
+        data = base.get_fake_direct_message_data()
         self.message = messages.DirectMessage(self.m_manager, **data)
 
     def test_conversation_id_is_sender_and_recipient(self):
         self.assertEqual(self.message.conversation_id, 'bar+baz')
 
 
-class AttachmentTests(TestCase):
+class AttachmentTests(base.TestCase):
     def setUp(self):
         self.m_manager = mock.Mock()
 
@@ -290,7 +265,7 @@ class AttachmentsFromBulkDataTests(AttachmentTests):
         self.assertIsInstance(self.attachments[1], attachments.Location)
 
 
-class LeaderboardTests(TestCase):
+class LeaderboardTests(base.TestCase):
     def setUp(self):
         self.m_session = mock.Mock()
         self.leaderboard = messages.Leaderboard(self.m_session, 'foo')
@@ -298,9 +273,9 @@ class LeaderboardTests(TestCase):
 
 class LeaderboardGetMessagesTests(LeaderboardTests):
     def test_results_are_messages(self):
-        message = get_fake_message_data()
+        message = base.get_fake_message_data()
         data = {'messages': [message]}
-        self.m_session.get.return_value = get_fake_response(data=data)
+        self.m_session.get.return_value = base.get_fake_response(data=data)
         results = self.leaderboard._get_messages()
         self.assertTrue(all(isinstance(m, messages.Message) for m in results))
 
@@ -331,7 +306,7 @@ class LeaderboardListMethodTests(LeaderboardTests):
         self.assert_kwargs(self.leaderboard._get_messages, path='for_me')
 
 
-class LikesTests(TestCase):
+class LikesTests(base.TestCase):
     def setUp(self):
         self.m_session = mock.Mock()
         self.likes = messages.Likes(self.m_session, conversation_id='foo',
@@ -364,7 +339,7 @@ class UnlikeTests(LikesTests):
         self.assertTrue(self.result)
 
 
-class GalleryTests(TestCase):
+class GalleryTests(base.TestCase):
     def setUp(self):
         self.m_session = mock.Mock()
         self.gallery = messages.Gallery(self.m_session, group_id='foo')
@@ -373,9 +348,9 @@ class GalleryTests(TestCase):
 class RawListGalleryTests(GalleryTests):
     def setUp(self):
         super().setUp()
-        message = get_fake_message_data()
-        response = get_fake_response(data={'messages': [message]},
-                                     code=self.code)
+        message = base.get_fake_message_data()
+        response = base.get_fake_response(data={'messages': [message]},
+                                          code=self.code)
         self.m_session.get.return_value = response
         self.results = self.gallery._raw_list()
 

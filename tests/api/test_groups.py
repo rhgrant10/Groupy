@@ -1,21 +1,9 @@
 from unittest import mock
 
-from .base import get_fake_response
+from .base import get_fake_response, get_fake_member_data, get_fake_group_data
 from .base import TestCase
 from groupy import pagers
 from groupy.api import groups
-
-
-def get_fake_group_data(**kwargs):
-    group_data = {
-        'id': 'foo',
-        'name': 'foobar',
-        'group_id': 'bar',
-        'created_at': 1302623328,
-        'updated_at': 1302623329,
-    }
-    group_data.update(kwargs)
-    return group_data
 
 
 class GroupsTests(TestCase):
@@ -215,8 +203,9 @@ class GroupRejoinTests(GroupTests):
 class GroupRefreshFromServerTests(GroupTests):
     def setUp(self):
         super().setUp()
-        group = get_fake_group_data(name='qux')
-        self.group.manager.get.return_value = get_fake_response(data=group)
+        self.members = [get_fake_member_data(), get_fake_member_data()]
+        refreshed_group = get_fake_group_data(name='qux', members=self.members)
+        self.group.manager.get.return_value = get_fake_response(data=refreshed_group)
         self.group.refresh_from_server()
 
     def test_manager_used(self):
@@ -224,6 +213,9 @@ class GroupRefreshFromServerTests(GroupTests):
 
     def test_name_is_updated(self):
         self.assertEqual(self.group.name, 'qux')
+
+    def test_members_is_updated(self):
+        self.assertEqual(len(self.group.members), len(self.members))
 
 
 class UnsuccessfulChangeOwnersResultTests(TestCase):

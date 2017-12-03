@@ -3,18 +3,8 @@ from unittest import mock
 from groupy.api import memberships
 from groupy.exceptions import ResultsNotReady
 from groupy.exceptions import ResultsExpired
-from .base import get_fake_response
+from .base import get_fake_response, get_fake_member_data
 from .base import TestCase
-
-
-def get_fake_member_data(**kwargs):
-    data = {
-        'id': 'foo',
-        'user_id': 'baz',
-        'nicknack': 'nick',
-    }
-    data.update(kwargs)
-    return data
 
 
 class MembershipsTests(TestCase):

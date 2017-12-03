@@ -184,8 +184,8 @@ class Group(base.ManagedResource):
 
         members = self.data.get('members') or []
         self.members = [memberships.Member(self.manager, self.id, **m) for m in members]
-        self.created_at = datetime.fromtimestamp(self.created_at)
-        self.updated_at = datetime.fromtimestamp(self.updated_at)
+        self.created_at = datetime.fromtimestamp(self.data['created_at'])
+        self.updated_at = datetime.fromtimestamp(self.data['updated_at'])
 
     def __repr__(self):
         klass = self.__class__.__name__
@@ -233,4 +233,4 @@ class Group(base.ManagedResource):
     def refresh_from_server(self):
         """Refresh the group from the server in place."""
         group = self.manager.get(id=self.id)
-        self.data = group.data
+        self.__init__(self.manager, **group.data)
