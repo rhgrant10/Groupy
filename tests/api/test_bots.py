@@ -23,7 +23,7 @@ class ListBotsTests(BotsTests):
 class CreateBotsTests(BotsTests):
     def setUp(self):
         super().setUp()
-        self.m_session.post.return_value = mock.Mock(data={'x': 'X'})
+        self.m_session.post.return_value = mock.Mock(data={'bot': {'x': 'X'}})
         self.result = self.bots.create(name='foo', group_id='bar', baz='qux')
 
     def test_result_is_bot(self):
@@ -31,18 +31,18 @@ class CreateBotsTests(BotsTests):
 
     def test_name_is_in_payload(self):
         __, kwargs = self.m_session.post.call_args
-        payload = kwargs.get('json') or {}
-        self.assertEqual(payload.get('name'), 'foo')
+        payload = kwargs['json']
+        self.assertEqual(payload['bot'].get('name'), 'foo')
 
     def test_group_id_is_in_payload(self):
         __, kwargs = self.m_session.post.call_args
-        payload = kwargs.get('json') or {}
-        self.assertEqual(payload.get('group_id'), 'bar')
+        payload = kwargs['json']
+        self.assertEqual(payload['bot'].get('group_id'), 'bar')
 
     def test_details_in_payload(self):
         __, kwargs = self.m_session.post.call_args
-        payload = kwargs.get('json') or {}
-        self.assertEqual(payload.get('baz'), 'qux')
+        payload = kwargs['json']
+        self.assertEqual(payload['bot'].get('baz'), 'qux')
 
 
 class PostAsBotTests(BotsTests):

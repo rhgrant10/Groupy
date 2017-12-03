@@ -21,16 +21,16 @@ class Bots(base.Manager):
     def create(self, name, group_id, **details):
         """Create a new bot.
 
-
         :param str name: name of the bot
         :param str group_id: the ID of the group in which the bot will exist
         :param kwargs details: any additional fields
         :return: the new bot
         :rtype: :class:`~groupy.api.bots.Bot`
         """
-        payload = dict(details, name=name, group_id=group_id)
+        payload = {'bot': dict(details, name=name, group_id=group_id)}
         response = self.session.post(self.url, json=payload)
-        return Bot(self, **response.data)
+        bot = response.data['bot']
+        return Bot(self, **bot)
 
     def post(self, bot_id, text, attachments=None):
         """Post a new message as a bot to its room.
@@ -58,9 +58,9 @@ class Bots(base.Manager):
         :return: ``True`` if successful
         :rtype: bool
         """
-        path = '{}/destroy'.format(bot_id)
-        url = utils.urljoin(self.url, path)
-        response = self.session.post(url)
+        url = utils.urljoin(self.url, 'destroy')
+        payload = {'bot_id': bot_id}
+        response = self.session.post(url, json=payload)
         return response.ok
 
 
@@ -81,3 +81,11 @@ class Bot(base.ManagedResource):
         :rtype: bool
         """
         return self.manager.post(self.bot_id, text, attachments)
+
+    def destroy(self):
+        """Destroy the bot.
+
+        :return: ``True`` if successful
+        :rtype: bool
+        """
+        return self.manager.destroy(self.bot_id)

@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from . import base
+from . import bots
 from . import messages
 from . import memberships
 from groupy import utils
@@ -181,6 +182,7 @@ class Group(base.ManagedResource):
         self.gallery = messages.Gallery(self.manager.session, self.group_id)
         self.leaderboard = messages.Leaderboard(self.manager.session, self.id)
         self.memberships = memberships.Memberships(self.manager.session, self.id)
+        self._bots = bots.Bots(self.manager.session)
 
         members = self.data.get('members') or []
         self.members = [memberships.Member(self.manager, self.id, **m) for m in members]
@@ -234,3 +236,6 @@ class Group(base.ManagedResource):
         """Refresh the group from the server in place."""
         group = self.manager.get(id=self.id)
         self.__init__(self.manager, **group.data)
+
+    def create_bot(self, name, **details):
+        return self._bots.create(name, self.group_id, **details)
