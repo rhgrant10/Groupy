@@ -23,7 +23,7 @@ class Resource:
 
     def __getattr__(self, attr):
         if attr not in self.data:
-            error_message = '{!s} resources do not have a {!r} field'
+            error_message = 'this {!s} resource does not have a {!r} field'
             raise AttributeError(error_message.format(self.__class__.__name__,
                                                       attr))
         return self.data[attr]
