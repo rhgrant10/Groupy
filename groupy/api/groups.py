@@ -112,7 +112,7 @@ class Groups(base.Manager):
         :return: the group
         :rtype: :class:`~groupy.api.groups.Group`
         """
-        url = utils.urljoin(self.url, group_id)
+        url = utils.urljoin(self.url, 'join')
         payload = {'group_id': group_id}
         response = self.session.post(url, json=payload)
         return Group(self, **response.data)
