@@ -239,6 +239,13 @@ class Group(base.ManagedResource):
         self.__init__(self.manager, **group.data)
 
     def create_bot(self, name, **details):
+        """Create a bot in the group.
+
+        :param str name: the name of the bot
+        :param kwargs details: additional bot details
+        :return: the created bot
+        :rtype: :class:`~groupy.api.bots.Bot`
+        """
         return self._bots.create(name, self.group_id, **details)
 
     def change_owners(self, user_id):
