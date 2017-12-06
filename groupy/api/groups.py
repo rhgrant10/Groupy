@@ -125,8 +125,8 @@ class Groups(base.Manager):
 
         :param str group_id: the group_id of a group
         :param str owner_id: the ID of the new owner
-        :return: the group
-        :rtype: :class:`~groupy.api.groups.Group`
+        :return: the result
+        :rtype: :class:`~groupy.api.groups.ChangeOwnersResult`
         """
         url = utils.urljoin(self.url, 'change_owners')
         requests = [{'group_id': group_id, 'owner_id': owner_id}]
@@ -227,6 +227,7 @@ class Group(base.ManagedResource):
         """Rejoin the group.
 
         Note that this must be a former group.
+
         :return: a current (not former) group
         :rtype: :class:`~groupy.api.groups.Group`
         """
@@ -239,3 +240,14 @@ class Group(base.ManagedResource):
 
     def create_bot(self, name, **details):
         return self._bots.create(name, self.group_id, **details)
+
+    def change_owners(self, user_id):
+        """Change the owner of the group.
+
+        Note that the user must be a member of the group.
+
+        :param str user_id: the user_id of the new owner
+        :return: the result
+        :rtype: :class:`~groupy.api.groups.ChangeOwnersResult`
+        """
+        return self.manager.change_owners(self.group_id, user_id)
