@@ -13,6 +13,16 @@ class GroupyError(Exception):
         super().__init__(self.message)
 
 
+class MissingMembershipError(GroupyError):
+    """Exception raied when your membership could not be found in a group."""
+    message = 'The group does not contain your membership, if you have one.'
+
+    def __init__(self, group_id, user_id, message=None):
+        super().__init__(message)
+        self.group_id = group_id
+        self.user_id = user_id
+
+
 class ApiError(GroupyError):
     """Base exception for all GroupMe API errors."""
     message = 'There was a problem communicating with the API.'

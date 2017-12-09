@@ -4,8 +4,10 @@ from . import base
 from . import bots
 from . import messages
 from . import memberships
+from . import user
 from groupy import utils
 from groupy import pagers
+from groupy import exceptions
 
 
 class Groups(base.Manager):
@@ -183,6 +185,7 @@ class Group(base.ManagedResource):
         self.leaderboard = messages.Leaderboard(self.manager.session, self.id)
         self.memberships = memberships.Memberships(self.manager.session, self.id)
         self._bots = bots.Bots(self.manager.session)
+        self._user = user.User(self.manager.session)
 
         members = self.data.get('members') or []
         self.members = [memberships.Member(self.manager, self.id, **m) for m in members]
@@ -258,3 +261,42 @@ class Group(base.ManagedResource):
         :rtype: :class:`~groupy.api.groups.ChangeOwnersResult`
         """
         return self.manager.change_owners(self.group_id, user_id)
+
+    def get_membership(self):
+        """Get your membership.
+
+        Note that your membership may not exist. For example, you do not have
+        a membership in a former group. Also, the group returned by the API
+        when rejoining a former group does not contain your membership. You
+        must call :func:`refresh_from_server` to update the list of members.
+
+        :return: your membership in the group
+        :rtype: :class:`~groupy.api.memberships.Member`
+        :raises groupy.exceptions.MissingMembershipError: if your membership is
+                not in the group data
+        """
+        user_id = self._user.me['user_id']
+        for member in self.members:
+            if member.user_id == user_id:
+                return member
+        raise exceptions.MissingMembershipError(self.group_id, user_id)
+
+    def update_membership(self, **details):
+        """Update the details of your membership in the group.
+
+        Note that this fails when called from a former group.
+
+        :param kwargs details: new values
+        :return: updated membership
+        :rtype: :class:`~groupy.api.members.Member`
+        """
+        return self.memberships.update(**details)
+
+    def leave(self):
+        """Leave the group.
+
+        :return: ``True`` if successful
+        :rtype: bool
+        """
+        membership = self.get_membership()
+        return membership.remove()

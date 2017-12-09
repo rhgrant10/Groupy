@@ -57,6 +57,18 @@ class Memberships(base.Manager):
             raise exceptions.ResultsExpired(response)
         return response.data['members']
 
+    def update(self, **details):
+        """Update your own membership.
+
+        :param kwargs details: new values for your membership
+        :return: updated membership
+        :rtype: :class:`~groupy.api.memberships.Member`
+        """
+        url = self.url + 'hips/update'
+        payload = {'membership': details}
+        response = self.session.post(url, json=payload)
+        return Member(self, self.group_id, **response.data)
+
     def remove(self, membership_id):
         """Remove a member from the group.
 
