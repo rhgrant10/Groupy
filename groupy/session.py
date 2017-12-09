@@ -16,15 +16,12 @@ class Session(requests.Session):
 
     def __init__(self, token):
         super().__init__()
-        self.token = token
-        self.headers = {'content-type': 'application/json'}
+        self.headers = {
+            'content-type': 'application/json',
+            'x-access-token': token,
+        }
 
     def request(self, *args, **kwargs):
-        # inject the access token
-        if 'params' not in kwargs:
-            kwargs['params'] = {}
-        kwargs['params']['token'] = self.token
-
         # ensure we reraise exceptions as our own
         try:
             response = super().request(*args, **kwargs)

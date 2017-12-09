@@ -26,6 +26,7 @@ def get_fake_group_data(**kwargs):
         'group_id': 'bar',
         'created_at': 1302623328,
         'updated_at': 1302623329,
+        'office_mode': False,
     }
     group_data.update(kwargs)
     return group_data

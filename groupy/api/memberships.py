@@ -25,6 +25,8 @@ class Memberships(base.Manager):
     def add(self, *members):
         """Add members to the group.
 
+        TODO: fix this! this is undocumented, clunky, and just uncivilized
+
         :param args members: the members to add
         :return: a membership request
         :rtype: :class:`MembershipRequest`
@@ -57,15 +59,22 @@ class Memberships(base.Manager):
             raise exceptions.ResultsExpired(response)
         return response.data['members']
 
-    def update(self, **details):
+    def update(self, nickname=None, **kwargs):
         """Update your own membership.
 
-        :param kwargs details: new values for your membership
+        Note that this fails on former groups.
+
+        :param str nickname: new nickname
         :return: updated membership
         :rtype: :class:`~groupy.api.memberships.Member`
         """
         url = self.url + 'hips/update'
-        payload = {'membership': details}
+        payload = {
+            'membership': {
+                'nickname': nickname,
+            },
+        }
+        payload['membership'].update(kwargs)
         response = self.session.post(url, json=payload)
         return Member(self, self.group_id, **response.data)
 

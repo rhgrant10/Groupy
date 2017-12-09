@@ -19,13 +19,11 @@ class SessionTests(unittest.TestCase):
         self.url = 'https://example.com/foo'
 
     @responses.activate
-    def test_token_is_injected_as_url_param(self):
-        url = '{}?token={}'.format(self.url, self.token)
-        responses.add(responses.GET, url, match_querystring=True)
-        try:
-            self.session.get(self.url)
-        except Exception as e:
-            self.fail(e)
+    def test_token_is_present_in_headers(self):
+        responses.add(responses.GET, self.url)
+        self.session.get(self.url)
+        self.assertEqual(responses.calls[0].request.headers['x-access-token'],
+                         self.token)
 
     def test_content_type_is_json(self):
         headers = self.session.headers or {}

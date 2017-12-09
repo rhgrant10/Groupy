@@ -60,26 +60,64 @@ class Groups(base.Manager):
         response = self.session.get(url)
         return Group(self, **response.data)
 
-    def create(self, name, **details):
-        """Create a new group.response
+    def create(self, name, description=None, image_url=None, share=None, **kwargs):
+        """Create a new group.
 
-        :param str name: the name of the group
-        :param kwargs details: additional group fields
+        Note that, although possible, there may be issues when not using an
+        image URL from GroupMe's image service.
+
+        :param str name: group name (140 characters maximum)
+        :param str description: short description (255 characters maximum)
+        :param str image_url: GroupMe image service URL
+        :param bool share: whether to generate a share URL
         :return: a new group
         :rtype: :class:`~groupy.api.groups.Group`
         """
-        payload = dict(details, name=name)
+        payload = {
+            'name': name,
+            'description': description,
+            'image_url': image_url,
+            'share': share,
+        }
+        payload.update(kwargs)
         response = self.session.post(self.url, json=payload)
         return Group(self, **response.data)
 
-    def update(self, id, **details):
+    def update(self, id, name=None, description=None, image_url=None,
+               office_mode=None, share=None, **kwargs):
         """Update the details of a group.
 
-        :param str id: a group ID
-        :param kwargs details: values to update
+        .. note::
+
+            There are significant bugs in this endpoint!
+            1. not providing ``name`` produces 400: "Topic can't be blank"
+            2. not providing ``office_mode`` produces 500: "sql: Scan error on
+            column index 14: sql/driver: couldn't convert <nil> (<nil>) into
+            type bool"
+
+            Note that these issues are "handled" automatically when calling
+            update on a :class:`~groupy.api.groups.Group` object.
+
+        :param str id: group ID
+        :param str name: group name (140 characters maximum)
+        :param str description: short description (255 characters maximum)
+        :param str image_url: GroupMe image service URL
+        :param bool office_mode: (undocumented)
+        :param bool share: whether to generate a share URL
+        :return: an updated group
+        :rtype: :class:`~groupy.api.groups.Group`
         """
-        url = utils.urljoin(self.url, id)
-        response = self.session.post(url, json=details)
+        path = '{}/update'.format(id)
+        url = utils.urljoin(self.url, path)
+        payload = {
+            'name': name,
+            'description': description,
+            'image_url': image_url,
+            'office_mode': office_mode,
+            'share': share,
+        }
+        payload.update(kwargs)
+        response = self.session.post(url, json=payload)
         return Group(self, **response.data)
 
     def destroy(self, id):
@@ -131,8 +169,12 @@ class Groups(base.Manager):
         :rtype: :class:`~groupy.api.groups.ChangeOwnersResult`
         """
         url = utils.urljoin(self.url, 'change_owners')
-        requests = [{'group_id': group_id, 'owner_id': owner_id}]
-        payload = {'requests': requests}
+        payload = {
+            'requests': {
+                'group_id': group_id,
+                'owner_id': owner_id
+            },
+        }
         response = self.session.post(url, json=payload)
         result, = response.data['results']  # should be exactly one
         return ChangeOwnersResult(**result)
@@ -207,14 +249,27 @@ class Group(base.ManagedResource):
         """
         return self.messages.create(text=text, attachments=attachments)
 
-    def update(self, **details):
-        """Update the details of a group.
+    def update(self, name=None, description=None, image_url=None,
+               office_mode=None, share=None, **kwargs):
+        """Update the details of the group.
 
-        :param kwargs details: updated values
+        :param str name: group name (140 characters maximum)
+        :param str description: short description (255 characters maximum)
+        :param str image_url: GroupMe image service URL
+        :param bool office_mode: (undocumented)
+        :param bool share: whether to generate a share URL
         :return: an updated group
         :rtype: :class:`~groupy.api.groups.Group`
         """
-        return self.manager.update(id=self.id, **details)
+        # note we default to the current values for name and office_mode as a
+        # work-around for issues with the group update endpoint
+        if name is None:
+            name = self.name
+        if office_mode is None:
+            office_mode = self.office_mode
+        return self.manager.update(id=self.id, name=name, description=description,
+                                   image_url=image_url, office_mode=office_mode,
+                                   share=share, **kwargs)
 
     def destroy(self):
         """Destroy the group.
@@ -241,15 +296,20 @@ class Group(base.ManagedResource):
         group = self.manager.get(id=self.id)
         self.__init__(self.manager, **group.data)
 
-    def create_bot(self, name, **details):
-        """Create a bot in the group.
+    def create_bot(self, name, avatar_url=None, callback_url=None, dm_notification=None,
+                   **kwargs):
+        """Create a new bot in a particular group.
 
-        :param str name: the name of the bot
-        :param kwargs details: additional bot details
-        :return: the created bot
+        :param str name: bot name
+        :param str avatar_url: the URL of an image to use as an avatar
+        :param str callback_url: a POST-back URL for each new message
+        :param bool dm_notification: whether to POST-back for direct messages?
+        :return: the new bot
         :rtype: :class:`~groupy.api.bots.Bot`
         """
-        return self._bots.create(name, self.group_id, **details)
+        return self._bots.create(name=name, group_id=self.group_id,
+                                 avatar_url=avatar_url, callback_url=callback_url,
+                                 dm_notification=dm_notification)
 
     def change_owners(self, user_id):
         """Change the owner of the group.
@@ -281,16 +341,16 @@ class Group(base.ManagedResource):
                 return member
         raise exceptions.MissingMembershipError(self.group_id, user_id)
 
-    def update_membership(self, **details):
-        """Update the details of your membership in the group.
+    def update_membership(self, nickname=None, **kwargs):
+        """Update your own membership.
 
-        Note that this fails when called from a former group.
+        Note that this fails on former groups.
 
-        :param kwargs details: new values
+        :param str nickname: new nickname
         :return: updated membership
         :rtype: :class:`~groupy.api.members.Member`
         """
-        return self.memberships.update(**details)
+        return self.memberships.update(nickname=nickname, **kwargs)
 
     def leave(self):
         """Leave the group.
