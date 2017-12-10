@@ -51,8 +51,17 @@ Since paging can be a pain, the :class:`~groupy.pagers.GroupList` also possesses
 :func:`~groupy.pagers.Pager.autopage` method that can be used to obtain all groups
 by automatically handling paging:
 
+.. code-block:: python
+
     >>> groups = client.groups.list()
     >>> for group in groups.autopage():
+    ...     print(group.name)
+
+However, the easiest way to list all groups, is:
+
+.. code-block:: python
+
+    >>> for group in client.groups.list_all():
     ...     print(group.name)
 
 .. note::
@@ -97,12 +106,8 @@ omit fields.
 
 .. code-block:: python
 
-    >>> chats = client.chats.list()
-    >>> for chat in chats:
+    >>> for chat in client.chats.list_all():
     ...     print(chat.other_user['name'])
-
-    >>> for chat in chats.autopage():
-    ...     print(chat.created_at)
 
 
 Listing bots
@@ -119,15 +124,14 @@ Bots are listed all in one go. That is, the list of bots you own is not paginate
 Your own user information
 -------------------------
 
-At any time, you can easily access information about your GroupMe user account:
+At any time, you can easily access information about your GroupMe user account
+as a simple dictionary:
 
 .. code-block:: python
 
     >>> fresh_user_data = client.user.get_me()
 
-The information is returned as a simple dictionary.
-
-However, since user information does not typically change during the lifetime
+Since user information does not typically change during the lifetime
 of a single client instance, the user information is cached the first time it
 is fetched. You can access the cached user information as a read-only property:
 
@@ -170,7 +174,11 @@ Listing messages from a group
 
 .. code-block:: python
 
-    >>> messages = group.messages.list()
+    >>> message_page = group.messages.list()
+    >>> for message in group.messages.list_all():
+    ...     print(message.text)
+    ... 
+    >>> message_page = group.messages.list_after(message_id=message)
 
 .. note:: See "Listing messages" for details.
 

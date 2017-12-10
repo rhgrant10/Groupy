@@ -10,17 +10,11 @@ class Chats(base.Manager):
         super().__init__(session, 'chats')
 
     def _raw_list(self, **params):
-        """List all chats.
-
-        :param args params: listing paramters
-        :return: chats with other users
-        :rtype: :class:`~groupy.pagers.ChatList`
-        """
         response = self.session.get(self.url, params=params)
         return [Chat(self, **chat) for chat in response.data]
 
     def list(self, page=1, per_page=10):
-        """List all chats.
+        """List a page of chats.
 
         :param int page: which page
         :param int per_page: how many chats per page
@@ -29,6 +23,15 @@ class Chats(base.Manager):
         """
         return pagers.ChatList(self, self._raw_list, per_page=per_page,
                                page=page)
+
+    def list_all(self, per_page=10):
+        """List all chats.
+
+        :param int per_page: how many chats per page
+        :return: chats with other users
+        :rtype: :class:`~groupy.pagers.ChatList`
+        """
+        return self.list(per_page=per_page).autopage()
 
 
 class Chat(base.ManagedResource):

@@ -24,7 +24,7 @@ The simple yet powerful API client for the GroupMe messaging service.
     >>> from groupy import Client
     >>> client = Client.from_token('api_token')
     
-    >>> groups = list(client.groups.list().autopage())
+    >>> groups = list(client.groups.list_all())
 
     >>> for group in groups:
     ...     print(group.name)
@@ -33,7 +33,7 @@ The simple yet powerful API client for the GroupMe messaging service.
     >>> for member in group.members:
     ...     print(member.nickname)
 
-    >>> for message in group.messages.list().autopage():
+    >>> for message in group.messages.list_all():
     ...     print(message.text)
     ...     for attachment in message.attachments:
     ...         print(attachment.type)

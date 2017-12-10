@@ -92,7 +92,7 @@ class MessageList(Pager):
         """
         modes = []
         for mode in ('before_id', 'after_id', 'since_id'):
-            if mode in params:
+            if params.get(mode) is not None:
                 modes.append(mode)
         if len(modes) > 1:
             raise ValueError('ambiguous mode')

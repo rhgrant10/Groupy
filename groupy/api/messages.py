@@ -26,52 +26,89 @@ class Messages(base.Manager):
         messages = response.data['messages']
         return [Message(self, **message) for message in messages]
 
-    def list(self, **params):
-        """Return a page of messages from the group.
+    def list(self, before_id=None, since_id=None, after_id=None, limit=20):
+        """Return a page of group messages.
 
-        :param kwargs params: optional listing parameters
-        :return: messages from the group
+        The messages come in reversed order (newest first). Note you can only
+        provide _one_ of ``before_id``, ``since_id``, or ``after_id``.
+
+        :param str before_id: message ID for paging backwards
+        :param str after_id: message ID for paging forwards
+        :param str since_id: message ID for most recent messages since
+        :param int limit: maximum number of messages per page
+        :return: group messages
         :rtype: :class:`~groupy.pagers.MessageList`
         """
-        return pagers.MessageList(self, self._raw_list, **params)
+        return pagers.MessageList(self, self._raw_list, before_id=before_id,
+                                  after_id=after_id, since_id=since_id,
+                                  limit=limit)
 
-    def list_before(self, message_id, **params):
-        """Return a page of messages from the group created before a message.
+    def list_before(self, message_id, limit=None):
+        """Return a page of group messages created before a message.
 
-        This is used to page backwards through messages.
+        This can be used to page backwards through messages.
 
         :param str message_id: the ID of a message
-        :param kwargs params: optional listing parameters
-        :return: messages from the group
+        :param int limit: maximum number of messages per page
+        :return: group messages
         :rtype: :class:`~groupy.pagers.MessageList`
         """
-        return self.list(before_id=message_id, **params)
+        return self.list(before_id=message_id, limit=None)
 
-    def list_since(self, message_id, **params):
-        """Return a page of messages from the group created since a message.
+    def list_since(self, message_id, limit=None):
+        """Return a page of group messages created since a message.
 
         This is used to fetch the most recent messages after another. There
         may exist messages between the one given and the ones returned. Use
         :func:`list_after` to retrieve newer messages without skipping any.
 
         :param str message_id: the ID of a message
-        :param kwargs params: optional listing parameters
-        :return: messages from the group
+        :param int limit: maximum number of messages per page
+        :return: group messages
         :rtype: :class:`~groupy.pagers.MessageList`
         """
-        return self.list(since_id=message_id, **params)
+        return self.list(since_id=message_id, limit=limit)
 
-    def list_after(self, message_id, **params):
-        """Return a page of messages from the group created after a message.
+    def list_after(self, message_id, limit=None):
+        """Return a page of group messages created after a message.
 
         This is used to page forwards through messages.
 
         :param str message_id: the ID of a message
-        :param kwargs params: optional listing parameters
-        :return: messages from the group
+        :param int limit: maximum number of messages per page
+        :return: group messages
         :rtype: :class:`~groupy.pagers.MessageList`
         """
-        return self.list(after_id=message_id, **params)
+        return self.list(after_id=message_id, limit=limit)
+
+    def list_all(self, limit=None):
+        """Return all group messages.
+
+        :param int limit: maximum number of messages per page
+        :return: group messages
+        :rtype: :class:`~groupy.pagers.MessageList`
+        """
+        return self.list().autopage()
+
+    def list_all_before(self, message_id, limit=None):
+        """Return all group messages created before a message.
+
+        :param str message_id: the ID of a message
+        :param int limit: maximum number of messages per page
+        :return: group messages
+        :rtype: :class:`~groupy.pagers.MessageList`
+        """
+        return self.list_before(message_id, limit=limit).autopage()
+
+    def list_all_after(self, message_id, limit=None):
+        """Return all group messages created after a message.
+
+        :param str message_id: the ID of a message
+        :param int limit: maximum number of messages per page
+        :return: group messages
+        :rtype: :class:`~groupy.pagers.MessageList`
+        """
+        return self.list_after(message_id, limit=limit).autopage()
 
     def create(self, text=None, attachments=None, source_guid=None):
         """Create a new message in the group.
