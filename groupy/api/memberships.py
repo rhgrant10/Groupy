@@ -22,23 +22,45 @@ class Memberships(base.Manager):
         super().__init__(session, path=path)
         self.group_id = group_id
 
-    def add(self, *members):
-        """Add members to the group.
+    def add(self, nickname, email=None, phone_number=None, user_id=None):
+        """Add a user to the group.
 
-        TODO: fix this! this is undocumented, clunky, and just uncivilized
+        You must provide either the email, phone number, or user_id that
+        uniquely identifies a user.
 
-        :param args members: the members to add
+        :param str nickname: new name for the user in the group
+        :param str email: email address of the user
+        :param str phone_number: phone number of the user
+        :param str user_id: user_id of the user
+        :return: a membership request
+        :rtype: :class:`MembershipRequest`
+        """
+        member = {
+            'nickname': nickname,
+            'email': email,
+            'phone_number': phone_number,
+            'user_id': user_id,
+        }
+        return self.add_multiple(member)
+
+    def add_multiple(self, *users):
+        """Add multiple users to the group at once.
+
+        Each given user must be a dictionary containing a nickname and either
+        an email, phone number, or user_id.
+
+        :param args users: the users to add
         :return: a membership request
         :rtype: :class:`MembershipRequest`
         """
         guid = uuid.uuid4()
-        for i, member in enumerate(members):
-            member['guid'] = '{}-{}'.format(guid, i)
+        for i, user_ in enumerate(users):
+            user_['guid'] = '{}-{}'.format(guid, i)
 
-        payload = {'members': members}
+        payload = {'members': users}
         url = utils.urljoin(self.url, 'add')
         response = self.session.post(url, json=payload)
-        return MembershipRequest(self, *members, group_id=self.group_id,
+        return MembershipRequest(self, *users, group_id=self.group_id,
                                  **response.data)
 
     def check(self, results_id):
@@ -148,6 +170,21 @@ class Member(base.ManagedResource):
         :rtype: bool
         """
         return self._memberships.remove(membership_id=self.id)
+
+    def add_to_group(self, group_id, nickname=None):
+        """Add the member to another group.
+
+        If a nickname is not provided the member's current nickname is used.
+
+        :param str group_id: the group_id of a group
+        :param str nickname: a new nickname
+        :return: a membership request
+        :rtype: :class:`MembershipRequest`
+        """
+        if nickname is None:
+            nickname = self.nickname
+        memberships = Memberships(self.manager.session, group_id=group_id)
+        return memberships.add(nickname, user_id=self.user_id)
 
 
 class MembershipRequest(base.ManagedResource):
