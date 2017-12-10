@@ -252,6 +252,11 @@ class Group(base.ManagedResource):
         klass = self.__class__.__name__
         return '<{}(name={!r})>'.format(klass, self.name)
 
+    @property
+    def is_mine(self):
+        membership = self.get_membership()
+        return 'owner' in membership.roles
+
     def post(self, text=None, attachments=None):
         """Post a new message to the group.
 
