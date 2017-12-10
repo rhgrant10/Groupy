@@ -272,6 +272,7 @@ class MembershipRequest(base.ManagedResource):
         :return: the membership request result
         :rtype: :class:`~groupy.api.memberships.MembershipResult.Results`
         """
+        time.sleep(interval)
         start = time.time()
         while time.time() - start < timeout and not self.is_ready():
             time.sleep(interval)
