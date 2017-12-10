@@ -100,4 +100,5 @@ class MessageList(Pager):
 
     def set_next_page_params(self):
         if self.items:
-            self.params[self.mode] = self.items[-1].id
+            index = 0 if self.mode == 'since_id' else -1
+            self.params[self.mode] = self.items[index].id
