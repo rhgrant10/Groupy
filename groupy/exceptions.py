@@ -15,12 +15,39 @@ class GroupyError(Exception):
 
 class MissingMembershipError(GroupyError):
     """Exception raied when your membership could not be found in a group."""
-    message = 'The group does not contain your membership, if you have one.'
+    message = ('The group does not contain your membership; if not a former '
+               'group, try refreshing the group.')
 
     def __init__(self, group_id, user_id, message=None):
         super().__init__(message)
         self.group_id = group_id
         self.user_id = user_id
+
+
+class FindError(GroupyError):
+    """Exception raised when the number of results is not 1."""
+
+    def __init__(self, message, objects, tests, matches=None):
+        super().__init__(message)
+        self.objects = objects
+        self.tests = tests
+        self.matches = matches
+
+
+class NoMatchesError(FindError):
+    """Exception raised when the number of results is 0."""
+
+    def __init__(self, objects, tests):
+        message = 'No matches using {!r}'.format(tests)
+        super().__init__(message, objects, tests)
+
+
+class MultipleMatchesError(FindError):
+    """Exception raised when the number of results exceeds 1."""
+
+    def __init__(self, objects, tests, matches):
+        message = 'Found {} matches'.format(len(matches))
+        super().__init__(message, objects, tests, matches)
 
 
 class ApiError(GroupyError):
