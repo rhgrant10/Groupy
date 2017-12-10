@@ -51,9 +51,7 @@ class Groups(base.Manager):
         :return: a list of groups
         :rtype: :class:`~groupy.pagers.GroupList`
         """
-        pager = pagers.GroupList(self, self._raw_list, page=1,
-                                 per_page=per_page, omit=omit)
-        return pager.autopage()
+        return self.list(per_page=per_page, omit=omit).autopage()
 
     def list_former(self):
         """List all former groups.
@@ -186,10 +184,10 @@ class Groups(base.Manager):
         """
         url = utils.urljoin(self.url, 'change_owners')
         payload = {
-            'requests': {
+            'requests': [{
                 'group_id': group_id,
-                'owner_id': owner_id
-            },
+                'owner_id': owner_id,
+            }],
         }
         response = self.session.post(url, json=payload)
         result, = response.data['results']  # should be exactly one
