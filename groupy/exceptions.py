@@ -53,9 +53,20 @@ class BadResponse(ApiError):
 
     message = 'Got a bad response'
 
-    def __init__(self, response, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, response, message=None):
+        if message is None:
+            message = self._extract_message(response)
+        super().__init__(message=message)
         self.response = response
+
+    def _extract_message(self, response):
+        try:
+            meta = response.json()['meta']
+            code = meta.get('code', response.status_code)
+            errors = ','.join(meta.get('errors'), ['unknown'])
+        except (ValueError, KeyError):
+            return None
+        return 'HTTP {code}: {errors}'.format(code=code, errors=errors)
 
 
 class InvalidJsonError(BadResponse):
