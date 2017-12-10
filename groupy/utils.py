@@ -27,6 +27,12 @@ def parse_share_url(share_url):
 
 
 class AttrTest:
+    """An attribute value test.
+
+    :param str key: attribute key
+    :param value: value against which to compare
+    """
+
     def __init__(self, key, value):
         self._key = key
         if '__' in key[1:-1]:
@@ -52,6 +58,10 @@ class AttrTest:
 
 
 class Filter:
+    """A callable filter composed of one or more tests.
+
+    :param tests: tests to perform
+    """
     def __init__(self, tests):
         self.tests = tests
 
@@ -59,6 +69,14 @@ class Filter:
         yield from filter(self.passes, objects)
 
     def find(self, objects):
+        """Find exactly one match in the list of objects.
+
+        :param objects: objects to filter
+        :type objects: :class:`list`
+        :return: the one matching object
+        :raises groupy.exceptions.NoMatchesError: if no objects match
+        :raises groupy.exceptions.MultipleMatchesError: if multiple objects match
+        """
         matches = list(self.__call__(objects))
         if not matches:
             raise exceptions.NoMatchesError(objects, self.tests)
@@ -68,9 +86,16 @@ class Filter:
         return matches[0]
 
     def passes(self, obj):
+        """Test one object.
+
+        :param obj: the object to test
+        :return: ``True`` if the object passes all tests
+        :rtype: bool
+        """
         return all(test(obj) for test in self.tests)
 
 
 def make_filter(**tests):
+    """Create a filter from keyword arguments."""
     tests = [AttrTest(k, v) for k, v in tests.items()]
     return Filter(tests)
