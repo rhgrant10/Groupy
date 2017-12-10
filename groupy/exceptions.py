@@ -46,7 +46,7 @@ class MultipleMatchesError(FindError):
     """Exception raised when the number of results exceeds 1."""
 
     def __init__(self, objects, tests, matches):
-        message = 'Found {} matches'.format(len(matches))
+        message = 'Found {} matches using {!r}'.format(len(matches), tests)
         super().__init__(message, objects, tests, matches)
 
 

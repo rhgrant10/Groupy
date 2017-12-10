@@ -1,4 +1,5 @@
 import urllib
+import operator
 from functools import partial
 
 from groupy import exceptions
@@ -25,8 +26,33 @@ def parse_share_url(share_url):
     return group_id, share_token
 
 
+class AttrTest:
+    def __init__(self, key, value):
+        self._key = key
+        if '__' in key[1:-1]:
+            attr, op_name = key.rsplit('__', 1)
+            op = getattr(operator, op_name)
+        else:
+            attr = key
+            op = operator.eq
+        self.attr = attr
+        self.op = op
+        self.value = value
+
+    def __repr__(self):
+        return '{0._key}={0.value}'.format(self)
+
+    def __call__(self, obj):
+        try:
+            attr = getattr(obj, self.attr)
+        except AttributeError:
+            return False
+        else:
+            return self.op(attr, self.value)
+
+
 class Filter:
-    def __init__(self, **tests):
+    def __init__(self, tests):
         self.tests = tests
 
     def __call__(self, objects):
@@ -42,11 +68,9 @@ class Filter:
         return matches[0]
 
     def passes(self, obj):
-        try:
-            return all(getattr(obj, name) == value for name, value in self.tests.items())
-        except AttributeError:
-            return False
+        return all(test(obj) for test in self.tests)
 
 
 def make_filter(**tests):
-    return Filter(**tests)
+    tests = [AttrTest(k, v) for k, v in tests.items()]
+    return Filter(tests)

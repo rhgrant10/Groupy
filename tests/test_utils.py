@@ -1,6 +1,8 @@
 import unittest
+from unittest import mock
 
 from groupy import utils
+from groupy import exceptions
 
 
 class UrlJoinTests(unittest.TestCase):
@@ -33,3 +35,33 @@ class ParseShareUrlTests(unittest.TestCase):
 
 class TrailingSlashParseShareUrlTests(ParseShareUrlTests):
     url = 'http://example.com/foo/group_id/share_token/'
+
+
+class FilterTests(unittest.TestCase):
+    def setUp(self):
+        self.objects = [
+            mock.Mock(foo='foo', baz=0),
+            mock.Mock(foo='bar', baz=1),
+            mock.Mock(foo='baz', baz=2),
+            mock.Mock(foo='qux', baz=3),
+        ]
+
+    def test_find(self):
+        f = utils.make_filter(foo__gt='foo')
+        match = f.find(self.objects)
+        self.assertEqual(match, self.objects[3])
+
+    def test_filter(self):
+        f = utils.make_filter(baz__gt=1)
+        matches = list(f(self.objects))
+        self.assertEqual(matches, self.objects[2:4])
+
+    def test_no_matches(self):
+        f = utils.make_filter(foobar='barfoo')
+        with self.assertRaises(exceptions.NoMatchesError):
+            f.find(self.objects)
+
+    def test_multiple_matches(self):
+        f = utils.make_filter(baz__lt=10)
+        with self.assertRaises(exceptions.MultipleMatchesError):
+            f.find(self.objects)
