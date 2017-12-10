@@ -137,6 +137,12 @@ class Messages(base.Manager):
 
 
 class DirectMessages(base.Manager):
+    """Manager for direct messages with a particular user.
+
+    :param session: request session
+    :param str other_user_id: user_id of another user
+    """
+
     def __init__(self, session, other_user_id):
         super().__init__(session, 'direct_messages')
         self.other_user_id = other_user_id
@@ -149,16 +155,79 @@ class DirectMessages(base.Manager):
         messages = response.data['direct_messages']
         return [DirectMessage(self, **message) for message in messages]
 
-    def list(self, **params):
-        return pagers.MessageList(self, self._raw_list, **params)
+    def list(self, before_id=None, since_id=None, **kwargs):
+        """Return a page of direct messages.
+
+        The messages come in reversed order (newest first). Note you can only
+        provide _one_ of ``before_id``, ``since_id``.
+
+        :param str before_id: message ID for paging backwards
+        :param str since_id: message ID for most recent messages since
+        :return: direct messages
+        :rtype: :class:`~groupy.pagers.MessageList`
+        """
+        return pagers.MessageList(self, self._raw_list, before_id=before_id,
+                                  since_id=since_id, **kwargs)
 
     def list_before(self, message_id, **kwargs):
+        """Return a page of direct messages created before a message.
+
+        This can be used to page backwards through messages.
+
+        :param str message_id: the ID of a message
+        :return: direct messages
+        :rtype: :class:`~groupy.pagers.MessageList`
+        """
         return self.list(before_id=message_id, **kwargs)
 
     def list_since(self, message_id, **kwargs):
+        """Return a page of direct messages created since a message.
+
+        This is used to fetch the most recent messages after another. There
+        may exist messages between the one given and the ones returned.
+
+        :param str message_id: the ID of a message
+        :param int limit: maximum number of messages per page
+        :return: direct messages
+        :rtype: :class:`~groupy.pagers.MessageList`
+        """
         return self.list(since_id=message_id, **kwargs)
 
+    def list_all(self, before_id=None, since_id=None, **kwargs):
+        """Return all direct messages.
+
+        The messages come in reversed order (newest first). Note you can only
+        provide _one_ of ``before_id``, ``since_id``.
+
+        :param str before_id: message ID for paging backwards
+        :param str since_id: message ID for most recent messages since
+        :return: direct messages
+        :rtype: :class:`~groupy.pagers.MessageList`
+        """
+        return self.list(before_id=before_id, since_id=since_id, **kwargs).autopage()
+
+    def list_all_before(self, message_id, **kwargs):
+        """Return all direct messages created before a message.
+
+        This can be used to page backwards through messages.
+
+        :param str message_id: the ID of a message
+        :return: direct messages
+        :rtype: :class:`~groupy.pagers.MessageList`
+        """
+        return self.list_before(before_id=message_id, **kwargs).autopage()
+
     def create(self, text=None, attachments=None, source_guid=None):
+        """Send a new direct message to the user.
+
+        Only provide the source_guid if you want to control it.
+
+        :param str text: the message content
+        :param attachments: message attachments
+        :param str source_guid: a client-side unique ID for the message
+        :return: the message sent
+        :rtype: :class:`~groupy.api.messages.DirectMessage`
+        """
         message = {
             'source_guid': source_guid or str(time.time()),
             'recipient_id': self.other_user_id,
@@ -177,6 +246,14 @@ class DirectMessages(base.Manager):
 
 
 class GenericMessage(base.ManagedResource):
+    """A message.
+
+    :param manager: a message manager
+    :param str conversation_id: the ID for the conversation
+    :param kwargs data: the data of the message
+    """
+
+    #: number of characters seen in the repr output
     preview_length = 42
 
     def __init__(self, manager, conversation_id, **data):
@@ -203,9 +280,11 @@ class GenericMessage(base.ManagedResource):
                 .format(klass, self.name, text, len(self.attachments)))
 
     def like(self):
+        """Like the message."""
         return self._likes.like()
 
     def unlike(self):
+        """Unlike the message."""
         return self._likes.unlike()
 
 
