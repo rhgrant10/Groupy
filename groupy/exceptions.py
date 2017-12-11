@@ -90,7 +90,7 @@ class BadResponse(ApiError):
         try:
             meta = response.json()['meta']
             code = meta.get('code', response.status_code)
-            errors = ','.join(meta.get('errors'), ['unknown'])
+            errors = ','.join(meta.get('errors', ['unknown']))
         except (ValueError, KeyError):
             return None
         return 'HTTP {code}: {errors}'.format(code=code, errors=errors)
