@@ -187,7 +187,6 @@ class DirectMessages(base.Manager):
         may exist messages between the one given and the ones returned.
 
         :param str message_id: the ID of a message
-        :param int limit: maximum number of messages per page
         :return: direct messages
         :rtype: :class:`~groupy.pagers.MessageList`
         """
@@ -215,7 +214,7 @@ class DirectMessages(base.Manager):
         :return: direct messages
         :rtype: :class:`~groupy.pagers.MessageList`
         """
-        return self.list_before(before_id=message_id, **kwargs).autopage()
+        return self.list_before(message_id, **kwargs).autopage()
 
     def create(self, text=None, attachments=None, source_guid=None):
         """Send a new direct message to the user.
