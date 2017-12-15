@@ -8,13 +8,26 @@ v0.8.0 (November 26, 2017)
 This version represents a significant, backwards-incompatible change! The old
 API was brittle, poorly designed, and very difficult to test.
 
-- added additional endpoints: gallery, leaderboard, blocks
-- added missing group functionality: joining with a share token, rejoining a former group, and changing group ownership
-- added control of paging of listings where possible; auto-paging is now explicit
+- No more global api key; create clients using a specific api key instead
+- Added missing group functionality:
+	- joining with a share token
+	- rejoining a former group
+	- changing group ownership
+- Added additional endpoints:
+	- leaderboard
+	- blocks
+- Reverse engineered the undocumented gallery endpoint
+	- has all known supported listing methods
+	- supports before, after, and since with UTC ``datetime``s
+- Added paging control for endpoints that support it
+- Message paging now maintains the order in which they come from the API:
+	- "before" messages go back in time
+	- "after" messages go forward in time
 - much more grandular exceptions and no layer violations
 - removal of Pillow depenedency for images; simply upload/download image bytes and do with them as you please
-- filter options on listings are gone; use standard python filter constructs instead
-- no more global api key; create clients using a specific api key instead
+- result filtering has been moved and improved
+	- can now make and reuse a filter
+	- can create arbitrary sets of tests and use them in a filter
 - now uses the Apache license instead of GPLv3
 
 
