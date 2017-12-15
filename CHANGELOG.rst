@@ -2,7 +2,7 @@
 Change Log
 ==========
 
-v0.8.0 (November 26, 2017)
+v0.8.0 (December 15, 2017)
 ==========================
 
 This version represents a significant, backwards-incompatible change! The old
