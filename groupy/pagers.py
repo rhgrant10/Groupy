@@ -1,3 +1,4 @@
+from groupy import utils
 
 
 class Pager:
@@ -77,28 +78,70 @@ class ChatList(GroupList):
 class MessageList(Pager):
     """Pager for messages."""
 
+    #: the default mode param
+    default_mode = 'before_id'
+
+    #: all possible mode params and the index for their next page params
+    modes = {
+        'before_id': -1,
+        'after_id': -1,
+        'since_id': 0,
+    }
+
     def __init__(self, manager, endpoint, **params):
         super().__init__(manager, endpoint, **params)
-        self.mode = MessageList.detect_mode(**params)
+        self.mode = self.__class__.detect_mode(**params)
 
-    @staticmethod
-    def detect_mode(**params):
+    @classmethod
+    def detect_mode(cls, **params):
         """Detect which listing mode of the given params.
 
         :params kwargs params: the params
-        :return: one of "before_id", "after_id", or "since_id"
+        :return: one of the available modes
         :rtype: str
         :raises ValueError: if multiple modes are detected
         """
         modes = []
-        for mode in ('before_id', 'after_id', 'since_id'):
+        for mode in cls.modes:
             if params.get(mode) is not None:
                 modes.append(mode)
         if len(modes) > 1:
-            raise ValueError('ambiguous mode')
-        return modes[0] if modes else 'before_id'
+            error_message = 'ambiguous mode, must be one of {}'
+            modes_csv = ', '.join(list(cls.modes))
+            raise ValueError(error_message.format(modes_csv))
+        return modes[0] if modes else cls.default_mode
 
     def set_next_page_params(self):
+        """Set the params so that the next page is fetched."""
         if self.items:
-            index = 0 if self.mode == 'since_id' else -1
-            self.params[self.mode] = self.items[index].id
+            index = self.get_last_item_index()
+            self.params[self.mode] = self.get_next_page_param(self.items[index])
+
+    def get_last_item_index(self):
+        """Return the index of the last item in the page."""
+        return self.modes[self.mode]
+
+    def get_next_page_param(self, item):
+        """Return the param from the given item.
+
+        :param item: the item that has the next page param
+        :returns: next page param value
+        """
+        return item.id
+
+    def fetch_next(self):
+        return super().fetch_next() if self.modes[self.mode] else []
+
+
+class GalleryList(MessageList):
+    """Pager for gallery messages."""
+
+    default_mode = 'before'
+    modes = {
+        'before': -1,
+        'after': -1,
+        'since': 0,
+    }
+
+    def get_next_page_param(self, item):
+        return utils.get_rfc3339(item.created_at)

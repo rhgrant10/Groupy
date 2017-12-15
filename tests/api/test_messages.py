@@ -1,5 +1,7 @@
 from unittest import mock
+from datetime import datetime
 
+from groupy import utils
 from groupy.api import attachments
 from groupy.api import messages
 from . import base
@@ -373,15 +375,17 @@ class ListMethodGalleryTests(GalleryTests):
     def setUp(self):
         super().setUp()
         self.gallery._raw_list = mock.Mock()
+        self.when = datetime.now()
+        self.ts = utils.get_rfc3339(self.when)
 
     def test_before(self):
-        self.gallery.list_before('baz')
-        self.assert_kwargs(self.gallery._raw_list, before_id='baz')
+        self.gallery.list_before(self.when)
+        self.assert_kwargs(self.gallery._raw_list, before=self.ts)
 
     def test_since(self):
-        self.gallery.list_since('baz')
-        self.assert_kwargs(self.gallery._raw_list, since_id='baz')
+        self.gallery.list_since(self.when)
+        self.assert_kwargs(self.gallery._raw_list, since=self.ts)
 
     def test_after(self):
-        self.gallery.list_after('baz')
-        self.assert_kwargs(self.gallery._raw_list, after_id='baz')
+        self.gallery.list_after(self.when)
+        self.assert_kwargs(self.gallery._raw_list, after=self.ts)

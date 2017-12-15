@@ -260,13 +260,7 @@ class GenericMessage(base.ManagedResource):
         self.conversation_id = conversation_id
         self.created_at = datetime.fromtimestamp(self.created_at)
         attachments = self.data.get('attachments') or []
-        try:
-            self.attachments = Attachment.from_bulk_data(attachments)
-        except Exception:
-            print(attachments)
-            import sys
-            sys.exit(1)
-
+        self.attachments = Attachment.from_bulk_data(attachments)
         self._likes = Likes(self.manager.session, self.conversation_id,
                             message_id=self.id)
 
@@ -288,12 +282,16 @@ class GenericMessage(base.ManagedResource):
 
 
 class Message(GenericMessage):
+    """A group message."""
+
     def __init__(self, manager, **data):
         conversation_id = data['group_id']
         super().__init__(manager, conversation_id, **data)
 
 
 class DirectMessage(GenericMessage):
+    """A direct message between two users."""
+
     # manager could be from a chat or from a group... is that a problem?
     def __init__(self, manager, **data):
         data['conversation_id'] = self.__class__.get_conversation_id(data)
@@ -301,6 +299,8 @@ class DirectMessage(GenericMessage):
 
     @staticmethod
     def get_conversation_id(data):
+        # some endpoints return direct messages with a conversation id. if not,
+        # we have to construct it
         conversation_id = data.get('conversation_id')
         if not conversation_id:
             participant_ids = data['recipient_id'], data['sender_id']
@@ -309,6 +309,8 @@ class DirectMessage(GenericMessage):
 
 
 class Leaderboard(base.Manager):
+    """Manager for messages on the leaderboard."""
+
     def __init__(self, session, group_id):
         path = 'groups/{}/likes'.format(group_id)
         super().__init__(session, path=path)
@@ -320,41 +322,92 @@ class Leaderboard(base.Manager):
         return [Message(self, **message) for message in messages]
 
     def list(self, period):
+        """List most liked messages for a given period.
+
+        :param str period: either "day", "week", or "month"
+        :return: the messages
+        :rtype: :class:`list`
+        """
         return self._get_messages(period=period)
 
     def list_day(self):
+        """List most liked messages for the last day.
+
+        :return: the messages
+        :rtype: :class:`list`
+        """
         return self._get_messages(period='day')
 
     def list_week(self):
+        """List most liked messages for the last week.
+
+        :return: the messages
+        :rtype: :class:`list`
+        """
         return self._get_messages(period='week')
 
     def list_month(self):
+        """List most liked messages for the last month.
+
+        :return: the messages
+        :rtype: :class:`list`
+        """
         return self._get_messages(period='month')
 
     def list_mine(self):
+        """List messages you liked.
+
+        :return: the messages
+        :rtype: :class:`list`
+        """
         return self._get_messages(path='mine')
 
     def list_for_me(self):
+        """List your top liked messages.
+
+        :return: the messages
+        :rtype: :class:`list`
+        """
         return self._get_messages(path='for_me')
 
 
 class Likes(base.Manager):
+    """Manager for likes/unlikes of a particular message.
+
+    The message can be from either a group or a chat.
+
+    :param session: request session
+    :param str conversation_id: unique ID for a the conversation from which
+                                the message originates
+    :param str message_id: unique ID of the message to like/unlike
+    """
+
     def __init__(self, session, conversation_id, message_id):
         path = 'messages/{}/{}'.format(conversation_id, message_id)
         super().__init__(session, path=path)
 
     def like(self):
+        """Like the message."""
         url = utils.urljoin(self.url, 'like')
         response = self.session.post(url)
         return response.ok
 
     def unlike(self):
+        """Unlike the message."""
         url = utils.urljoin(self.url, 'unlike')
         response = self.session.post(url)
         return response.ok
 
 
 class Gallery(base.Manager):
+    """Manager for messages in the gallery.
+
+    This endpoint is undocumented!
+
+    :param session: request session
+    :param str group_id: group_id for a particular group
+    """
+
     def __init__(self, session, group_id):
         path = 'conversations/{}/gallery'.format(group_id)
         super().__init__(session, path=path)
@@ -366,14 +419,35 @@ class Gallery(base.Manager):
         messages = response.data['messages']
         return [Message(self, **message) for message in messages]
 
-    def list(self, **params):
-        return pagers.MessageList(self, self._raw_list, **params)
+    def _convert_to_rfc3339(self, when=None):
+        if when is None:
+            return None
+        return utils.get_rfc3339(when)
 
-    def list_before(self, message_id, **params):
-        return self.list(before_id=message_id, **params)
+    def list(self, before=None, since=None, after=None, limit=100):
+        before = self._convert_to_rfc3339(before)
+        since = self._convert_to_rfc3339(since)
+        after = self._convert_to_rfc3339(after)
+        return pagers.GalleryList(self, self._raw_list, before=before,
+                                  since=since, after=after, limit=limit)
 
-    def list_since(self, message_id, **params):
-        return self.list(since_id=message_id, **params)
+    def list_before(self, when, limit=100):
+        return self.list(before=when, limit=limit)
 
-    def list_after(self, message_id, **params):
-        return self.list(after_id=message_id, **params)
+    def list_since(self, when, limit=100):
+        return self.list(since=when, limit=limit)
+
+    def list_after(self, when, limit=100):
+        return self.list(after=when, limit=limit)
+
+    def list_all(self, **params):
+        return self.list(**params).autopage()
+
+    def list_all_before(self, when, limit=100):
+        return self.list_before(when=when, limit=limit).autopage()
+
+    def list_all_since(self, when, limit=100):
+        return self.list_since(when=when, limit=limit).autopage()
+
+    def list_all_after(self, when, limit=100):
+        return self.list_after(when=when, limit=limit).autopage()
