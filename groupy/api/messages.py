@@ -446,8 +446,6 @@ class Gallery(base.Manager):
     def list_all_before(self, when, limit=100):
         return self.list_before(when=when, limit=limit).autopage()
 
-    def list_all_since(self, when, limit=100):
-        return self.list_since(when=when, limit=limit).autopage()
-
     def list_all_after(self, when, limit=100):
         return self.list_after(when=when, limit=limit).autopage()
+
