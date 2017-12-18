@@ -259,7 +259,6 @@ class GenericMessage(base.ManagedResource):
         super().__init__(manager, **data)
         self.conversation_id = conversation_id
         try:
-
             self.created_at = datetime.fromtimestamp(self.created_at)
         except OverflowError:
             # for very strange/wrong dates: https://stackoverflow.com/a/36180569/8207
