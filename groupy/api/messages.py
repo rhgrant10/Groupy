@@ -1,5 +1,5 @@
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from . import base
 from .attachments import Attachment
@@ -261,10 +261,9 @@ class GenericMessage(base.ManagedResource):
         try:
 
             self.created_at = datetime.fromtimestamp(self.created_at)
-        except:
-            print('failure creating date for {}'.format(self.created_at))
-            print(data)
-            raise
+        except OverflowError:
+            # for very strange/wrong dates: https://stackoverflow.com/a/36180569/8207
+            self.created_at = datetime(1970, 1, 1) + timedelta(seconds=self.created_at)
         attachments = self.data.get('attachments') or []
         self.attachments = Attachment.from_bulk_data(attachments)
         self._likes = Likes(self.manager.session, self.conversation_id,
