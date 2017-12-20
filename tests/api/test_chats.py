@@ -14,7 +14,11 @@ class ChatsTests(unittest.TestCase):
 class ListChatsTests(ChatsTests):
     def setUp(self):
         super().setUp()
-        m_chat = {'other_user': {'id': 42}}
+        m_chat = {
+            'other_user': {'id': 42},
+            'created_at': 123457890,
+            'updated_at': 123457891,
+        }
         self.m_session.get.return_value = mock.Mock(data=[m_chat])
         self.results = self.chats.list()
 
@@ -28,8 +32,12 @@ class ListChatsTests(ChatsTests):
 class ChatTests(unittest.TestCase):
     def setUp(self):
         self.m_manager = mock.Mock()
-        other_user = {'id': 42, 'name': 'foo'}
-        self.chat = chats.Chat(self.m_manager, other_user=other_user)
+        m_chat = {
+            'other_user': {'id': 42, 'name': 'foo'},
+            'created_at': 123457890,
+            'updated_at': 123457891,
+        }
+        self.chat = chats.Chat(self.m_manager, **m_chat)
 
     def test_repr(self):
         representation = repr(self.chat)

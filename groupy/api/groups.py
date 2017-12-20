@@ -245,8 +245,8 @@ class Group(base.ManagedResource):
 
         members = self.data.get('members') or []
         self.members = [memberships.Member(self.manager, self.id, **m) for m in members]
-        self.created_at = datetime.fromtimestamp(self.data['created_at'])
-        self.updated_at = datetime.fromtimestamp(self.data['updated_at'])
+        self.created_at = utils.get_datetime(self.data['created_at'])
+        self.updated_at = utils.get_datetime(self.data['updated_at'])
 
     def __repr__(self):
         klass = self.__class__.__name__

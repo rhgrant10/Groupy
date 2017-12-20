@@ -258,11 +258,7 @@ class GenericMessage(base.ManagedResource):
     def __init__(self, manager, conversation_id, **data):
         super().__init__(manager, **data)
         self.conversation_id = conversation_id
-        try:
-            self.created_at = datetime.fromtimestamp(self.created_at)
-        except OverflowError:
-            # for very strange/wrong dates: https://stackoverflow.com/a/36180569/8207
-            self.created_at = datetime(1970, 1, 1) + timedelta(seconds=self.created_at)
+        self.created_at = utils.get_datetime(self.data['created_at'])
         attachments = self.data.get('attachments') or []
         self.attachments = Attachment.from_bulk_data(attachments)
         self._likes = Likes(self.manager.session, self.conversation_id,

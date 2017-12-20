@@ -1,6 +1,7 @@
 import urllib
 import operator
 from functools import partial
+from datetime import datetime, timezone, timedelta
 
 from groupy import exceptions
 
@@ -36,6 +37,12 @@ def get_rfc3339(when):
     microseconds = format(when.microsecond, '04d')[:4]
     rfc3339 = '%Y-%m-%dT%H:%M:%S.{}Z'
     return when.strftime(rfc3339.format(microseconds))
+
+
+def get_datetime(timestamp):
+    # for very strange/wrong dates: https://stackoverflow.com/a/36180569/8207
+    epoch = datetime.fromtimestamp(0, timezone.utc)
+    return epoch + timedelta(seconds=timestamp)
 
 
 class AttrTest:

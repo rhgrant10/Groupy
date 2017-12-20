@@ -1,6 +1,7 @@
 from . import base
 from . import messages
 from groupy import pagers
+from groupy import utils
 
 
 class Chats(base.Manager):
@@ -41,6 +42,8 @@ class Chat(base.ManagedResource):
         super().__init__(manager, **data)
         self.messages = messages.DirectMessages(self.manager.session,
                                                 self.other_user['id'])
+        self.created_at = utils.get_datetime(self.data['created_at'])
+        self.updated_at = utils.get_datetime(self.data['updated_at'])
 
     def __repr__(self):
         klass = self.__class__.__name__
