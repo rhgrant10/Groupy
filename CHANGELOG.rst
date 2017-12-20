@@ -2,6 +2,12 @@
 Change Log
 ==========
 
+v0.8.1 (December 19, 2017)
+==========================
+
+- fix bug when converting stange/invalid timestamps to datetimes
+- add missing ``created_at`` and ``updated_at`` in ``Chat`` resources
+
 v0.8.0 (December 15, 2017)
 ==========================
 
