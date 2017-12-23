@@ -157,6 +157,17 @@ class GroupTests(TestCase):
         self.group = groups.Group(mock.Mock(), **get_fake_group_data())
 
 
+class GroupEqualityTests(GroupTests):
+    def test_same_group_id(self):
+        group = groups.Group(mock.Mock(), **get_fake_group_data())
+        self.assertEqual(self.group, group)
+
+    def test_different_group_id(self):
+        group = groups.Group(mock.Mock(), **get_fake_group_data())
+        group.group_id = 2 * self.group.group_id
+        self.assertNotEqual(self.group, group)
+
+
 class GroupReprTests(GroupTests):
     def test_repr(self):
         representation = repr(self.group)

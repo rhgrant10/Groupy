@@ -252,6 +252,9 @@ class Group(base.ManagedResource):
         klass = self.__class__.__name__
         return '<{}(name={!r})>'.format(klass, self.name)
 
+    def __eq__(self, other):
+        return self.group_id == other.group_id
+
     @property
     def is_mine(self):
         membership = self.get_membership()

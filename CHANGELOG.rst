@@ -2,6 +2,10 @@
 Change Log
 ==========
 
+???
+===
+- add ``Group`` equality by ``group_id``
+
 v0.8.1 (December 19, 2017)
 ==========================
 
