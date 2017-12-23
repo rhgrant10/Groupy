@@ -4,6 +4,7 @@ Change Log
 
 ???
 ===
+- add ``Member`` equality by ``id``
 - add ``Group`` equality by ``group_id``
 
 v0.8.1 (December 19, 2017)

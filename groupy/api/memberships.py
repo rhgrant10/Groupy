@@ -120,6 +120,12 @@ class Member(base.ManagedResource):
     Members have both an ID and a membership ID. The membership ID is unique
     to the combination of user and group.
 
+    It can be helpful to think of a "memmber" as a "membership." That is, a
+    specific user in a specific group. Thus, two ``Member`` objects are
+    equal only if their ``id`` fields are equal,. As a consequence, the two
+    ``Member`` objects representing user A in two groups X and Y will _not_
+    be equal.
+
     :param manager: a manager for the group of the membership
     :type manager: :class:`~groupy.api.base.Manager`
     :param str group_id: the group_id of the membership
@@ -138,6 +144,9 @@ class Member(base.ManagedResource):
         klass = self.__class__.__name__
         return '<{}(user_id={!r}, nickname={!r})>'.format(klass, self.user_id,
                                                           self.nickname)
+
+    def __eq__(self, other):
+        return self.id == other.id
 
     def post(self, text=None, attachments=None, source_guid=None):
         """Post a direct message to the user.

@@ -66,6 +66,17 @@ class MemberTests(TestCase):
         self._memberships = self.member._memberships
 
 
+class MemberEqualityTests(MemberTests):
+    def test_same_id(self):
+        member = memberships.Member(self.m_manager, **self.data)
+        self.assertEqual(self.member, member)
+
+    def test_different_id(self):
+        member = memberships.Member(self.m_manager, **self.data)
+        member.id = 2 * self.member.id
+        self.assertNotEqual(self.member, member)
+
+
 class MemberIsBlockedTests(MemberTests):
     def setUp(self):
         super().setUp()
