@@ -2,8 +2,9 @@
 Change Log
 ==========
 
-???
-===
+v0.9.0 (December 23, 2017)
+==========================
+
 - add ``Block`` equality by ``user_id`` and ``blocked_user_id``
 - add ``Bot`` equality by ``bot_id``
 - add ``Message`` equality by ``id``
