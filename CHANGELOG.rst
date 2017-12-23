@@ -2,7 +2,7 @@
 Change Log
 ==========
 
-v0.9.1 (December 23, 2017)
+v0.9.2 (December 23, 2017)
 ==========================
 
 - fix travis CD
@@ -38,7 +38,7 @@ API was brittle, poorly designed, and very difficult to test.
 	- blocks
 - Reverse engineered the undocumented gallery endpoint
 	- has all known supported listing methods
-	- supports before, after, and since with UTC ``datetime``s
+	- supports before, after, and since with UTC ``datetime`` s
 - Added paging control for endpoints that support it
 - Message paging now maintains the order in which they come from the API:
 	- "before" messages go back in time
