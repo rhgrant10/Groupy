@@ -10,7 +10,7 @@ deploy:
   distributions: sdist bdist_wheel
   user: rhgrant10
   password:
-    secure: JhxeEKGlDqtxzJrHoRqa9YFuEWbQOhH3/maVjdqLH/LXpfKEcYq7K1hZRYOATaIVJ+Y0dZJ0IKJrRfAP1IgMXphySDe8GwbNyt7ifngUru+tyvZ5gGs7mGbI4Z6Jev58zf0h+laiNMj7EmqBcEJZ6e4fy2jardCspUJ3/EGC87E=
+    secure: RqlkMTktF7hHUodl2tAHaRGyM39V+lS2cc3AWoYAWwU8zvjRz8prmlKsnxn052VR4AyshgKce3RMSPkc7j7flUgUzL2bHofgpqUb6bk99cBvJgwsw+d0XeWc0h/iSSXKy+PEvyOhHSwR11HSKDuvDT1pPpReFasLOuHQoexHtHo=
   on:
     tags: true
     condition: $TRAVIS_PYTHON_VERSION = 3.6
