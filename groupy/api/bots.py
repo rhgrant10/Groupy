@@ -82,6 +82,9 @@ class Bot(base.ManagedResource):
         klass = self.__class__.__name__
         return '<{}(name={!r})>'.format(klass, self.name)
 
+    def __eq__(self, other):
+        return self.bot_id == other.bot_id
+
     def post(self, text, attachments=None):
         """Post a message as the bot.
 

@@ -49,6 +49,8 @@ class Chat(base.ManagedResource):
         klass = self.__class__.__name__
         return '<{}(other_user={!r})>'.format(klass, self.other_user['name'])
 
+    # TODO: figure out how best to achieve chat equality
+
     def post(self, text=None, attachments=None):
         """Post a message to the chat.
 

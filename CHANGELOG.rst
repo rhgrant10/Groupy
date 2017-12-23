@@ -4,6 +4,9 @@ Change Log
 
 ???
 ===
+- add ``Block`` equality by ``user_id`` and ``blocked_user_id``
+- add ``Bot`` equality by ``bot_id``
+- add ``Message`` equality by ``id``
 - add ``Member`` equality by ``id``
 - add ``Group`` equality by ``group_id``
 

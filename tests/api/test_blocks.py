@@ -95,11 +95,13 @@ class BlocksUnblockTests(BlocksTests):
 class BlockTests(unittest.TestCase):
     def setUp(self):
         self.m_manager = mock.Mock()
-        self.user_id = 'foo'
-        self.block = blocks.Block(self.m_manager, blocked_user_id=self.user_id)
+        self.block = blocks.Block(self.m_manager, user_id='foo',
+                                  blocked_user_id='bar')
 
+
+class MiscBlockTests(BlockTests):
     def test_repr_contains_pertinent_info(self):
-        representation = "<Block(blocked_user_id='foo')>"
+        representation = "<Block(blocked_user_id='bar')>"
         self.assertEqual(representation, repr(self.block))
 
     def test_exists_uses_blocks_between(self):
@@ -109,3 +111,20 @@ class BlockTests(unittest.TestCase):
     def test_unblock_uses_unblock(self):
         self.block.unblock()
         self.assertTrue(self.m_manager.unblock.called)
+
+
+class BlockEqualityTests(BlockTests):
+    def test_different_blocked_user_id(self):
+        block = blocks.Block(self.m_manager, user_id=self.block.user_id,
+                             blocked_user_id='qux')
+        self.assertNotEqual(self.block, block)
+
+    def test_different_user_id(self):
+        block = blocks.Block(self.m_manager, user_id='qux',
+                             blocked_user_id=self.block.blocked_user_id)
+        self.assertNotEqual(self.block, block)
+
+    def test_same_user_id_and_blocked_user_id(self):
+        block = blocks.Block(self.m_manager, user_id=self.block.user_id,
+                             blocked_user_id=self.block.blocked_user_id)
+        self.assertEqual(self.block, block)

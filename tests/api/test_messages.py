@@ -195,8 +195,19 @@ class CreateAttachmentDirectMessagesTests(DirectMessagesTests):
 class GenericMessageTests(base.TestCase):
     def setUp(self):
         self.m_manager = mock.Mock()
-        data = base.get_fake_generic_message_data(name='Alice', text='corge')
-        self.message = messages.GenericMessage(self.m_manager, 'qux', **data)
+        self.data = base.get_fake_generic_message_data(name='Alice', text='corge')
+        self.message = messages.GenericMessage(self.m_manager, 'qux', **self.data)
+
+
+class GenericMessageEqualityTests(GenericMessageTests):
+    def test_same_id(self):
+        message = messages.GenericMessage(self.m_manager, 'qux', **self.data)
+        self.assertEqual(self.message, message)
+
+    def test_different_id(self):
+        message = messages.GenericMessage(self.m_manager, 'qux', **self.data)
+        message.id = 2 * self.message.id
+        self.assertNotEqual(self.message, message)
 
 
 class LikeGenericMessageTests(GenericMessageTests):

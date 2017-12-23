@@ -65,6 +65,9 @@ class Block(base.ManagedResource):
         klass = self.__class__.__name__
         return '<{}(blocked_user_id={!r})>'.format(klass, self.blocked_user_id)
 
+    def __eq__(self, other):
+        return self.user_id == other.user_id and self.blocked_user_id == other.blocked_user_id
+
     def exists(self):
         """Return ``True`` if the block still exists.
 

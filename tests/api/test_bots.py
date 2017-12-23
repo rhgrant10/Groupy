@@ -117,6 +117,11 @@ class BotTests(unittest.TestCase):
         self.m_manager = mock.Mock()
         self.bot_id = 'foo'
         self.bot = bots.Bot(self.m_manager, name='bob', bot_id=self.bot_id)
+
+
+class BotPostTests(BotTests):
+    def setUp(self):
+        super().setUp()
         self.attachment = mock.Mock()
         self.result = self.bot.post(text='hi', attachments=[self.attachment])
 
@@ -127,3 +132,14 @@ class BotTests(unittest.TestCase):
     def test_repr_contains_pertinent_info(self):
         representation = repr(self.bot)
         self.assertEqual(representation, "<Bot(name='bob')>")
+
+
+class BotEqualityTests(BotTests):
+    def test_same_bot_id(self):
+        bot = bots.Bot(self.m_manager, name='bob', bot_id=self.bot_id)
+        self.assertEqual(self.bot, bot)
+
+    def test_different_bot_id(self):
+        bot = bots.Bot(self.m_manager, name='bob', bot_id=self.bot_id)
+        bot.bot_id = 2 * self.bot_id
+        self.assertNotEqual(self.bot, bot)

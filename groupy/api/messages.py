@@ -272,6 +272,9 @@ class GenericMessage(base.ManagedResource):
         return ('<{}(name={!r}, text={!r}, attachments={})>'
                 .format(klass, self.name, text, len(self.attachments)))
 
+    def __eq__(self, other):
+        return self.id == other.id
+
     def like(self):
         """Like the message."""
         return self._likes.like()
