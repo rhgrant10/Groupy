@@ -28,6 +28,12 @@ class Resource:
                                                       attr))
         return self.data[attr]
 
+    def __getstate__(self):
+        return self.__dict__
+
+    def __setstate__(self, d):
+        self.__dict__.update(d)
+
 
 class ManagedResource(Resource):
     """Class to represent an API object."""
