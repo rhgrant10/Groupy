@@ -134,7 +134,7 @@ class Images(base.Manager):
         :rtype: :class:`~groupy.api.attachments.Image`
         """
         image_urls = self.upload(fp)
-        return Image(self, image_urls['url'])
+        return Image(image_urls['url'], source_url=image_urls['picture_url'])
 
     def upload(self, fp):
         """Upload image data to the image service.
@@ -147,8 +147,8 @@ class Images(base.Manager):
         :rtype: dict
         """
         url = utils.urljoin(self.url, 'pictures')
-        response = self.session.post(url, files={'file': fp})
-        image_urls = response.data['payload']
+        response = self.session.post(url, data=fp.read())
+        image_urls = response.data
         return image_urls
 
     def download(self, image, url_field='url', suffix=None):
