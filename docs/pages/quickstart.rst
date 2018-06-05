@@ -85,7 +85,7 @@ To avoid this, use the ``omit`` parameter to specify fields to omit.
     >>> groups = client.groups.list(omit="memberships")
 
 .. note::
-    
+
     Multiple fields must be formatted in a CSV (e.g. "memberships,description").
     At the time of this writing, however, the API only supports omission of
     "memberships."
@@ -177,7 +177,7 @@ Listing messages from a group
     >>> message_page = group.messages.list()
     >>> for message in group.messages.list_all():
     ...     print(message.text)
-    ... 
+    ...
     >>> message_page = group.messages.list_after(message_id=message)
 
 .. note:: See "Listing messages" for details.
@@ -250,7 +250,7 @@ Removing members from groups
 
 .. note::
 
-    Remember, members are specific to the group from which they are 
+    Remember, members are specific to the group from which they are
     obtained.
 
 .. code-block:: python
@@ -327,7 +327,7 @@ you can obtain the actual image. To create a new image from a local file object,
 .. code-block:: python
 
     >>> with open('some-image', 'rb') as f:
-    >>>     image = attachments.Image.from_file(f)    
+    >>>     image = client.images.from_file(f)
 
 To fetch the actual image bytes of an image attachment, use the ``client``:
 
@@ -365,7 +365,7 @@ saw you with @Zoe Childs at the park!'"
 
     >>> mentions = attachments.Mentions(loci=[[0, 5], [25, 11]],
     ...                                 user_ids=['2345', '6789'])
-    
+
 
 
 Emojis

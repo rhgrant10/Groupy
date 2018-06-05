@@ -50,7 +50,10 @@ class Response:
         except ValueError as e:
             raise exceptions.InvalidJsonError(self._resp) from e
         except KeyError as e:
-            raise exceptions.MissingResponseError(self._resp) from e
+            try:
+                return self.json()['payload']
+            except KeyError:
+                raise exceptions.MissingResponseError(self._resp) from e
 
     @property
     def errors(self):

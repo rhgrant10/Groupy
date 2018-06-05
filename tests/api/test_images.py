@@ -1,3 +1,4 @@
+import io
 import unittest
 from unittest import mock
 
@@ -13,11 +14,11 @@ class ImagesTests(unittest.TestCase):
 class UploadImageTests(ImagesTests):
     def setUp(self):
         super().setUp()
-        self.m_session.post.return_value = mock.Mock(data={'payload': 'bar'})
-        self.result = self.images.upload('foo')
+        self.m_session.post.return_value = mock.Mock(data={'url': 'bar'})
+        self.result = self.images.upload(io.BytesIO(b'foo'))
 
     def test_result_is_payload(self):
-        self.assertEqual(self.result, 'bar')
+        self.assertEqual(self.result, {'url': 'bar'})
 
 
 class DownloadImageTests(ImagesTests):
