@@ -2,6 +2,12 @@
 Change Log
 ==========
 
+v0.10.0 (June 4, 2018)
+======================
+
+- fix image attachment creation
+- support pickling/unpickling of ``Resource`` objects
+
 v0.9.2 (December 23, 2017)
 ==========================
 
