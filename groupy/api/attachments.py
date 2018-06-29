@@ -100,7 +100,9 @@ class Mentions(Attachment):
     :type user_ids: :class:`list`
     """
 
-    def __init__(self, loci, user_ids):
+    def __init__(self, loci=None, user_ids=None):
+        loci = loci or []
+        user_ids = user_ids or []
         super().__init__(type='mentions', loci=loci, user_ids=user_ids)
 
 
