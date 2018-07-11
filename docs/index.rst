@@ -23,12 +23,12 @@ The simple yet powerful API client for the GroupMe messaging service.
 
     >>> from groupy import Client
     >>> client = Client.from_token('api_token')
-    
+
     >>> groups = list(client.groups.list_all())
 
     >>> for group in groups:
     ...     print(group.name)
-    
+
     >>> group = groups[0]
     >>> for member in group.members:
     ...     print(member.nickname)
@@ -63,7 +63,7 @@ features.
 - post messages as a bot
 - create, list, update, and destroy bots
 - list chats with other users
-- join new groups and rejoin former groups 
+- join new groups and rejoin former groups
 - transfer group ownership
 
 

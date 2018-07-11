@@ -1,5 +1,4 @@
 import time
-from datetime import datetime, timedelta
 
 from . import base
 from .attachments import Attachment

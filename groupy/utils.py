@@ -1,6 +1,5 @@
 import urllib
 import operator
-from functools import partial
 from datetime import datetime, timezone, timedelta
 
 from groupy import exceptions
