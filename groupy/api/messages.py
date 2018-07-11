@@ -220,6 +220,13 @@ class DirectMessages(base.Manager):
 
         Only provide the source_guid if you want to control it.
 
+        .. note::
+
+            This endpoint seems to only work with an application API token. If
+            you're getting HTTP 429 Too Many Requests, create a new application
+            at https://dev.groupme.com/applications and use the API token
+            provided at the end of that process.
+
         :param str text: the message content
         :param attachments: message attachments
         :param str source_guid: a client-side unique ID for the message

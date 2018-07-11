@@ -74,6 +74,7 @@ Table of Contents
     :maxdepth: 3
 
     pages/installation
+    pages/troubleshooting
     pages/quickstart
     pages/api
     pages/contributing

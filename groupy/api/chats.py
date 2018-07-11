@@ -54,6 +54,13 @@ class Chat(base.ManagedResource):
     def post(self, text=None, attachments=None):
         """Post a message to the chat.
 
+        .. note::
+
+            This endpoint seems to only work with an application API token. If
+            you're getting HTTP 429 Too Many Requests, create a new application
+            at https://dev.groupme.com/applications and use the API token
+            provided at the end of that process.
+
         :param str text: the text of the message
         :param attachments: a list of attachments
         :type attachments: :class:`list`
