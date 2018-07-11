@@ -2,6 +2,13 @@
 Change Log
 ==========
 
+v0.10.1 (July 10, 2018)
+=======================
+
+- allow missing fields in ``Mention`` objects in support of very old message attachments
+- update documentation to warn users of HTTP 429 responses when creating chat messages with non-application API tokens
+- update development status to Production/Stable in ``setup.py``
+
 v0.10.0 (June 4, 2018)
 ======================
 

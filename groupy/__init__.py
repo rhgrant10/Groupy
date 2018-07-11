@@ -11,4 +11,4 @@ from .client import Client  # noqa: F401
 from .api import attachments  # noqa: F401
 
 
-__version__ = '0.10.0'
+__version__ = '0.10.1'
