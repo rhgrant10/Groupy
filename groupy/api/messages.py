@@ -85,7 +85,7 @@ class Messages(base.Manager):
 
         :param int limit: maximum number of messages per page
         :return: group messages
-        :rtype: :class:`~groupy.pagers.MessageList`
+        :rtype: generator
         """
         return self.list().autopage()
 
@@ -95,7 +95,7 @@ class Messages(base.Manager):
         :param str message_id: the ID of a message
         :param int limit: maximum number of messages per page
         :return: group messages
-        :rtype: :class:`~groupy.pagers.MessageList`
+        :rtype: generator
         """
         return self.list_before(message_id, limit=limit).autopage()
 
@@ -105,7 +105,7 @@ class Messages(base.Manager):
         :param str message_id: the ID of a message
         :param int limit: maximum number of messages per page
         :return: group messages
-        :rtype: :class:`~groupy.pagers.MessageList`
+        :rtype: generator
         """
         return self.list_after(message_id, limit=limit).autopage()
 
@@ -200,7 +200,7 @@ class DirectMessages(base.Manager):
         :param str before_id: message ID for paging backwards
         :param str since_id: message ID for most recent messages since
         :return: direct messages
-        :rtype: :class:`~groupy.pagers.MessageList`
+        :rtype: generator
         """
         return self.list(before_id=before_id, since_id=since_id, **kwargs).autopage()
 
@@ -211,7 +211,7 @@ class DirectMessages(base.Manager):
 
         :param str message_id: the ID of a message
         :return: direct messages
-        :rtype: :class:`~groupy.pagers.MessageList`
+        :rtype: generator
         """
         return self.list_before(message_id, **kwargs).autopage()
 
