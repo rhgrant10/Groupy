@@ -10,12 +10,17 @@ Author
 Contributors
 ============
 
+* Adel Qalieh
+* Cory Zue
+* Evan Sloan
 * fraben
 * JacobAMason
-* JCDJullian
+* JCDJulian
+* Milo Mirate
+* Patrick McGannon
+* Quentin Young
 * rAntonioH
+* Robert Graham
 * ScufyfNrdHrdr
-* t3zla
-* mmirate
-* czue
-* evansloan
+* Sebass13
+* Zach Hardesty

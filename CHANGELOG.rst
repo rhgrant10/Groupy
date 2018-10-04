@@ -2,6 +2,11 @@
 Change Log
 ==========
 
+v0.10.2 (October 3, 2018)
+=========================
+
+- fix incorrect return type in the documentation for Message methods (thanks to Zach Hardesty)
+
 v0.10.1 (July 10, 2018)
 =======================
 
