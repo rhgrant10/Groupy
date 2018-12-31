@@ -2,6 +2,8 @@
 Change Log
 ==========
 
+- bump requests dependency to ``~=2.20.0`` (CVE-2018-18074)
+
 v0.10.2 (October 3, 2018)
 =========================
 
