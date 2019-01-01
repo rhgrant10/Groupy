@@ -44,6 +44,9 @@ class Attachment(base.Resource, metaclass=AttachmentMeta):
             return cls._types[type](**data)
         except KeyError:
             return cls(type=type, **data)
+        except TypeError as e:
+            error = 'could not create {!r} attachment'.format(type)
+            raise TypeError('{}: {}'.format(error, e.args[0]))
 
     @classmethod
     def from_bulk_data(cls, attachments):
@@ -112,10 +115,13 @@ class Image(Attachment):
 
     :param str url: the absolute URL for the image
     :param str source_url: an optional, absolute URL for the image source
+    :param str file_id: an optional file ID (used when viewing uploaded files
+                        in the gallery)
     """
 
-    def __init__(self, url, source_url=None):
-        super().__init__(type='image', url=url, source_url=source_url)
+    def __init__(self, url, source_url=None, file_id=None):
+        super().__init__(type='image', url=url, source_url=source_url,
+                         file_id=file_id)
 
 
 # this is documented nowhere :(
