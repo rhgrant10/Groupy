@@ -88,7 +88,8 @@ class Emoji(Attachment):
     """
 
     def __init__(self, placeholder, charmap):
-        super().__init__(type='emoji', placeholder=placeholder, charmap=charmap)
+        super().__init__(type='emoji', placeholder=placeholder,
+                         charmap=charmap)
 
 
 class Mentions(Attachment):
