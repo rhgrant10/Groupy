@@ -60,8 +60,9 @@ docs/_build/
 target/
 MANIFEST
 
-# Pycharm
+# IDEs and Editors
 .idea*
+.vscode/
 
 # temp files
 *~
