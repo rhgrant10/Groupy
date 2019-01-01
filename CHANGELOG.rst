@@ -2,6 +2,9 @@
 Change Log
 ==========
 
+v0.10.3 (January 1, 2019)
+=========================
+
 - fix issue with file attachments as image attachments in the gallery (thanks to Bryce Corbitt)
 - bump requests dependency to ``~=2.20.0`` (CVE-2018-18074)
 
