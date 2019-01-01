@@ -19,7 +19,7 @@ with open('testing_requirements.txt') as test_requirements_file:
 
 setup(
     name='GroupyAPI',
-    version='0.10.2',
+    version='0.10.3',
     description='The simple yet powerful wrapper for the GroupMe API',
     long_description=readme + '\n\n' + changelog,
     author='Robert Grant',
